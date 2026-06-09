@@ -38,10 +38,12 @@ def sidebar() -> str:
         sidebar_brand()
         st.caption(clean("CIDRE and Quantium Insights LLC, in technical support of NPHCDA. "
                          "Funders and reviewers: GAVI and UNICEF."))
-        page = st.radio("Navigate", ["Home", "Data and Quality",
-                                     "Domain 1 - Coverage", "Domain 2 - Dropout",
-                                     "Domain 5 - Zero-dose", "Program Q&A (RAG)"],
-                        label_visibility="collapsed")
+        nav_options = ["Home", "Data and Quality", "Domain 1 - Coverage", "Domain 2 - Dropout",
+                       "Domain 5 - Zero-dose", "Program Q&A (RAG)"]
+        # Allow other pages to request navigation (e.g. the Home "Upload your own data" button).
+        if st.session_state.get("_goto") in nav_options:
+            st.session_state["navradio"] = st.session_state.pop("_goto")
+        page = st.radio("Navigate", nav_options, label_visibility="collapsed", key="navradio")
         st.divider()
         src = st.session_state.get("data_source")
         if src:
@@ -90,13 +92,19 @@ def page_home():
             "quickly; full per-LGA and full-posterior runs are available behind explicit controls."))
     with c2:
         section("Start here")
-        st.write(clean("Run the demo instantly with the canonical project inputs, or upload your own "
-                       "files on the Data and Quality page."))
+        st.write(clean("Option A - explore now with the canonical project inputs:"))
         if st.button("Use bundled sample data", type="primary", use_container_width=True):
             io.set_sample_data()
             st.rerun()
+        st.write(clean("Option B - run the models on your own files:"))
+        if st.button("Upload your own data", use_container_width=True):
+            st.session_state["_goto"] = "Data and Quality"
+            st.rerun()
+        st.caption(clean("Uploads (DHIS2 export, NDHS file, LGA population, under-five cohort, model "
+                         "dataset) live on the Data and Quality page in the sidebar."))
         if st.session_state.get("data_source"):
-            st.success(clean("Data loaded. Open a domain from the sidebar."))
+            st.success(clean(f"Data loaded: {st.session_state['data_source']}. "
+                             "Open a domain from the sidebar."))
 
     section("Modelling domains and research questions")
     st.dataframe(pd.DataFrame([
