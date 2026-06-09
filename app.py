@@ -15,7 +15,7 @@ import pandas as pd
 import streamlit as st
 
 import config as C
-from theme import inject_theme, hero, section, kpi_row, clean
+from theme import inject_theme, hero, section, kpi_row, clean, sidebar_brand
 
 st.set_page_config(page_title="NPHCDA Zero-Dose Modelling Platform",
                    page_icon="💉", layout="wide", initial_sidebar_state="expanded")
@@ -35,7 +35,7 @@ STATUS_ICON = {"ok": "🟢", "partial": "🟡", "invalid": "🔴", "missing": "�
 # --------------------------------------------------------------------------------------
 def sidebar() -> str:
     with st.sidebar:
-        st.markdown("### NPHCDA Zero-Dose Platform")
+        sidebar_brand()
         st.caption(clean("CIDRE and Quantium Insights LLC, in technical support of NPHCDA. "
                          "Funders and reviewers: GAVI and UNICEF."))
         page = st.radio("Navigate", ["Home", "Data and Quality",

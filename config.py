@@ -93,6 +93,14 @@ INK = "#1A1A1A"
 PAPER = "#FFFFFF"
 PANEL = "#F8F9FA"
 
+# NPHCDA brand green (from the agency logo) - used as a secondary accent that blends with navy.
+NPHCDA_GREEN = "#1C7A3D"
+NPHCDA_GREEN_DK = "#0F5226"
+
+# Optional branding images (drop these into assets/; the app falls back gracefully if absent).
+LOGO_PATH = ASSETS_DIR / "nphcda_logo.png"
+HERO_PATH = ASSETS_DIR / "hero.jpg"
+
 ANTIGEN_PAL = {
     "BCG": "#1565C0",
     "Penta1": "#2E7D32",
