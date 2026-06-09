@@ -25,6 +25,7 @@ import data_io as io  # noqa: E402  (after page config)
 import data_quality as dq  # noqa: E402
 import llm  # noqa: E402
 import rag  # noqa: E402
+import reports  # noqa: E402
 import domain1, domain2, domain5  # noqa: E402
 
 STATUS_ICON = {"ok": "🟢", "partial": "🟡", "invalid": "🔴", "missing": "⚪"}
@@ -39,7 +40,7 @@ def sidebar() -> str:
         st.caption(clean("CIDRE and Quantium Insights LLC, in technical support of NPHCDA. "
                          "Funders and reviewers: GAVI and UNICEF."))
         nav_options = ["Home", "Data and Quality", "Domain 1 - Coverage", "Domain 2 - Dropout",
-                       "Domain 5 - Zero-dose", "Program Q&A (RAG)"]
+                       "Domain 5 - Zero-dose", "Reports & Briefs", "Program Q&A (RAG)"]
         # Allow other pages to request navigation (e.g. the Home "Upload your own data" button).
         if st.session_state.get("_goto") in nav_options:
             st.session_state["navradio"] = st.session_state.pop("_goto")
@@ -272,6 +273,63 @@ def page_rag():
 
 
 # --------------------------------------------------------------------------------------
+# Reports & Briefs
+# --------------------------------------------------------------------------------------
+def page_reports():
+    import streamlit.components.v1 as components
+    st.markdown("## Reports and Briefs")
+    st.caption(clean("Generate a premium factsheet or an editable policy brief from the live model "
+                     "outputs (Domains 1, 2 and 5). Every figure traces to the on-screen results."))
+    data = io.get_active_data()
+    if not data:
+        st.warning("Load data first on Home or the Data and Quality page.")
+        return
+    cfg = st.session_state.get("llm") or {}
+
+    c1, c2 = st.columns([2, 1])
+    doc_type = c1.radio("Document", ["Factsheet (1 page, HTML / print to PDF)",
+                                     "Policy brief (editable Word .docx)"], horizontal=False)
+    if cfg.get("key"):
+        use_ai = c2.toggle("AI-drafted narrative", value=True,
+                           help="Draft the narrative with the model, grounded in the findings. "
+                                "Off uses a templated narrative built from the numbers.")
+    else:
+        use_ai = False
+        c2.caption(clean("Add an OpenAI key in the sidebar for an AI-drafted narrative; a templated "
+                         "narrative is used otherwise."))
+
+    if st.button("Generate document", type="primary"):
+        with st.spinner("Assembling findings from the live models (first run may fit Domain 5)..."):
+            findings = reports.build_findings(data)
+        kind = "factsheet" if doc_type.startswith("Factsheet") else "policy"
+        with st.spinner("Drafting the narrative..."):
+            nar = ""
+            if use_ai and cfg.get("key"):
+                nar = llm.compose_brief(cfg["key"], cfg.get("model", llm.DEFAULT_MODEL), kind, findings)
+            if (not nar) or nar.strip() == llm.REFUSAL or len(nar.strip()) < 60:
+                nar = reports.template_narrative(findings, kind)
+        st.session_state["rep"] = {"findings": findings, "narrative": nar, "kind": kind}
+
+    rep = st.session_state.get("rep")
+    if not rep:
+        return
+    if rep["kind"] == "factsheet":
+        html = reports.factsheet_html(rep["findings"], rep["narrative"])
+        section("Factsheet preview")
+        components.html(html, height=920, scrolling=True)
+        st.download_button("Download factsheet (HTML - open and print to PDF)",
+                           html.encode("utf-8"), "NPHCDA_zero_dose_factsheet.html", "text/html")
+    else:
+        section("Policy brief preview")
+        st.markdown(clean(rep["narrative"]))
+        docx_bytes = reports.policy_docx(rep["findings"], rep["narrative"])
+        st.download_button(
+            "Download policy brief (Word .docx)", docx_bytes,
+            "NPHCDA_zero_dose_policy_brief.docx",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+
+
+# --------------------------------------------------------------------------------------
 # Router
 # --------------------------------------------------------------------------------------
 def main():
@@ -287,6 +345,8 @@ def main():
         domain2.render(data)
     elif page.startswith("Domain 5"):
         domain5.render(data)
+    elif page.startswith("Reports"):
+        page_reports()
     elif page.startswith("Program Q&A"):
         page_rag()
 

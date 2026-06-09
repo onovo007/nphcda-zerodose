@@ -180,3 +180,28 @@ def rag_answer(api_key: str, model: str, question: str, retrieved: list[dict]) -
     messages = [{"role": "system", "content": RAG_SYSTEM},
                 {"role": "user", "content": f"DOCUMENT EXCERPTS:\n{ctx[:12000]}\n\nQUESTION: {question}"}]
     return _complete(api_key, model, messages)
+
+
+BRIEF_SYSTEM = (
+    "You are a senior health-policy writer for NPHCDA, GAVI and UNICEF. Using ONLY the FINDINGS "
+    "provided (live model outputs from the zero-dose platform), write the requested document. "
+    "Ground every statement in the numbers given; never invent figures, places or dates. "
+    "House style: hyphen only (no em or en dashes); American -ize spelling; keep British "
+    "'modelling' and 'programme'. Return clean markdown with the requested headings.")
+
+
+def compose_brief(api_key: str, model: str, kind: str, findings: dict) -> str:
+    """Draft a factsheet or policy brief grounded in findings. kind in {factsheet, policy}."""
+    if kind == "factsheet":
+        ask_for = ("Write a one-page factsheet with: a 2-sentence Situation summary; a 'Key findings' "
+                   "list of 5 concise bullets each citing specific numbers; and a 'Priority actions' "
+                   "list of 4 short, concrete bullets.")
+    else:
+        ask_for = ("Write a policy brief with these markdown sections: '## Executive summary' (one "
+                   "tight paragraph), '## Situation analysis' (one paragraph), '## Key findings' "
+                   "(bullets with numbers), '## Recommendations' (numbered, each with a one-line "
+                   "rationale grounded in the findings), and '## Implementation priorities' (which "
+                   "states and LGAs to act on first, and why).")
+    user = f"FINDINGS (the only source of truth):\n{json.dumps(findings, default=str)[:8000]}\n\n{ask_for}"
+    messages = [{"role": "system", "content": BRIEF_SYSTEM}, {"role": "user", "content": user}]
+    return _complete(api_key, model, messages)
