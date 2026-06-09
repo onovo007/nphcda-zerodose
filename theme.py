@@ -101,7 +101,7 @@ def inject_theme() -> None:
     st.markdown(
         f"""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:wght@600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;600;700&display=swap');
 
         :root {{
             --navy:{C.NAVY}; --steel:{C.STEEL}; --accent:{C.ACCENT}; --gold:{C.GOLD};
@@ -153,8 +153,8 @@ def inject_theme() -> None:
         .hero.hero-anim {{ animation:heroPan 18s ease-in-out infinite alternate; }}
         .hero::before {{ content:""; position:absolute; inset:0;
             background:radial-gradient(120% 120% at 80% 10%, rgba(28,122,61,0.30) 0%, rgba(28,122,61,0) 55%); }}
-        .hero h1 {{ color:#fff; font-family:'Space Grotesk',{C.FONT_HEAD}; font-size:2.25rem; margin:0 0 8px 0;
-            font-weight:700; letter-spacing:.3px; text-shadow:0 3px 18px rgba(0,0,0,0.45); position:relative; }}
+        .hero h1 {{ color:#fff; font-family:{C.FONT_HEAD}; font-size:2.25rem; margin:0 0 8px 0;
+            font-weight:700; letter-spacing:.2px; text-shadow:0 3px 18px rgba(0,0,0,0.45); position:relative; }}
         .hero p {{ color:rgba(255,255,255,0.94); font-size:1.05rem; margin:0; max-width:62rem;
             text-shadow:0 2px 12px rgba(0,0,0,0.5); position:relative; }}
         .hero .pill {{ display:inline-block; background:rgba(255,255,255,0.14);
@@ -172,8 +172,8 @@ def inject_theme() -> None:
             background:linear-gradient(90deg, var(--accent-c, var(--steel)), transparent 85%); }}
         .kpi:hover {{ transform:translateY(-4px); box-shadow:0 16px 32px rgba(15,40,60,0.14); }}
         .kpi .label {{ color:var(--mute); font-size:.72rem; font-weight:700; text-transform:uppercase; letter-spacing:.7px; }}
-        .kpi .value {{ color:var(--navy); font-size:1.85rem; font-weight:800; font-family:'Space Grotesk',{C.FONT_HEAD};
-            line-height:1.1; margin-top:3px; }}
+        .kpi .value {{ color:var(--navy); font-size:1.85rem; font-weight:700; font-family:{C.FONT_BODY};
+            font-feature-settings:'tnum' 1; line-height:1.1; margin-top:3px; }}
         .kpi .sub {{ color:var(--mute); font-size:.8rem; margin-top:3px; }}
 
         /* Section headers */

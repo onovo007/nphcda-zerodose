@@ -198,17 +198,17 @@ def factsheet_html(f: dict, narrative_md: str) -> str:
                   if rows else "")
     return f"""<!doctype html><html><head><meta charset='utf-8'>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Source+Serif+4:wght@700&display=swap');
-body{{font-family:Inter,sans-serif;color:#1A1A1A;margin:0;background:#fff}}
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Serif:wght@600;700&display=swap');
+body{{font-family:'IBM Plex Sans',Segoe UI,sans-serif;color:#1A1A1A;margin:0;background:#fff}}
 .wrap{{max-width:900px;margin:0 auto;padding:34px 40px}}
 .hd{{display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid {C.NPHCDA_GREEN};padding-bottom:14px}}
-.title{{font-family:'Source Serif 4',serif;font-size:26px;color:{C.NAVY};margin:14px 0 2px}}
+.title{{font-family:'IBM Plex Serif',serif;font-size:26px;color:{C.NAVY};margin:14px 0 2px}}
 .sub{{color:{C.MUTE};font-size:13px}}
 .kgrid{{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}}
 .k{{background:linear-gradient(180deg,#fff,#f5f9f6);border:1px solid rgba(28,122,61,.18);border-top:4px solid {C.NPHCDA_GREEN};border-radius:12px;padding:12px 14px}}
 .kl{{color:{C.MUTE};font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}}
 .kv{{color:{C.NAVY};font-size:24px;font-weight:700}}
-h2{{color:{C.NAVY};font-family:'Source Serif 4',serif;border-left:4px solid {C.GOLD};padding-left:10px;font-size:18px;margin-top:22px}}
+h2{{color:{C.NAVY};font-family:'IBM Plex Serif',serif;border-left:4px solid {C.GOLD};padding-left:10px;font-size:18px;margin-top:22px}}
 h3{{color:{C.NAVY};font-size:15px}}
 ul{{margin:6px 0 6px 0}} li{{margin:4px 0}}
 .tbl{{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}}

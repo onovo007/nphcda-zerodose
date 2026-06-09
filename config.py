@@ -153,8 +153,8 @@ ZONE_ORDER = [
     "South West", "South East", "South South",
 ]
 
-FONT_HEAD = "Georgia, 'Times New Roman', serif"
-FONT_BODY = "Inter, Calibri, 'Segoe UI', sans-serif"
+FONT_HEAD = "'IBM Plex Serif', Georgia, 'Times New Roman', serif"
+FONT_BODY = "'IBM Plex Sans', 'Segoe UI', Calibri, sans-serif"
 
 # --------------------------------------------------------------------------------------
 # Upload schemas (required columns for validation)
