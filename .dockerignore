@@ -1,0 +1,10 @@
+.git
+__pycache__/
+*.pyc
+.streamlit/secrets.toml
+_smoke_test.py
+_test_d5.py
+*.log
+.venv/
+venv/
+.claude/

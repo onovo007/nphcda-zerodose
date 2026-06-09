@@ -1,3 +1,14 @@
+---
+title: NPHCDA Zero-Dose Platform
+emoji: 💉
+colorFrom: green
+colorTo: indigo
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # NPHCDA Zero-Dose Predictive Modelling Platform (Domains 1, 2, 5)
 
 A real-time, no-code modelling tool for the NPHCDA Digital Innovation Hub. Upload the raw
