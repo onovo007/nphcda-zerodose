@@ -13,6 +13,7 @@ import pandas as pd
 import streamlit as st
 
 import config as C
+import names as N
 from data_io import prep_dhis2
 
 
@@ -27,19 +28,33 @@ def run_prophet(ts_df: pd.DataFrame, periods: int = C.FORECAST_MONTHS):
     return m.predict(future)
 
 
+def _horizon_to(last_ds, year: int = 2027, month: int = 12) -> int:
+    """Prophet periods needed to reach the end of the target year."""
+    return max((year - last_ds.year) * 12 + (month - last_ds.month), C.FORECAST_MONTHS)
+
+
 @st.cache_data(show_spinner="Fitting national antigen forecasts (Prophet)...")
 def national_forecasts(_nat, key: str) -> dict:
     """Return per-antigen series (% of 2024 baseline) + the at-risk summary table."""
     nat = _nat
     cutoff = nat["ds"].max()
+    periods = _horizon_to(cutoff)
     series = {}
     summary = []
+    monthly_long = []
     for antigen, col in C.ANTIGEN_TS.items():
         if col not in nat.columns:
             continue
         ts = nat[["ds", col]].rename(columns={col: "y"})
-        fc = run_prophet(ts)
+        fc = run_prophet(ts, periods=periods)
         base = ts[ts["ds"].dt.year == 2024]["y"].mean()
+        fr = fc[fc["ds"] > cutoff]
+        monthly_long.append(pd.DataFrame({
+            "Antigen": antigen, "Month": fr["ds"].dt.strftime("%Y-%m"), "Year": fr["ds"].dt.year,
+            "Forecast doses": fr["yhat"].round(0), "Lower 95% doses": fr["yhat_lower"].round(0),
+            "Upper 95% doses": fr["yhat_upper"].round(0),
+            "% of 2024 baseline": (fr["yhat"] / base * 100).round(1) if base else None,
+        }))
         fc_pct = fc.copy()
         for c in ["yhat", "yhat_lower", "yhat_upper"]:
             fc_pct[c] = fc[c] / base * 100
@@ -75,7 +90,80 @@ def national_forecasts(_nat, key: str) -> dict:
             "Crosses 80% in 6-12m": "Yes" if crosses else "No",
             "First month below 80%": first_below.strftime("%b %Y") if first_below is not None else "-",
         })
-    return {"series": series, "summary": pd.DataFrame(summary)}
+    monthly = pd.concat(monthly_long, ignore_index=True) if monthly_long else pd.DataFrame()
+    return {"series": series, "summary": pd.DataFrame(summary), "monthly": monthly}
+
+
+@st.cache_data(show_spinner="Forecasting antigen coverage by state (Prophet, 2026-2027)...")
+def state_antigen_forecasts(_dhis2, key: str) -> pd.DataFrame:
+    """Prophet forecast per state and antigen; returns monthly 2026-2027 projections (long)."""
+    d = prep_dhis2(_dhis2)
+    cc = [c for c in C.ANTIGEN_TS.values() if c in d.columns]
+    zmap = (d.drop_duplicates("state").set_index("state")["zone"].to_dict()
+            if "zone" in d.columns else {})
+    out = []
+    for state, g in d.groupby("state"):
+        gm = g.groupby("ds")[cc].sum().reset_index().sort_values("ds")
+        last = gm["ds"].max()
+        per = _horizon_to(last)
+        for antigen, col in C.ANTIGEN_TS.items():
+            if col not in gm.columns:
+                continue
+            ts = gm[["ds", col]].rename(columns={col: "y"})
+            base = ts[ts["ds"].dt.year == 2024]["y"].mean()
+            try:
+                fc = run_prophet(ts, periods=per)
+            except Exception:
+                continue
+            fr = fc[(fc["ds"] > last) & (fc["ds"].dt.year.isin([2026, 2027]))]
+            for _, r in fr.iterrows():
+                out.append({
+                    "zone": zmap.get(state, ""), "state": state, "antigen": antigen,
+                    "month": r["ds"].strftime("%Y-%m"), "year": int(r["ds"].year),
+                    "forecast_doses": round(float(r["yhat"])),
+                    "lower95_doses": round(float(r["yhat_lower"])),
+                    "upper95_doses": round(float(r["yhat_upper"])),
+                    "pct_of_2024_baseline": round(float(r["yhat"]) / base * 100, 1) if base else None,
+                })
+    return pd.DataFrame(out)
+
+
+@st.cache_data(show_spinner="Projecting antigen coverage by LGA (trend, 2026-2027)...")
+def lga_antigen_projections(_dhis2, key: str) -> pd.DataFrame:
+    """
+    Fast linear-trend monthly projections per LGA and antigen for 2026-2027 (microplanning).
+    Trend method (not Prophet) so all 774 LGAs x 4 antigens return in seconds rather than the
+    tens of minutes a full per-LGA Prophet run would take.
+    """
+    d = prep_dhis2(_dhis2)
+    grp = ["zone", "state", "lga"] if "zone" in d.columns else ["state", "lga"]
+    months = pd.date_range("2026-01-01", "2027-12-01", freq="MS")
+    out = []
+    for keys, g in d.groupby(grp):
+        rec = dict(zip(grp, keys if isinstance(keys, tuple) else (keys,)))
+        if "lga" in rec:
+            rec["lga"] = N.clean_lga_name(rec["lga"])
+        g = g.sort_values("ds")
+        for antigen, col in C.ANTIGEN_TS.items():
+            if col not in g.columns:
+                continue
+            ts = g[["ds", col]].dropna()
+            base = ts[ts["ds"].dt.year == 2024][col].mean()
+            if len(ts) < 12 or not base or base <= 0:
+                continue
+            t0 = ts["ds"].min()
+            t = (ts["ds"] - t0).dt.days.values.astype(float)
+            y = ts[col].values.astype(float)
+            try:
+                slope, intercept = np.polyfit(t, y, 1)
+            except Exception:
+                continue
+            for m in months:
+                proj = max(slope * (m - t0).days + intercept, 0.0)
+                out.append({**rec, "antigen": antigen, "month": m.strftime("%Y-%m"),
+                            "year": int(m.year), "projected_doses": round(float(proj)),
+                            "pct_of_2024_baseline": round(float(proj) / base * 100, 1)})
+    return pd.DataFrame(out)
 
 
 @st.cache_data(show_spinner="Screening LGAs for at-risk antigens...")
@@ -91,6 +179,8 @@ def lga_at_risk_screen(_dhis2, key: str) -> pd.DataFrame:
     for keys, g in d.groupby(grp_cols):
         g = g.sort_values("ds")
         rec = dict(zip(grp_cols, keys if isinstance(keys, tuple) else (keys,)))
+        if "lga" in rec:
+            rec["lga"] = N.clean_lga_name(rec["lga"])
         for antigen, col in C.ANTIGEN_TS.items():
             if col not in g:
                 continue

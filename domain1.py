@@ -9,7 +9,8 @@ import viz
 import ai
 from theme import section, kpi_row, clean
 from data_io import prep_dhis2, national_monthly, df_hash
-from models.d1_forecast import national_forecasts, lga_at_risk_screen
+from models.d1_forecast import (national_forecasts, lga_at_risk_screen,
+                                state_antigen_forecasts, lga_antigen_projections)
 
 
 def _download(df, label, fname):
@@ -61,6 +62,42 @@ def render(data: dict):
                 "Each antigen's national Prophet forecast as a percent of its 2024 baseline, with "
                 "the minimum forecast value, when it occurs, and whether it crosses the 80 percent "
                 "target within 6 to 12 months.", summary)
+
+    section("Microplanning downloads (2026-2027 projections)",
+            "Export the modelled antigen projections for microplanning and decision implementation.")
+    monthly = out.get("monthly")
+    if monthly is not None and not monthly.empty:
+        _download(monthly, "Download national monthly forecast - 4 antigens (CSV)",
+                  "D1_national_antigen_forecast_monthly.csv")
+
+    c1, c2 = st.columns(2)
+    with c1:
+        st.markdown("**State-level forecasts (Prophet)**")
+        st.caption(clean("Per-state Prophet forecast for each antigen, monthly for 2026 and 2027. "
+                         "Runs about 37 states x 4 antigens; allow a couple of minutes."))
+        if st.button("Generate state-level forecasts", key="d1_state_btn"):
+            sdf = state_antigen_forecasts(data["dhis2"], key=kd)
+            st.session_state["d1_state_df"] = sdf
+        sdf = st.session_state.get("d1_state_df")
+        if sdf is not None and not sdf.empty:
+            st.success(clean(f"{len(sdf):,} state-antigen-month rows."))
+            st.dataframe(sdf.head(20), use_container_width=True, height=260)
+            _download(sdf, "Download state-level forecasts (CSV)",
+                      "D1_state_antigen_forecast_2026_2027.csv")
+    with c2:
+        st.markdown("**LGA-level projections (trend)**")
+        st.caption(clean("Fast trend projection for every LGA and antigen, monthly for 2026 and "
+                         "2027. Trend method so all 774 LGAs return in seconds (full per-LGA Prophet "
+                         "is impractical live)."))
+        if st.button("Generate LGA-level projections", key="d1_lga_btn"):
+            ldf = lga_antigen_projections(data["dhis2"], key=kd)
+            st.session_state["d1_lga_df"] = ldf
+        ldf = st.session_state.get("d1_lga_df")
+        if ldf is not None and not ldf.empty:
+            st.success(clean(f"{len(ldf):,} LGA-antigen-month rows."))
+            st.dataframe(ldf.head(20), use_container_width=True, height=260)
+            _download(ldf, "Download LGA-level projections (CSV)",
+                      "D1_lga_antigen_projections_2026_2027.csv")
 
     section("LGA at-risk screen (fast trend projection)",
             "Linear-trend projection 12 months ahead per LGA and antigen, flagged below 80 percent of "

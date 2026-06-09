@@ -2,9 +2,10 @@ services:
   - type: web
     name: nphcda-zerodose-platform
     runtime: python
-    # 'standard' = 2 GB RAM / 1 CPU: the floor for the PyMC + Prophet + geopandas stack.
-    # Bump to 'pro' (4 GB) in the dashboard for extra headroom during live sampling.
-    plan: standard
+    # 'pro' = 4 GB RAM / 2 CPU. The full stack (pymc + pytensor + numba + geopandas + prophet +
+    # arviz + matplotlib) idles near 1-1.5 GB, so 2 GB Standard can OOM during a live model run
+    # (seen as a health-check 'connection reset' and instance restart). 4 GB gives safe headroom.
+    plan: pro
     buildCommand: pip install -r requirements.txt
     startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
     healthCheckPath: /_stcore/health
