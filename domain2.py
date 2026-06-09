@@ -8,7 +8,7 @@ import viz
 import ai
 from theme import section, kpi_row, clean
 from data_io import prep_dhis2, national_monthly, state_monthly, df_hash
-from models.d2_dropout import (dropout_forecasts, lasso_drivers,
+from models.d2_dropout import (dropout_forecasts, lasso_drivers, state_dropout_forecasts,
                                state_year_observed, state_year_with_forecast)
 
 
@@ -89,6 +89,19 @@ def render(data: dict):
         piv = state_year_observed(agg, metric)
     st.plotly_chart(viz.dropout_heatmap_fig(piv, f"{C.DROPOUT_TARGETS[metric]} dropout by state and year",
                     last_obs), use_container_width=True)
+
+    section("State-level dropout forecasts (2026-2027) for microplanning",
+            "Per-state Prophet forecast of each dropout pair, monthly for 2026 and 2027, to guide "
+            "interventions. Runs about 37 states x 3 pairs; allow a couple of minutes.")
+    if st.button("Generate state dropout forecasts", key="d2_state_btn"):
+        st.session_state["d2_state_df"] = state_dropout_forecasts(data["dhis2"], key=kd)
+    sdf = st.session_state.get("d2_state_df")
+    if sdf is not None and not sdf.empty:
+        st.success(clean(f"{len(sdf):,} state-pair-month rows."))
+        st.dataframe(sdf.head(30), use_container_width=True, height=260)
+        st.download_button("Download state dropout forecasts (CSV)",
+                           sdf.to_csv(index=False).encode("utf-8"),
+                           "D2_state_dropout_forecast_2026_2027.csv", "text/csv")
 
     st.divider()
     ai.chat_panel("d2", "Domain 2 - dropout dynamics and drivers",

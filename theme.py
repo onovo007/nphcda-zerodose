@@ -8,6 +8,7 @@ from __future__ import annotations
 import base64
 from pathlib import Path
 
+import pandas as pd
 import plotly.graph_objects as go
 import plotly.io as pio
 import streamlit as st
@@ -28,6 +29,20 @@ def clean(text) -> str:
     for bad, good in _BAD.items():
         s = s.replace(bad, good)
     return s
+
+
+def highlight_below(df: pd.DataFrame, col: str, thresh: float = 80.0):
+    """Return a Styler that flags values below the threshold in red (for at-risk projections)."""
+    if df is None or df.empty or col not in df.columns:
+        return df
+
+    def _row(s):
+        return ["color:#C0392B; font-weight:700" if (pd.notna(v) and v < thresh) else "" for v in s]
+
+    try:
+        return df.style.apply(_row, subset=[col])
+    except Exception:
+        return df
 
 
 def img_data_uri(path: Path) -> str | None:

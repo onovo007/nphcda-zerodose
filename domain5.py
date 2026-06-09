@@ -110,37 +110,45 @@ def render(data: dict):
 
     with tabs[2]:
         section("Getis-Ord Gi* hotspot maps",
-                "LGA-level local spatial autocorrelation (k=5 nearest neighbours) and estimated rate.")
-        import spatial
-        gi = spatial.lga_gi_star(clean_df.rename(columns={
-            "State": "state", "LGA": "lga", "ZD proxy (%)": "zd_proxy_pct"})[["state", "lga", "zd_proxy_pct"]],
-            key=lkey)
-        gdf = spatial.load_gdf("lga").merge(
-            gi[["state_key", "lga_key", "zd_proxy_pct", "gi_class"]],
-            on=["state_key", "lga_key"], how="left")
-        gdf["gi_class"] = gdf["gi_class"].fillna("Not Significant")
-        c1, c2 = st.columns(2)
-        with c1:
-            st.plotly_chart(viz.choropleth(gdf, "gi_class", categorical=True,
-                            color_map=C.HOTSPOT_COLORS, title="LGA zero-dose hotspot clusters (Gi*)",
-                            legend_title="Gi* class"), use_container_width=True)
-        with c2:
-            st.plotly_chart(viz.choropleth(gdf, "zd_proxy_pct", categorical=False,
-                            range_color=[0, 99], title="Estimated zero-dose rate by LGA (%)",
-                            legend_title="ZD rate (%)"), use_container_width=True)
-        hot = gi[gi["gi_class"].str.contains("Hot", na=False)].sort_values("gi_z", ascending=False)
-        hot_ctx = {"class_counts": gi["gi_class"].value_counts().to_dict(),
-                   "top_hotspot_lgas": hot[["state", "lga", "zd_proxy_pct", "gi_class"]]
-                   .head(30).to_dict(orient="records")}
-        ai.ai_block("d5_hot", "Domain 5 - Getis-Ord Gi* hotspot clusters",
-                    "Counts of LGAs in each Gi* category (statistically significant hot spots and "
-                    "cold spots of zero-dose burden, k=5 nearest neighbours), and the strongest "
-                    "hotspot LGAs.", hot_ctx)
-        st.divider()
-        ai.chat_panel("d5_hot_chat", "Gi* hotspot clusters",
-                      "Counts of LGAs per Gi* category and the strongest hotspot LGAs by z-score.",
-                      hot_ctx,
-                      suggestions=["Which LGAs are the strongest hotspots?", "How many hot spots at p<0.01?"])
+                "LGA-level local spatial autocorrelation (k=5 nearest neighbours) and estimated rate. "
+                "This spatial step is heavier than the rest, so it runs on demand.")
+        if st.button("Generate hotspot maps", type="primary", key="d5_maps_btn"):
+            st.session_state["d5_maps_ready"] = lkey
+        if st.session_state.get("d5_maps_ready") != lkey:
+            st.info(clean("Click 'Generate hotspot maps' to run the Getis-Ord Gi* spatial model and "
+                          "render the LGA hotspot and estimated-rate maps."))
+        else:
+            import spatial
+            gi = spatial.lga_gi_star(clean_df.rename(columns={
+                "State": "state", "LGA": "lga", "ZD proxy (%)": "zd_proxy_pct"})
+                [["state", "lga", "zd_proxy_pct"]], key=lkey)
+            gdf = spatial.load_gdf("lga").merge(
+                gi[["state_key", "lga_key", "zd_proxy_pct", "gi_class"]],
+                on=["state_key", "lga_key"], how="left")
+            gdf["gi_class"] = gdf["gi_class"].fillna("Not Significant")
+            c1, c2 = st.columns(2)
+            with c1:
+                st.plotly_chart(viz.choropleth(gdf, "gi_class", categorical=True,
+                                color_map=C.HOTSPOT_COLORS, title="LGA zero-dose hotspot clusters (Gi*)",
+                                legend_title="Gi* class"), use_container_width=True)
+            with c2:
+                st.plotly_chart(viz.choropleth(gdf, "zd_proxy_pct", categorical=False,
+                                range_color=[0, 99], title="Estimated zero-dose rate by LGA (%)",
+                                legend_title="ZD rate (%)"), use_container_width=True)
+            hot = gi[gi["gi_class"].str.contains("Hot", na=False)].sort_values("gi_z", ascending=False)
+            hot_ctx = {"class_counts": gi["gi_class"].value_counts().to_dict(),
+                       "top_hotspot_lgas": hot[["state", "lga", "zd_proxy_pct", "gi_class"]]
+                       .head(30).to_dict(orient="records")}
+            ai.ai_block("d5_hot", "Domain 5 - Getis-Ord Gi* hotspot clusters",
+                        "Counts of LGAs in each Gi* category (statistically significant hot spots and "
+                        "cold spots of zero-dose burden, k=5 nearest neighbours), and the strongest "
+                        "hotspot LGAs.", hot_ctx)
+            st.divider()
+            ai.chat_panel("d5_hot_chat", "Gi* hotspot clusters",
+                          "Counts of LGAs per Gi* category and the strongest hotspot LGAs by z-score.",
+                          hot_ctx,
+                          suggestions=["Which LGAs are the strongest hotspots?",
+                                       "How many hot spots at p<0.01?"])
 
     with tabs[3]:
         section("Ranked LGA table (population-weighted)",

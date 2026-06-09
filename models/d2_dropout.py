@@ -12,7 +12,7 @@ import pandas as pd
 import streamlit as st
 
 import config as C
-from models.d1_forecast import run_prophet
+from models.d1_forecast import run_prophet, _horizon_to
 
 
 @st.cache_data(show_spinner="Fitting dropout forecasts (Prophet)...")
@@ -64,6 +64,39 @@ def lasso_drivers(agg: pd.DataFrame, model_dataset: pd.DataFrame) -> dict:
         coefs = pd.Series(np.abs(lasso.coef_), index=feats).sort_values(ascending=False)
         results[target] = coefs[coefs > 0]
     return results
+
+
+@st.cache_data(show_spinner="Forecasting state dropout (Prophet, 2026-2027)...")
+def state_dropout_forecasts(_dhis2, key: str) -> pd.DataFrame:
+    """Per-state Prophet forecast of each dropout pair; monthly 2026-2027 (long) for microplanning."""
+    from data_io import prep_dhis2, state_monthly
+    agg = state_monthly(prep_dhis2(_dhis2))
+    zmap = (agg.drop_duplicates("state").set_index("state")["zone"].to_dict()
+            if "zone" in agg.columns else {})
+    out = []
+    for state, g in agg.groupby("state"):
+        g = g.sort_values("ds")
+        last = g["ds"].max()
+        per = _horizon_to(last)
+        for col, label in C.DROPOUT_TARGETS.items():
+            if col not in g.columns:
+                continue
+            ts = g[["ds", col]].rename(columns={col: "y"}).dropna()
+            if len(ts) < 18:
+                continue
+            try:
+                fc = run_prophet(ts, periods=per)
+            except Exception:
+                continue
+            fr = fc[(fc["ds"] > last) & (fc["ds"].dt.year.isin([2026, 2027]))]
+            for _, r in fr.iterrows():
+                out.append({
+                    "zone": zmap.get(state, ""), "state": state, "dropout_pair": label,
+                    "month": r["ds"].strftime("%Y-%m"), "year": int(r["ds"].year),
+                    "forecast_dropout_pct": round(float(r["yhat"]), 1),
+                    "lower95_pct": round(float(r["yhat_lower"]), 1),
+                    "upper95_pct": round(float(r["yhat_upper"]), 1)})
+    return pd.DataFrame(out)
 
 
 def state_year_observed(agg: pd.DataFrame, metric: str) -> pd.DataFrame:

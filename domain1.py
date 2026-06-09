@@ -7,7 +7,7 @@ import streamlit as st
 import config as C
 import viz
 import ai
-from theme import section, kpi_row, clean
+from theme import section, kpi_row, clean, highlight_below
 from data_io import prep_dhis2, national_monthly, df_hash
 from models.d1_forecast import (national_forecasts, lga_at_risk_screen,
                                 state_antigen_forecasts, lga_antigen_projections)
@@ -56,7 +56,8 @@ def render(data: dict):
                 use_container_width=True)
 
     section("National at-risk summary")
-    st.dataframe(summary, use_container_width=True)
+    st.caption(clean("Values below 80 percent of the 2024 baseline are flagged in red."))
+    st.dataframe(highlight_below(summary, "Min forecast (% of 2024 baseline)"), use_container_width=True)
     _download(summary, "Download national forecast summary (CSV)", "D1_national_antigen_forecast.csv")
     ai.ai_block("d1_summary", "Domain 1 - national antigen coverage forecast",
                 "Each antigen's national Prophet forecast as a percent of its 2024 baseline, with "
@@ -80,8 +81,9 @@ def render(data: dict):
             st.session_state["d1_state_df"] = sdf
         sdf = st.session_state.get("d1_state_df")
         if sdf is not None and not sdf.empty:
-            st.success(clean(f"{len(sdf):,} state-antigen-month rows."))
-            st.dataframe(sdf.head(20), use_container_width=True, height=260)
+            st.success(clean(f"{len(sdf):,} state-antigen-month rows. Below-80% values in red."))
+            st.dataframe(highlight_below(sdf.head(30), "pct_of_2024_baseline"),
+                         use_container_width=True, height=260)
             _download(sdf, "Download state-level forecasts (CSV)",
                       "D1_state_antigen_forecast_2026_2027.csv")
     with c2:
@@ -94,8 +96,9 @@ def render(data: dict):
             st.session_state["d1_lga_df"] = ldf
         ldf = st.session_state.get("d1_lga_df")
         if ldf is not None and not ldf.empty:
-            st.success(clean(f"{len(ldf):,} LGA-antigen-month rows."))
-            st.dataframe(ldf.head(20), use_container_width=True, height=260)
+            st.success(clean(f"{len(ldf):,} LGA-antigen-month rows. Below-80% values in red."))
+            st.dataframe(highlight_below(ldf.head(30), "pct_of_2024_baseline"),
+                         use_container_width=True, height=260)
             _download(ldf, "Download LGA-level projections (CSV)",
                       "D1_lga_antigen_projections_2026_2027.csv")
 
@@ -107,8 +110,10 @@ def render(data: dict):
         if screen.empty:
             st.success("No LGAs projected below the 80 percent target on the fast screen.")
         else:
-            st.write(clean(f"{len(screen)} LGA-and-antigen combinations project below 80 percent."))
-            st.dataframe(screen, use_container_width=True, height=460)
+            st.write(clean(f"{len(screen)} LGA-and-antigen combinations project below 80 percent "
+                           "(all flagged in red)."))
+            st.dataframe(highlight_below(screen, "Projected % of baseline (12m)"),
+                         use_container_width=True, height=460)
             _download(screen, "Download LGA at-risk screen (CSV)", "D1_lga_at_risk_screen.csv")
 
     st.divider()
