@@ -2,10 +2,15 @@ services:
   - type: web
     name: nphcda-zerodose-platform
     runtime: python
-    plan: starter
+    # 'standard' = 2 GB RAM / 1 CPU: the floor for the PyMC + Prophet + geopandas stack.
+    # Bump to 'pro' (4 GB) in the dashboard for extra headroom during live sampling.
+    plan: standard
     buildCommand: pip install -r requirements.txt
     startCommand: streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
+    healthCheckPath: /_stcore/health
+    autoDeploy: true
     envVars:
+      # numpy 1.26.4 has cp312 wheels only, so pin Python to 3.12 (do not let Render use 3.13).
       - key: PYTHON_VERSION
         value: "3.12.4"
       - key: PYTENSOR_FLAGS
