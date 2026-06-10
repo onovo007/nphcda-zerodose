@@ -9,3 +9,8 @@ _test_d5.py
 *.log
 .venv/
 venv/
+
+assets/domain1.png
+assets/domain2.jpg
+assets/domain5.jpg
+assets/Data and Quality.png

@@ -9,7 +9,7 @@ import names as N
 import viz
 import ai
 import data_io as io
-from theme import section, kpi_row, clean
+from theme import section, kpi_row, clean, domain_banner
 from models.d5_zerodose import run_state_model, run_lga_burden
 
 
@@ -18,10 +18,10 @@ def _download(df: pd.DataFrame, label: str, fname: str):
 
 
 def render(data: dict):
-    st.markdown("## Domain 5 - Zero-dose modelling and hotspot detection")
-    st.caption(clean("Research question: where are zero-dose children most concentrated, and "
-                     "what local factors contribute? Bayesian hierarchical Beta regression of "
-                     "state rates, distributed to LGA burden by population, with Getis-Ord Gi* hotspots."))
+    domain_banner("_banner_d5.jpg", "Domain 5 - Zero-dose modelling and hotspot detection",
+                  "Where are zero-dose children most concentrated, and what local factors contribute? "
+                  "Bayesian hierarchical Beta regression of state rates, distributed to LGA burden by "
+                  "population, with Getis-Ord Gi* hotspots.")
 
     needed = {"ndhs_long", "under5", "dhis2", "lga_population"}
     if not data or any(data.get(k) is None for k in needed):

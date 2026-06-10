@@ -162,6 +162,15 @@ def inject_theme() -> None:
             margin:14px 8px 0 0; font-size:.82rem; font-weight:600; backdrop-filter:blur(6px); position:relative; }}
         .hero .pill.green {{ background:rgba(28,122,61,0.40); border-color:rgba(255,255,255,0.4); }}
 
+        /* Per-domain banner */
+        .dbanner {{ position:relative; border-radius:16px; padding:22px 30px; margin-bottom:14px;
+            color:#fff; background-size:cover; background-position:center;
+            box-shadow:0 12px 32px rgba(10,30,45,0.26); border:1px solid rgba(255,255,255,0.08); }}
+        .dbanner h2 {{ color:#fff; font-family:{C.FONT_HEAD}; font-size:1.6rem; margin:0 0 4px 0;
+            text-shadow:0 2px 14px rgba(0,0,0,0.5); }}
+        .dbanner p {{ color:rgba(255,255,255,0.93); margin:0; font-size:.95rem; max-width:65rem;
+            text-shadow:0 2px 10px rgba(0,0,0,0.5); }}
+
         /* KPI cards (glassy, tech) */
         .kpi-wrap {{ display:flex; gap:16px; flex-wrap:wrap; margin:12px 0 6px 0; }}
         .kpi {{ flex:1; min-width:172px; position:relative; border-radius:16px; padding:16px 18px;
@@ -245,6 +254,19 @@ def hero(title: str, subtitle: str, pills: list[str] | None = None) -> None:
         f"<div class='{cls}' style=\"{style}\"><h1>{clean(title)}</h1>"
         f"<p>{clean(subtitle)}</p>{pill_html}</div>",
         unsafe_allow_html=True)
+
+
+def domain_banner(img_name: str, title: str, subtitle: str = "") -> None:
+    """A slim photographic banner for a domain page (falls back to a gradient)."""
+    uri = img_data_uri(C.ASSETS_DIR / img_name)
+    if uri:
+        style = (f"background-image:linear-gradient(110deg, rgba(11,28,42,0.92) 0%, "
+                 f"rgba(15,40,60,0.72) 45%, rgba(15,82,43,0.55) 100%), url('{uri}');")
+    else:
+        style = "background:linear-gradient(120deg,#10283c 0%,#1F3B57 55%,#1C7A3D 140%);"
+    sub = f"<p>{clean(subtitle)}</p>" if subtitle else ""
+    st.markdown(f"<div class='dbanner' style=\"{style}\"><h2>{clean(title)}</h2>{sub}</div>",
+                unsafe_allow_html=True)
 
 
 def section(title: str, subtitle: str = "") -> None:

@@ -198,8 +198,10 @@ def lga_at_risk_screen(_dhis2, key: str) -> pd.DataFrame:
             proj = slope * t_future + intercept
             pct = proj / base * 100
             if pct < C.THRESHOLD_PCT:
+                target_month = (ts["ds"].max() + pd.DateOffset(months=12)).strftime("%b %Y")
                 rows.append({**rec, "Antigen": antigen,
                              "2024 baseline (doses/month)": round(float(base), 1),
+                             "Projection month": target_month,
                              "Projected % of baseline (12m)": round(float(max(pct, 0)), 1)})
     out = pd.DataFrame(rows)
     if not out.empty:

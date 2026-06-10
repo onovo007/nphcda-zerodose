@@ -15,7 +15,7 @@ import pandas as pd
 import streamlit as st
 
 import config as C
-from theme import inject_theme, hero, section, kpi_row, clean, sidebar_brand
+from theme import inject_theme, hero, section, kpi_row, clean, sidebar_brand, domain_banner
 
 st.set_page_config(page_title="NPHCDA Zero-Dose Modelling Platform",
                    page_icon="💉", layout="wide", initial_sidebar_state="expanded")
@@ -125,9 +125,9 @@ UPLOAD_ORDER = ["dhis2", "ndhs_long", "model_dataset", "under5", "lga_population
 
 
 def page_data():
-    st.markdown("## Data and Quality")
-    st.caption(clean("Upload the raw sources or use the bundled sample. Each file is validated "
-                     "against its expected schema before modelling."))
+    domain_banner("_banner_dq.jpg", "Data and Quality",
+                  "Upload the raw sources or use the bundled sample. Each file is validated against "
+                  "its expected schema before modelling.")
 
     if st.button("Use bundled sample data", type="primary"):
         io.set_sample_data()

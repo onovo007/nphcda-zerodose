@@ -6,7 +6,7 @@ import streamlit as st
 import config as C
 import viz
 import ai
-from theme import section, kpi_row, clean
+from theme import section, kpi_row, clean, domain_banner
 from data_io import prep_dhis2, national_monthly, state_monthly, df_hash
 from models.d2_dropout import (dropout_forecasts, lasso_drivers, state_dropout_forecasts,
                                state_year_observed, state_year_with_forecast)
@@ -17,10 +17,9 @@ def _download(df, label, fname):
 
 
 def render(data: dict):
-    st.markdown("## Domain 2 - Dropout and completion dynamics")
-    st.caption(clean("Research question: what are the predicted dropout rates between key antigen "
-                     "pairs, and what factors drive incomplete vaccination? Prophet forecasts plus "
-                     "LASSO-selected drivers."))
+    domain_banner("_banner_d2.jpg", "Domain 2 - Dropout and completion dynamics",
+                  "What are the predicted dropout rates between key antigen pairs, and what factors "
+                  "drive incomplete vaccination? Prophet forecasts plus LASSO-selected drivers.")
 
     if not data or data.get("dhis2") is None:
         st.warning("Domain 2 needs the DHIS2 export. Load the bundled sample data or upload it.")
@@ -32,6 +31,12 @@ def render(data: dict):
     agg = state_monthly(d)
     fc = dropout_forecasts(nat, key=kd)
 
+    fc_summary = {s["label"]: {"latest_observed_pct": round(s["obs_y"][-1], 1),
+                               "forecast_end_pct": round(s["fore_y"][-1], 1),
+                               "direction": ("worsening" if s["fore_y"][-1] > s["obs_y"][-1] + 0.5
+                                             else "improving" if s["fore_y"][-1] < s["obs_y"][-1] - 0.5
+                                             else "stable")} for s in fc.values()}
+
     latest = {col: nat[col].dropna().iloc[-1] for col in C.DROPOUT_TARGETS if col in nat}
     cards = [{"label": "Dropout pairs", "value": str(len(fc)), "sub": "Prophet forecast", "color": C.NAVY}]
     for col, label in C.DROPOUT_TARGETS.items():
@@ -40,68 +45,87 @@ def render(data: dict):
                           "color": C.DROPOUT_COLORS[col]})
     kpi_row(cards)
 
-    section("Dropout rate forecasts",
-            "Penta1 to Penta3, Penta1 to Measles1, and Measles1 to Measles2, with 80/95 percent intervals.")
-    cols = st.columns(3)
-    for i, (col, s) in enumerate(fc.items()):
-        with cols[i % 3]:
-            st.plotly_chart(
-                viz.forecast_band_fig(s, C.DROPOUT_COLORS[col],
-                                      f"{s['label']} dropout", "Dropout rate (%)"),
-                use_container_width=True)
-    fc_summary = {s["label"]: {"latest_observed_pct": round(s["obs_y"][-1], 1),
-                               "forecast_end_pct": round(s["fore_y"][-1], 1)} for s in fc.values()}
-    ai.ai_block("d2_forecast", "Domain 2 - dropout rate forecasts",
-                "Prophet forecasts of the three antigen-pair dropout rates; positive values mean "
-                "children received the earlier dose but not the later one.", fc_summary)
-
+    tabs = st.tabs(["Dropout forecasts", "Drivers (LASSO)", "State-year heatmap",
+                    "Microplanning downloads"])
     drivers_summary: dict = {}
-    section("Drivers of dropout (LASSO)",
-            "Cross-validated LASSO coefficients linking state equity covariates to each dropout pair.")
-    if data.get("model_dataset") is None:
-        st.info("Upload the zero-dose model dataset (equity covariates) to compute LASSO drivers.")
-    else:
-        drivers = lasso_drivers(agg, data["model_dataset"])
-        cols = st.columns(len(drivers) or 1)
-        for i, (target, coefs) in enumerate(drivers.items()):
-            with cols[i]:
-                if coefs.empty:
-                    st.caption(clean(f"{C.DROPOUT_TARGETS[target]}: no non-zero LASSO coefficients."))
-                else:
-                    st.plotly_chart(viz.lasso_bars_fig(coefs, C.DROPOUT_TARGETS[target],
-                                    C.DROPOUT_COLORS[target]), use_container_width=True)
-        drivers_summary = {C.DROPOUT_TARGETS[t]: {k.replace("pct_", "").replace("_", " "): round(float(v), 3)
-                           for k, v in c.head(6).items()} for t, c in drivers.items()}
-        ai.ai_block("d2_drivers", "Domain 2 - dropout drivers (LASSO)",
-                    "Cross-validated LASSO coefficients (absolute) linking state equity and "
-                    "socioeconomic indicators to each dropout pair; larger means stronger association.",
-                    drivers_summary)
 
-    section("Dropout by state and year",
-            "Observed annual means. Extend with per-state Prophet forecasts on demand.")
-    metric = st.selectbox("Dropout pair", list(C.DROPOUT_TARGETS),
-                          format_func=lambda k: C.DROPOUT_TARGETS[k])
-    add_fc = st.toggle("Add Prophet forecast columns to 2027 (slower)", value=False)
-    last_obs = int(agg["year"].max())
-    if add_fc:
-        piv = state_year_with_forecast(agg, metric, key=kd)
-    else:
-        piv = state_year_observed(agg, metric)
-    st.plotly_chart(viz.dropout_heatmap_fig(piv, f"{C.DROPOUT_TARGETS[metric]} dropout by state and year",
-                    last_obs), use_container_width=True)
+    with tabs[0]:
+        section("Dropout rate forecasts",
+                "Penta1 to Penta3, Penta1 to Measles1, and Measles1 to Measles2, with 80/95 percent "
+                "prediction intervals. Positive values mean the earlier dose was received but not the later one.")
+        cols = st.columns(3)
+        for i, (col, s) in enumerate(fc.items()):
+            with cols[i % 3]:
+                st.plotly_chart(
+                    viz.forecast_band_fig(s, C.DROPOUT_COLORS[col],
+                                          f"{s['label']} dropout", "Dropout rate (%)"),
+                    use_container_width=True)
+        ai.ai_block("d2_forecast", "Domain 2 - dropout rate forecasts",
+                    "Prophet forecasts of the three antigen-pair dropout rates (latest observed vs "
+                    "forecast end value, with direction). State the trend direction and magnitude for "
+                    "each pair, name the pair of greatest concern, and give one priority action. "
+                    "Positive values mean the earlier dose was received but not the later one.",
+                    fc_summary)
 
-    section("State-level dropout forecasts (2026-2027) for microplanning",
-            "Per-state Prophet forecast of each dropout pair, monthly for 2026 and 2027, to guide "
-            "interventions. Runs about 37 states x 3 pairs; allow a couple of minutes.")
-    if st.button("Generate state dropout forecasts", key="d2_state_btn"):
-        st.session_state["d2_state_df"] = state_dropout_forecasts(data["dhis2"], key=kd)
-    sdf = st.session_state.get("d2_state_df")
-    if sdf is not None and not sdf.empty:
-        st.success(clean(f"{len(sdf):,} state-pair-month rows."))
-        st.dataframe(sdf.head(30), use_container_width=True, height=260)
-        st.download_button("Download state dropout forecasts (CSV)",
-                           sdf.to_csv(index=False).encode("utf-8"),
-                           "D2_state_dropout_forecast_2026_2027.csv", "text/csv")
+    with tabs[1]:
+        section("Drivers of dropout (LASSO)",
+                "Cross-validated LASSO coefficients linking state equity covariates to each dropout pair.")
+        if data.get("model_dataset") is None:
+            st.info("Upload the zero-dose model dataset (equity covariates) to compute LASSO drivers.")
+        else:
+            drivers = lasso_drivers(agg, data["model_dataset"])
+            cols = st.columns(len(drivers) or 1)
+            for i, (target, coefs) in enumerate(drivers.items()):
+                with cols[i]:
+                    if coefs.empty:
+                        st.caption(clean(f"{C.DROPOUT_TARGETS[target]}: no non-zero LASSO coefficients."))
+                    else:
+                        st.plotly_chart(viz.lasso_bars_fig(coefs, C.DROPOUT_TARGETS[target],
+                                        C.DROPOUT_COLORS[target]), use_container_width=True)
+            drivers_summary = {C.DROPOUT_TARGETS[t]: {k.replace("pct_", "").replace("_", " "): round(float(v), 3)
+                               for k, v in c.head(6).items()} for t, c in drivers.items()}
+            ai.ai_block("d2_drivers", "Domain 2 - dropout drivers (LASSO)",
+                        "Cross-validated LASSO coefficients (absolute) linking state equity and "
+                        "socioeconomic indicators to each dropout pair; larger means stronger association. "
+                        "Name the leading drivers per pair and what they imply for intervention design.",
+                        drivers_summary)
+
+    with tabs[2]:
+        section("Dropout by state and year",
+                "Observed annual means; gaps where a state reported late are interpolated across years "
+                "for display. Extend with per-state Prophet forecasts on demand.")
+        metric = st.selectbox("Dropout pair", list(C.DROPOUT_TARGETS),
+                              format_func=lambda k: C.DROPOUT_TARGETS[k])
+        add_fc = st.toggle("Add Prophet forecast columns to 2027 (slower)", value=False)
+        last_obs = int(agg["year"].max())
+        piv = (state_year_with_forecast(agg, metric, key=kd) if add_fc
+               else state_year_observed(agg, metric))
+        # Fill late-reporting gaps so the heatmap has no blank cells.
+        piv = piv.astype(float).interpolate(axis=1, limit_direction="both").round(1)
+        st.plotly_chart(viz.dropout_heatmap_fig(piv, f"{C.DROPOUT_TARGETS[metric]} dropout by state and year",
+                        last_obs), use_container_width=True)
+        ly = max(piv.columns)
+        hm_ctx = {"metric": C.DROPOUT_TARGETS[metric], "latest_year": int(ly),
+                  "highest_dropout_states": piv[ly].sort_values(ascending=False).head(8).round(1).to_dict(),
+                  "lowest_dropout_states": piv[ly].sort_values().head(5).round(1).to_dict()}
+        ai.ai_block("d2_heatmap", f"Domain 2 - {C.DROPOUT_TARGETS[metric]} dropout by state and year",
+                    "State-by-year dropout matrix for the selected pair. Identify the states with the "
+                    "highest dropout in the latest year, note any clear regional pattern, and give one "
+                    "priority action for the worst states. Negative values denote net upward visits.",
+                    hm_ctx)
+
+    with tabs[3]:
+        section("State-level dropout forecasts (2026-2027) for microplanning",
+                "Per-state Prophet forecast of each dropout pair, monthly for 2026 and 2027, to guide "
+                "interventions. About 37 states x 3 pairs; allow a couple of minutes.")
+        if st.button("Generate state dropout forecasts", key="d2_state_btn"):
+            st.session_state["d2_state_df"] = state_dropout_forecasts(data["dhis2"], key=kd)
+        sdf = st.session_state.get("d2_state_df")
+        if sdf is not None and not sdf.empty:
+            st.success(clean(f"{len(sdf):,} state-pair-month rows."))
+            st.dataframe(sdf.head(30), use_container_width=True, height=260)
+            _download(sdf, "Download state dropout forecasts (CSV)",
+                      "D2_state_dropout_forecast_2026_2027.csv")
 
     st.divider()
     ai.chat_panel("d2", "Domain 2 - dropout dynamics and drivers",
