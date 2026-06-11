@@ -61,6 +61,35 @@ def highlight_severity(df: pd.DataFrame, col: str = "Severity"):
         return df
 
 
+def highlight_classes(df: pd.DataFrame, col: str, cmap: dict):
+    """Colour-code a categorical column by a {value: css} map."""
+    if df is None or df.empty or col not in df.columns:
+        return df
+
+    def _row(s):
+        return [cmap.get(str(v), "") for v in s]
+
+    try:
+        return df.style.apply(_row, subset=[col])
+    except Exception:
+        return df
+
+
+# Light background colours for priority-tier / severity columns in tables.
+TIER_CELL = {
+    "Tier 1": "background-color:#FDE2E0;color:#7F1D1D;font-weight:700",
+    "Tier 2": "background-color:#FDEBD9;color:#7A3E00;font-weight:600",
+    "Tier 3": "background-color:#FEF6D6;color:#6B5300",
+    "Tier 4": "background-color:#E6F0F6;color:#1F3B57",
+}
+SEVERITY_CELL = {
+    "Critical": "background-color:#FDE2E0;color:#7F1D1D;font-weight:700",
+    "High": "background-color:#FDEBD9;color:#7A3E00;font-weight:600",
+    "Moderate": "background-color:#FEF6D6;color:#6B5300",
+    "Lower": "background-color:#E6F0F6;color:#1F3B57",
+}
+
+
 def img_data_uri(path: Path) -> str | None:
     """Return a base64 data URI for an image on disk, or None if missing."""
     try:

@@ -9,7 +9,8 @@ import names as N
 import viz
 import ai
 import data_io as io
-from theme import section, kpi_row, clean, domain_banner
+from theme import (section, kpi_row, clean, domain_banner, highlight_classes,
+                   TIER_CELL, SEVERITY_CELL)
 from models.d5_zerodose import run_state_model, run_lga_burden
 
 
@@ -93,7 +94,15 @@ def render(data: dict):
                 "LGAs ranked by estimated burden against the cumulative share of the national total.")
         st.plotly_chart(viz.pareto_fig(pareto, lga["top20_pct"], lga["n80"],
                                        lga["national_total"]), use_container_width=True)
-        st.dataframe(pareto.head(60), use_container_width=True, height=420)
+        st.caption(clean(
+            "Severity classes (within state): Critical = Tier 1, the highest-burden LGAs (red) - act "
+            "first; High = Tier 2 (orange); Moderate = Tier 3 (amber); Lower = Tier 4 (blue). Priority "
+            "band: A = drives the first 50 percent of national burden, B = 50-80 percent, C = the long "
+            "tail. Use Severity to triage where to deploy catch-up first, and Priority band to size "
+            "how many LGAs to cover for a target share of the burden."))
+        col_sev = "Severity (within state)" if "Severity (within state)" in pareto.columns else None
+        show = highlight_classes(pareto.head(60), col_sev, SEVERITY_CELL) if col_sev else pareto.head(60)
+        st.dataframe(show, use_container_width=True, height=420)
         _download(pareto, "Download Pareto priority table (CSV)", "D5_lga_pareto_priority.csv")
         ai.ai_block("d5_pareto", "Domain 5 - LGA Pareto concentration of zero-dose burden",
                     f"Top LGAs ranked by estimated zero-dose children. Nationally about "
@@ -111,13 +120,15 @@ def render(data: dict):
     with tabs[2]:
         section("Getis-Ord Gi* hotspot maps",
                 "LGA-level local spatial autocorrelation (k=5 nearest neighbours) and estimated rate. "
-                "This spatial step is heavier than the rest, so it runs on demand.")
-        if st.button("Generate hotspot maps", type="primary", key="d5_maps_btn"):
-            st.session_state["d5_maps_ready"] = lkey
-        if st.session_state.get("d5_maps_ready") != lkey:
-            st.info(clean("Click 'Generate hotspot maps' to run the Getis-Ord Gi* spatial model and "
-                          "render the LGA hotspot and estimated-rate maps."))
-        else:
+                "Computed automatically on the loaded data and cached.")
+        st.caption(clean(
+            "How to read the Gi* map: a 'Hot Spot' is an LGA whose high zero-dose burden, together with "
+            "its neighbours, is statistically unlikely to be chance - p<0.01 (deep red) is the most "
+            "confident, then p<0.05 and p<0.10. 'Cold Spot' (blues) marks clusters of low burden; 'Not "
+            "Significant' (grey) shows no clustering. Target the p<0.01 hot-spot clusters first for "
+            "coordinated, multi-LGA response. The right map shows the estimated zero-dose rate per LGA "
+            "(green low to red high)."))
+        with st.spinner("Computing Getis-Ord Gi* hotspots..."):
             import spatial
             gi = spatial.lga_gi_star(clean_df.rename(columns={
                 "State": "state", "LGA": "lga", "ZD proxy (%)": "zd_proxy_pct"})
@@ -126,6 +137,7 @@ def render(data: dict):
                 gi[["state_key", "lga_key", "zd_proxy_pct", "gi_class"]],
                 on=["state_key", "lga_key"], how="left")
             gdf["gi_class"] = gdf["gi_class"].fillna("Not Significant")
+        if True:
             c1, c2 = st.columns(2)
             with c1:
                 st.plotly_chart(viz.choropleth(gdf, "gi_class", categorical=True,
@@ -160,7 +172,10 @@ def render(data: dict):
         view = clean_df if sel == "All" else clean_df[clean_df["State"] == sel]
         if q:
             view = view[view["LGA"].str.contains(q, case=False, na=False)]
-        st.dataframe(view, use_container_width=True, height=480)
+        st.caption(clean("LGA tier colours: Tier 1 Critical (red), Tier 2 High (orange), Tier 3 "
+                         "Moderate (amber), Tier 4 Lower (blue). Act on Tier 1 LGAs first."))
+        show = highlight_classes(view, "LGA tier", TIER_CELL) if "LGA tier" in view.columns else view
+        st.dataframe(show, use_container_width=True, height=480)
         _download(clean_df, "Download full ranked LGA table (CSV)", "D5_lga_zero_dose_ranked_CLEAN.csv")
         ai.ai_block("d5_lga", "Domain 5 - ranked LGA table (population-weighted)",
                     "The highest-burden LGAs with state, zone, estimated zero-dose rate and count, "

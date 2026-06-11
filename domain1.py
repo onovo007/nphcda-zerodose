@@ -97,21 +97,22 @@ def render(data: dict):
 
     with tabs[1]:
         section("LGA at-risk screen (fast trend projection)",
-                "Linear-trend projection 12 months ahead per LGA and antigen, flagged below 80 percent "
-                "of the LGA's 2024 baseline. The 'Projection month' column shows the period of "
-                "performance. The full per-LGA Prophet is the on-demand heavy run.")
-        if st.button("Run LGA at-risk screen", type="primary", key="d1_screen_btn"):
-            st.session_state["d1_screen"] = lga_at_risk_screen(data["dhis2"], key=kd)
-        screen = st.session_state.get("d1_screen")
-        if screen is not None:
-            if screen.empty:
-                st.success("No LGAs projected below the 80 percent target on the fast screen.")
-            else:
-                st.write(clean(f"{len(screen)} LGA-and-antigen combinations project below 80 percent "
-                               "(all flagged in red)."))
-                st.dataframe(highlight_below(screen, "Projected % of baseline (12m)"),
-                             use_container_width=True, height=460)
-                _download(screen, "Download LGA at-risk screen (CSV)", "D1_lga_at_risk_screen.csv")
+                "Runs automatically on the loaded data: a linear-trend projection 12 months ahead per "
+                "LGA and antigen, flagged below 80 percent of the LGA's 2024 baseline. The 'Projection "
+                "month' column shows the period of performance.")
+        screen = lga_at_risk_screen(data["dhis2"], key=kd)
+        if screen.empty:
+            st.success("No LGAs projected below the 80 percent target on the fast screen.")
+        else:
+            st.write(clean(f"{len(screen)} LGA-and-antigen combinations project below 80 percent "
+                           "(all flagged in red)."))
+            st.dataframe(highlight_below(screen, "Projected % of baseline (12m)"),
+                         use_container_width=True, height=460)
+            _download(screen, "Download LGA at-risk screen (CSV)", "D1_lga_at_risk_screen.csv")
+            ai.ai_block("d1_atrisk", "Domain 1 - LGA at-risk screen",
+                        "LGAs whose linear-trend projection 12 months ahead falls below 80 percent of "
+                        "their 2024 baseline, by antigen. Name the worst-hit states/LGAs and antigens "
+                        "and give a prioritized catch-up action.", screen.head(60))
 
     with tabs[2]:
         section("Microplanning downloads (2026-2027 projections)",
