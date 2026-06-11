@@ -19,14 +19,14 @@ def _download(df: pd.DataFrame, label: str, fname: str):
 
 
 def render(data: dict):
-    domain_banner("_banner_d5.jpg", "Domain 5 - Zero-dose modelling and hotspot detection",
+    domain_banner("_banner_d5.jpg", "Zero-Dose & Hotspots",
                   "Where are zero-dose children most concentrated, and what local factors contribute? "
                   "Bayesian hierarchical Beta regression of state rates, distributed to LGA burden by "
                   "population, with Getis-Ord Gi* hotspots.")
 
     needed = {"ndhs_long", "under5", "dhis2", "lga_population"}
     if not data or any(data.get(k) is None for k in needed):
-        st.warning("Domain 5 needs the NDHS longitudinal, under-five population, DHIS2 and LGA "
+        st.warning("Zero-Dose & Hotspots needs the NDHS longitudinal, under-five population, DHIS2 and LGA "
                    "population files. Load the bundled sample data or upload them on the Data page.")
         return
 
@@ -76,7 +76,7 @@ def render(data: dict):
         with c2:
             st.plotly_chart(viz.burden_bars_fig(res), use_container_width=True)
         st.plotly_chart(viz.zone_summary_fig(res), use_container_width=True)
-        ai.ai_block("d5_state", "Domain 5 - state zero-dose forecasts and risk ranking",
+        ai.ai_block("d5_state", "Zero-Dose & Hotspots - state zero-dose forecasts and risk ranking",
                     "Predicted state zero-dose rate for 2026 with 95 percent credible interval, the "
                     "observed 2024 rate, the estimated 2026 burden of children, and the priority tier.",
                     res[["state", "zone", "zd_obs_2024", "zd_pred_2026_mean", "zd_pred_2026_lo95",
@@ -104,7 +104,7 @@ def render(data: dict):
         show = highlight_classes(pareto.head(60), col_sev, SEVERITY_CELL) if col_sev else pareto.head(60)
         st.dataframe(show, use_container_width=True, height=420)
         _download(pareto, "Download Pareto priority table (CSV)", "D5_lga_pareto_priority.csv")
-        ai.ai_block("d5_pareto", "Domain 5 - LGA Pareto concentration of zero-dose burden",
+        ai.ai_block("d5_pareto", "Zero-Dose & Hotspots - LGA Pareto concentration of zero-dose burden",
                     f"Top LGAs ranked by estimated zero-dose children. Nationally about "
                     f"{lga['national_total']:,} children across {lga['n_lgas']} LGAs; the top 20 "
                     f"percent of LGAs carry about {lga['top20_pct']:.0f} percent of the burden.",
@@ -151,7 +151,7 @@ def render(data: dict):
             hot_ctx = {"class_counts": gi["gi_class"].value_counts().to_dict(),
                        "top_hotspot_lgas": hot[["state", "lga", "zd_proxy_pct", "gi_class"]]
                        .head(30).to_dict(orient="records")}
-            ai.ai_block("d5_hot", "Domain 5 - Getis-Ord Gi* hotspot clusters",
+            ai.ai_block("d5_hot", "Zero-Dose & Hotspots - Getis-Ord Gi* hotspot clusters",
                         "Counts of LGAs in each Gi* category (statistically significant hot spots and "
                         "cold spots of zero-dose burden, k=5 nearest neighbours), and the strongest "
                         "hotspot LGAs.", hot_ctx)
@@ -177,7 +177,7 @@ def render(data: dict):
         show = highlight_classes(view, "LGA tier", TIER_CELL) if "LGA tier" in view.columns else view
         st.dataframe(show, use_container_width=True, height=480)
         _download(clean_df, "Download full ranked LGA table (CSV)", "D5_lga_zero_dose_ranked_CLEAN.csv")
-        ai.ai_block("d5_lga", "Domain 5 - ranked LGA table (population-weighted)",
+        ai.ai_block("d5_lga", "Zero-Dose & Hotspots - ranked LGA table (population-weighted)",
                     "The highest-burden LGAs with state, zone, estimated zero-dose rate and count, "
                     "tier and within-state severity.", clean_df.head(25))
         st.divider()

@@ -18,12 +18,12 @@ def _download(df, label, fname):
 
 
 def render(data: dict):
-    domain_banner("_banner_d1.jpg", "Domain 1 - Antigen coverage forecasting",
+    domain_banner("_banner_d1.jpg", "Coverage Forecasting",
                   "Which routine antigens are projected to fall below the 80 percent coverage target "
                   "in the next 6 to 12 months? National Prophet forecasts as a percent of the 2024 baseline.")
 
     if not data or data.get("dhis2") is None:
-        st.warning("Domain 1 needs the DHIS2 export. Load the bundled sample data or upload it.")
+        st.warning("Coverage Forecasting needs the DHIS2 export. Load the bundled sample data or upload it.")
         return
 
     kd = df_hash(data["dhis2"])
@@ -74,7 +74,7 @@ def render(data: dict):
                                           "% of 2024 baseline", threshold=C.THRESHOLD_PCT, mark_below=True),
                     use_container_width=True)
 
-        ai.ai_block("d1_charts", "Domain 1 - national antigen coverage forecasts (% of 2024 baseline)",
+        ai.ai_block("d1_charts", "Coverage Forecasting - national antigen coverage forecasts (% of 2024 baseline)",
                     "Four national Prophet forecasts (BCG, Penta1, Penta3, Measles1) as a percent of the "
                     "2024 baseline against the 80 percent target. For each antigen give the minimum "
                     "projected value and the month it occurs, and whether it crosses 80 percent within 6 "
@@ -88,7 +88,7 @@ def render(data: dict):
                      use_container_width=True)
         _download(summary, "Download national forecast summary (CSV)", "D1_national_antigen_forecast.csv")
         st.divider()
-        ai.chat_panel("d1", "Domain 1 - national antigen forecast",
+        ai.chat_panel("d1", "Coverage Forecasting - national antigen forecast",
                       "Per-antigen national Prophet forecast as a percent of the 2024 baseline: the "
                       "minimum value, the month it occurs, and whether each crosses the 80 percent "
                       "target within 6 to 12 months.",
@@ -109,7 +109,7 @@ def render(data: dict):
             st.dataframe(highlight_below(screen, "Projected % of baseline (12m)"),
                          use_container_width=True, height=460)
             _download(screen, "Download LGA at-risk screen (CSV)", "D1_lga_at_risk_screen.csv")
-            ai.ai_block("d1_atrisk", "Domain 1 - LGA at-risk screen",
+            ai.ai_block("d1_atrisk", "Coverage Forecasting - LGA at-risk screen",
                         "LGAs whose linear-trend projection 12 months ahead falls below 80 percent of "
                         "their 2024 baseline, by antigen. Name the worst-hit states/LGAs and antigens "
                         "and give a prioritized catch-up action.", screen.head(60))

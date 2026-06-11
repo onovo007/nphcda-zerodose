@@ -17,12 +17,12 @@ def _download(df, label, fname):
 
 
 def render(data: dict):
-    domain_banner("_banner_d2.jpg", "Domain 2 - Dropout and completion dynamics",
+    domain_banner("_banner_d2.jpg", "Dropout & Completion",
                   "What are the predicted dropout rates between key antigen pairs, and what factors "
                   "drive incomplete vaccination? Prophet forecasts plus LASSO-selected drivers.")
 
     if not data or data.get("dhis2") is None:
-        st.warning("Domain 2 needs the DHIS2 export. Load the bundled sample data or upload it.")
+        st.warning("Dropout & Completion needs the DHIS2 export. Load the bundled sample data or upload it.")
         return
 
     kd = df_hash(data["dhis2"])
@@ -60,7 +60,7 @@ def render(data: dict):
                     viz.forecast_band_fig(s, C.DROPOUT_COLORS[col],
                                           f"{s['label']} dropout", "Dropout rate (%)"),
                     use_container_width=True)
-        ai.ai_block("d2_forecast", "Domain 2 - dropout rate forecasts",
+        ai.ai_block("d2_forecast", "Dropout & Completion - dropout rate forecasts",
                     "Prophet forecasts of the three antigen-pair dropout rates (latest observed vs "
                     "forecast end value, with direction). State the trend direction and magnitude for "
                     "each pair, name the pair of greatest concern, and give one priority action. "
@@ -84,7 +84,7 @@ def render(data: dict):
                                         C.DROPOUT_COLORS[target]), use_container_width=True)
             drivers_summary = {C.DROPOUT_TARGETS[t]: {k.replace("pct_", "").replace("_", " "): round(float(v), 3)
                                for k, v in c.head(6).items()} for t, c in drivers.items()}
-            ai.ai_block("d2_drivers", "Domain 2 - dropout drivers (LASSO)",
+            ai.ai_block("d2_drivers", "Dropout & Completion - dropout drivers (LASSO)",
                         "Cross-validated LASSO coefficients (absolute) linking state equity and "
                         "socioeconomic indicators to each dropout pair; larger means stronger association. "
                         "Name the leading drivers per pair and what they imply for intervention design.",
@@ -108,7 +108,7 @@ def render(data: dict):
         hm_ctx = {"metric": C.DROPOUT_TARGETS[metric], "latest_year": int(ly),
                   "highest_dropout_states": piv[ly].sort_values(ascending=False).head(8).round(1).to_dict(),
                   "lowest_dropout_states": piv[ly].sort_values().head(5).round(1).to_dict()}
-        ai.ai_block("d2_heatmap", f"Domain 2 - {C.DROPOUT_TARGETS[metric]} dropout by state and year",
+        ai.ai_block("d2_heatmap", f"Dropout & Completion - {C.DROPOUT_TARGETS[metric]} dropout by state and year",
                     "State-by-year dropout matrix for the selected pair. Identify the states with the "
                     "highest dropout in the latest year, note any clear regional pattern, and give one "
                     "priority action for the worst states. Negative values denote net upward visits.",
@@ -128,7 +128,7 @@ def render(data: dict):
                       "D2_state_dropout_forecast_2026_2027.csv")
 
     st.divider()
-    ai.chat_panel("d2", "Domain 2 - dropout dynamics and drivers",
+    ai.chat_panel("d2", "Dropout & Completion - dropout dynamics and drivers",
                   "Latest observed and forecast endpoint for each dropout pair (Penta1-Penta3, "
                   "Penta1-Measles1, Measles1-Measles2), and the top LASSO drivers per pair.",
                   {"forecasts": fc_summary, "drivers": drivers_summary},

@@ -42,8 +42,8 @@ def sidebar() -> str:
         sidebar_brand()
         st.caption(clean("CIDRE and Quantium Insights LLC, in technical support of NPHCDA. "
                          "Funders and reviewers: GAVI and UNICEF."))
-        nav_options = ["Home", "Data and Quality", "Domain 1 - Coverage", "Domain 2 - Dropout",
-                       "Domain 5 - Zero-dose", "Implementation Science", "Reports & Briefs",
+        nav_options = ["Home", "Data and Quality", "Coverage Forecasting", "Dropout & Completion",
+                       "Zero-Dose & Hotspots", "Implementation Science", "Reports & Briefs",
                        "Program Q&A (RAG)"]
         # Allow other pages to request navigation (e.g. the Home "Upload your own data" button).
         if st.session_state.get("_goto") in nav_options:
@@ -78,22 +78,25 @@ def sidebar() -> str:
 # --------------------------------------------------------------------------------------
 def page_home():
     hero("Zero-Dose Predictive Modelling Platform",
-         "Upload the routine immunization data and run the Domain 1, 2 and 5 models in real time.",
-         ["Domain 1 - Coverage forecasting", "Domain 2 - Dropout dynamics",
-          "Domain 5 - Zero-dose hotspots", "Bayesian + Prophet + spatial"])
+         "Upload the routine immunization data and run the coverage, dropout and zero-dose models in "
+         "real time.",
+         ["Coverage Forecasting", "Dropout & Completion", "Zero-Dose & Hotspots",
+          "Bayesian + Prophet + spatial"])
+    st.caption(clean("These are the GAVI-priority workstreams of NPHCDA's wider eight-domain "
+                     "zero-dose analytical framework, delivered as a working platform."))
 
     c1, c2 = st.columns([2, 1])
     with c1:
         section("What this tool does")
         st.markdown(clean(
-            "- **Domain 1.** National Prophet forecasts of BCG, Penta1, Penta3 and Measles1 as a "
-            "percent of the 2024 baseline, against the 80 percent target, plus an LGA at-risk screen "
-            "and state/LGA microplanning projections.\n"
-            "- **Domain 2.** Prophet forecasts of Penta1-to-Penta3, Penta1-to-Measles1 and "
-            "Measles1-to-Measles2 dropout, with LASSO-selected drivers and state-by-year heatmaps.\n"
-            "- **Domain 5.** A Bayesian hierarchical Beta regression of state zero-dose rates with "
-            "credible intervals, population-weighted LGA burden, Pareto prioritization and Getis-Ord "
-            "Gi* hotspot maps.\n"
+            "- **Coverage Forecasting.** National Prophet forecasts of BCG, Penta1, Penta3 and "
+            "Measles1 as a percent of the 2024 baseline, against the 80 percent target, plus an LGA "
+            "at-risk screen and state/LGA microplanning projections.\n"
+            "- **Dropout & Completion.** Prophet forecasts of Penta1-to-Penta3, Penta1-to-Measles1 "
+            "and Measles1-to-Measles2 dropout, with LASSO-selected drivers and state-by-year heatmaps.\n"
+            "- **Zero-Dose & Hotspots.** A Bayesian hierarchical Beta regression of state zero-dose "
+            "rates with credible intervals, population-weighted LGA burden, Pareto prioritization and "
+            "Getis-Ord Gi* hotspot maps.\n"
             "- **Implementation Science.** Exploratory analysis of the state zero-dose dataset - "
             "correlation matrix, distributions, scatter with Pearson r and p, violin by zone with a "
             "Kruskal-Wallis test, Sankey, mosaic and a Bland-Altman agreement plot.\n"
@@ -121,13 +124,13 @@ def page_home():
             st.success(clean(f"Data loaded: {st.session_state['data_source']}. "
                              "Open a domain from the sidebar."))
 
-    section("Modelling domains and research questions")
+    section("Workstreams and research questions")
     st.dataframe(pd.DataFrame([
-        {"Domain": "1 Coverage forecasting",
+        {"Workstream": "Coverage Forecasting",
          "Research question": "Which antigens fall below the 80% target in 6-12 months?"},
-        {"Domain": "2 Dropout dynamics",
+        {"Workstream": "Dropout & Completion",
          "Research question": "What are predicted dropout rates and what drives incomplete vaccination?"},
-        {"Domain": "5 Zero-dose and hotspots",
+        {"Workstream": "Zero-Dose & Hotspots",
          "Research question": "Where are zero-dose children most concentrated and why?"},
     ]), use_container_width=True, hide_index=True)
 
@@ -347,7 +350,7 @@ def page_reports():
                          "narrative is used otherwise."))
 
     if st.button("Generate document", type="primary"):
-        with st.spinner("Assembling findings from the live models (first run may fit Domain 5)..."):
+        with st.spinner("Assembling findings from the live models (first run may fit the zero-dose model)..."):
             findings = reports.build_findings(data)
         kind = "factsheet" if doc_type.startswith("Factsheet") else "policy"
         with st.spinner("Drafting the narrative..."):
@@ -489,11 +492,11 @@ def main():
         page_home()
     elif page == "Data and Quality":
         page_data()
-    elif page.startswith("Domain 1"):
+    elif page.startswith("Coverage"):
         domain1.render(data)
-    elif page.startswith("Domain 2"):
+    elif page.startswith("Dropout"):
         domain2.render(data)
-    elif page.startswith("Domain 5"):
+    elif page.startswith("Zero-Dose"):
         domain5.render(data)
     elif page.startswith("Implementation"):
         page_impsci()

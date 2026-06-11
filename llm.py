@@ -46,8 +46,8 @@ def blocked(text: str) -> bool:
 
 
 SYSTEM = f"""You are the analytics assistant for the NPHCDA zero-dose predictive modelling
-platform, helping NPHCDA, GAVI and UNICEF staff act on the immunization model outputs (Domains 1, 2
-and 5: antigen coverage forecasting, dropout dynamics, zero-dose modelling and hotspots).
+platform, helping NPHCDA, GAVI and UNICEF staff act on the immunization model outputs (coverage
+forecasting, dropout and completion, and zero-dose modelling and hotspot detection).
 
 GROUNDING:
 - Base every answer on the values in the CONTEXT. Treat them as the source of truth; quote figures
