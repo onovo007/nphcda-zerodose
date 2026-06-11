@@ -26,6 +26,7 @@ import data_quality as dq  # noqa: E402
 import llm  # noqa: E402
 import rag  # noqa: E402
 import reports  # noqa: E402
+import ai  # noqa: E402
 import domain1, domain2, domain5  # noqa: E402
 
 STATUS_ICON = {"ok": "🟢", "partial": "🟡", "invalid": "🔴", "missing": "⚪"}
@@ -83,14 +84,21 @@ def page_home():
         section("What this tool does")
         st.markdown(clean(
             "- **Domain 1.** National Prophet forecasts of BCG, Penta1, Penta3 and Measles1 as a "
-            "percent of the 2024 baseline, against the 80 percent target, plus an LGA at-risk screen.\n"
+            "percent of the 2024 baseline, against the 80 percent target, plus an LGA at-risk screen "
+            "and state/LGA microplanning projections.\n"
             "- **Domain 2.** Prophet forecasts of Penta1-to-Penta3, Penta1-to-Measles1 and "
             "Measles1-to-Measles2 dropout, with LASSO-selected drivers and state-by-year heatmaps.\n"
             "- **Domain 5.** A Bayesian hierarchical Beta regression of state zero-dose rates with "
             "credible intervals, population-weighted LGA burden, Pareto prioritization and Getis-Ord "
-            "Gi* hotspot maps.\n\n"
-            "The models run live on the uploaded data. Heavy steps are scoped so each click returns "
-            "quickly; full per-LGA and full-posterior runs are available behind explicit controls."))
+            "Gi* hotspot maps.\n"
+            "- **Data and Quality.** Schema validation, completeness, reporting rates, and anomaly "
+            "detection on the uploaded data.\n"
+            "- **Reports and Briefs.** One-click generation of a premium factsheet and an editable "
+            "policy brief from the live results.\n"
+            "- **Program Q&A (RAG).** Ask questions of an uploaded programme report (PDF or Word) with "
+            "page-cited, document-grounded answers.\n\n"
+            "Every output carries a grounded AI interpretation and a chat. Models run live on the "
+            "uploaded data; heavy steps are scoped so each click returns quickly."))
     with c2:
         section("Start here")
         st.write(clean("Option A - explore now with the canonical project inputs:"))
@@ -180,7 +188,19 @@ def page_data():
         {"label": "Reporting rate", "value": f"{q['reporting_rate']:.0f}%" if pd.notna(q["reporting_rate"]) else "-",
          "sub": clean(span_txt), "color": C.STEEL},
     ])
+    ai.ai_block("dq_overview", "DHIS2 data quality overview",
+                "Headline data-quality metrics: number of states and LGAs in the file, LGAs reporting "
+                "non-zero Penta1 in the latest year (of 774), count completeness, the state-month "
+                "reporting rate, and the reporting period.", q)
+
     st.plotly_chart(dq.missingness_by_state(d), use_container_width=True)
+    miss = (d.groupby("state")["penta_1_count"]
+            .apply(lambda s: int((s.fillna(0) <= 0).sum())).sort_values(ascending=False))
+    miss_ctx = {"reporting_rate_pct": q["reporting_rate"], "period": span_txt,
+                "states_with_most_missing_months": miss.head(8).to_dict()}
+    ai.ai_block("dq_missing", "DHIS2 reporting completeness by state and month",
+                "Which states have the most missing or zero Penta1 state-months (reporting gaps), "
+                "and the overall state-month reporting rate.", miss_ctx)
 
     nat = io.national_monthly(d)
     out = dq.outliers(nat)
@@ -189,6 +209,10 @@ def page_data():
         st.success("No national-series outliers flagged.")
     else:
         st.dataframe(out, use_container_width=True, hide_index=True)
+        ai.ai_block("dq_outliers", "National-series outlier flags",
+                    "Months where a national antigen dose count is more than 2 standard deviations "
+                    "from its mean (z-score), which may indicate data-entry spikes, campaigns, or "
+                    "reporting changes worth checking.", out)
 
 
 # --------------------------------------------------------------------------------------
