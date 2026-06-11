@@ -100,6 +100,8 @@ NPHCDA_GREEN_DK = "#0F5226"
 # Optional branding images (drop these into assets/; the app falls back gracefully if absent).
 LOGO_PATH = ASSETS_DIR / "nphcda_logo.png"
 HERO_PATH = ASSETS_DIR / "hero.jpg"
+FLAG_PATH = ASSETS_DIR / "flag.png"
+LOGIN_BANNER_PATH = ASSETS_DIR / "_banner_login.jpg"
 
 ANTIGEN_PAL = {
     "BCG": "#1565C0",
@@ -153,8 +155,9 @@ ZONE_ORDER = [
     "South West", "South East", "South South",
 ]
 
-FONT_HEAD = "'IBM Plex Serif', Georgia, 'Times New Roman', serif"
-FONT_BODY = "'IBM Plex Sans', 'Segoe UI', Calibri, sans-serif"
+# Sans-serif throughout (headings use the same family, heavier weight).
+FONT_HEAD = "'IBM Plex Sans', 'Segoe UI', Arial, sans-serif"
+FONT_BODY = "'IBM Plex Sans', 'Segoe UI', Arial, sans-serif"
 
 # --------------------------------------------------------------------------------------
 # Upload schemas (required columns for validation)

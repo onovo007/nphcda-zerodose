@@ -146,7 +146,7 @@ def inject_theme() -> None:
     st.markdown(
         f"""
         <style>
-        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
 
         :root {{
             --navy:{C.NAVY}; --steel:{C.STEEL}; --accent:{C.ACCENT}; --gold:{C.GOLD};
@@ -270,16 +270,17 @@ def inject_theme() -> None:
 
 
 def sidebar_brand() -> None:
-    """Branded logo chip at the top of the sidebar (falls back to text)."""
-    uri = img_data_uri(C.LOGO_PATH)
-    if uri:
-        st.markdown(
-            f"<div class='brand-chip'><img src='{uri}' alt='NPHCDA'/>"
-            f"<div><div class='bt'>Zero-Dose Platform</div>"
-            f"<div class='bs'>NPHCDA - GAVI - UNICEF</div></div></div>",
-            unsafe_allow_html=True)
-    else:
-        st.markdown("### NPHCDA Zero-Dose Platform")
+    """Branded logo chip at the top of the sidebar, with the Nigeria flag (falls back to text)."""
+    logo = img_data_uri(C.LOGO_PATH)
+    flag = img_data_uri(C.FLAG_PATH)
+    logo_html = f"<img src='{logo}' alt='NPHCDA'/>" if logo else "<b class='bt'>NPHCDA</b>"
+    flag_html = (f"<img src='{flag}' alt='Nigeria' title='Federal Republic of Nigeria' "
+                 f"style='height:30px;width:30px;border-radius:4px;margin-left:auto'/>" if flag else "")
+    st.markdown(
+        f"<div class='brand-chip'>{logo_html}"
+        f"<div><div class='bt'>Zero-Dose Platform</div>"
+        f"<div class='bs'>NPHCDA - GAVI - UNICEF</div></div>{flag_html}</div>",
+        unsafe_allow_html=True)
 
 
 def hero(title: str, subtitle: str, pills: list[str] | None = None) -> None:

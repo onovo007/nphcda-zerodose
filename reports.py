@@ -233,23 +233,23 @@ def factsheet_html(f: dict, narrative_md: str) -> str:
 
     return f"""<!doctype html><html><head><meta charset='utf-8'>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Serif:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap');
 body{{font-family:'IBM Plex Sans',Segoe UI,sans-serif;color:#1A1A1A;margin:0;background:#fff}}
 .wrap{{max-width:920px;margin:0 auto;padding:34px 42px}}
 .hd{{display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid {C.NPHCDA_GREEN};padding-bottom:14px}}
 .tag{{color:{C.NPHCDA_GREEN};font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase}}
-.lead{{font-family:'IBM Plex Serif',serif;font-size:25px;line-height:1.3;color:{C.NAVY};margin:18px 0 6px}}
+.lead{{font-family:'IBM Plex Sans',sans-serif;font-size:25px;line-height:1.3;color:{C.NAVY};margin:18px 0 6px}}
 .sub{{color:{C.MUTE};font-size:13px}}
 .stats{{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:26px 0 8px;border-top:1px solid #e7eef4;padding-top:18px}}
-.big{{font-family:'IBM Plex Serif',serif;font-size:46px;font-weight:700;line-height:1}}
+.big{{font-family:'IBM Plex Sans',sans-serif;font-size:46px;font-weight:700;line-height:1}}
 .lab{{color:#1A1A1A;font-size:13px;margin-top:6px;max-width:15rem}}
 .cap{{color:{C.MUTE};font-size:11.5px;margin-top:4px}}
-.sect{{color:{C.NAVY};font-family:'IBM Plex Serif',serif;font-size:18px;border-left:4px solid {C.GOLD};padding-left:10px;margin:26px 0 10px}}
+.sect{{color:{C.NAVY};font-family:'IBM Plex Sans',sans-serif;font-size:18px;border-left:4px solid {C.GOLD};padding-left:10px;margin:26px 0 10px}}
 .pills{{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}}
 .pill{{display:flex;align-items:center;gap:10px;border:1.5px solid {C.STEEL};border-radius:999px;padding:7px 14px;max-width:46%}}
 .pn{{color:{C.STEEL};font-weight:700;font-size:15px;white-space:nowrap}}
 .pt{{color:#33414d;font-size:11.5px;line-height:1.25}}
-h2,h3{{color:{C.NAVY};font-family:'IBM Plex Serif',serif}} h2{{font-size:17px;margin-top:18px}} h3{{font-size:14px}}
+h2,h3{{color:{C.NAVY};font-family:'IBM Plex Sans',sans-serif}} h2{{font-size:17px;margin-top:18px}} h3{{font-size:14px}}
 ul{{margin:6px 0}} li{{margin:4px 0;font-size:13px}}
 .tbl{{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px}}
 .tbl th{{background:{C.NAVY};color:#fff;padding:7px 9px;text-align:left}}
