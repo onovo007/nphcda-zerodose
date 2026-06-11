@@ -79,6 +79,7 @@ def sidebar() -> str:
             if st.button("Sign out", use_container_width=True):
                 auth.logout()
                 st.rerun()
+        auth.admin_panel()
         return page
 
 

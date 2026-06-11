@@ -80,6 +80,45 @@ def logout() -> None:
     st.session_state.pop("auth_user", None)
 
 
+def usage_log_bytes() -> bytes:
+    """Usage log as CSV bytes: the on-disk container log (all events since restart) or session."""
+    try:
+        if os.path.exists(_LOG_PATH):
+            with open(_LOG_PATH, "rb") as fh:
+                return fh.read()
+    except Exception:
+        pass
+    import io as _io
+    rows = st.session_state.get("usage_log", [])
+    if not rows:
+        return b""
+    buf = _io.StringIO()
+    w = csv.DictWriter(buf, fieldnames=list(rows[0].keys()))
+    w.writeheader(); w.writerows(rows)
+    return buf.getvalue().encode("utf-8")
+
+
+def admin_panel() -> None:
+    """Sidebar admin panel (shown only when an ADMIN_CODE secret is set): download the usage log."""
+    code = _secret("ADMIN_CODE")
+    if not code:
+        return
+    with st.expander("Admin - usage log"):
+        entered = st.text_input("Admin code", type="password", key="admin_code_in")
+        if not entered:
+            return
+        if entered != code:
+            st.error("Invalid admin code.")
+            return
+        data = usage_log_bytes()
+        n = len(st.session_state.get("usage_log", []))
+        st.caption(clean(f"{n} event(s) this session; the file below holds all events on this "
+                         "instance since its last restart. For a permanent cross-user record, set "
+                         "LOG_WEBHOOK."))
+        st.download_button("Download usage log (CSV)", data or b"time,event\n",
+                           "nphcda_usage_log.csv", "text/csv", use_container_width=True)
+
+
 def require_login() -> bool:
     """Return True if the user may proceed; otherwise render the login screen and return False."""
     if st.session_state.get("auth_user"):
