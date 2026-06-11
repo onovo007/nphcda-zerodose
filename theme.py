@@ -190,6 +190,9 @@ def inject_theme() -> None:
         /* Sidebar buttons + expanders sit on light backgrounds, so force dark text (the sidebar
            otherwise colours all text white, which made them invisible). */
         section[data-testid="stSidebar"] .stButton button {{ color:{C.NAVY} !important; background:#fff; }}
+        section[data-testid="stSidebar"] .stButton button p,
+        section[data-testid="stSidebar"] .stButton button div,
+        section[data-testid="stSidebar"] .stButton button span {{ color:{C.NAVY} !important; }}
         section[data-testid="stSidebar"] [data-testid="stExpander"] {{ background:#fff; }}
         section[data-testid="stSidebar"] [data-testid="stExpander"] * {{ color:{C.INK} !important; }}
         section[data-testid="stSidebar"] [data-testid="stExpander"] summary p {{ color:{C.NAVY} !important; font-weight:600; }}
