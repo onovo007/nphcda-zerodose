@@ -74,7 +74,8 @@ def ai_block(block_id: str, title: str, what: str, data) -> None:
                 st.rerun()
 
 
-def chat_panel(chat_id: str, title: str, what: str, data, suggestions: list[str] | None = None) -> None:
+def chat_panel(chat_id: str, title: str, what: str, data, suggestions: list[str] | None = None,
+               system: str | None = None) -> None:
     """A grounded, memory-keeping chat scoped to one output (or tab)."""
     cfg = _cfg()
     st.markdown(f"##### Ask about: {clean(title)}")
@@ -105,6 +106,6 @@ def chat_panel(chat_id: str, title: str, what: str, data, suggestions: list[str]
     if send and q and q.strip():
         st.session_state[mkey].append({"role": "user", "content": q.strip()})
         with st.spinner("Thinking..."):
-            reply = llm.chat(cfg["key"], model, st.session_state[mkey], title, what, data)
+            reply = llm.chat(cfg["key"], model, st.session_state[mkey], title, what, data, system=system)
         st.session_state[mkey].append({"role": "assistant", "content": reply})
         st.rerun()

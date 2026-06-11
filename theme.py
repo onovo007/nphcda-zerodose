@@ -187,6 +187,13 @@ def inject_theme() -> None:
         .brand-chip .bt {{ font-family:{C.FONT_HEAD}; color:var(--green-dk)!important; font-weight:700;
             font-size:.92rem; line-height:1.05; }}
         .brand-chip .bs {{ color:#5B6B79!important; font-size:.66rem; letter-spacing:.3px; }}
+        /* Sidebar buttons + expanders sit on light backgrounds, so force dark text (the sidebar
+           otherwise colours all text white, which made them invisible). */
+        section[data-testid="stSidebar"] .stButton button {{ color:{C.NAVY} !important; background:#fff; }}
+        section[data-testid="stSidebar"] [data-testid="stExpander"] {{ background:#fff; }}
+        section[data-testid="stSidebar"] [data-testid="stExpander"] * {{ color:{C.INK} !important; }}
+        section[data-testid="stSidebar"] [data-testid="stExpander"] summary p {{ color:{C.NAVY} !important; font-weight:600; }}
+        section[data-testid="stSidebar"] [data-testid="stExpander"] label {{ color:{C.INK} !important; }}
 
         /* Hero (photographic or gradient) */
         @keyframes heroPan {{ 0%{{background-position:50% 40%}} 100%{{background-position:50% 60%}} }}

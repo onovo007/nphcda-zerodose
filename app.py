@@ -94,8 +94,7 @@ def page_home():
          "programme and ensure that no child is left behind or exposed to vaccine-preventable disease.",
          ["Coverage Forecasting", "Dropout & Completion", "Zero-Dose & Hotspots",
           "Bayesian + Prophet + spatial"])
-    st.caption(clean("These are the GAVI-priority workstreams of NPHCDA's wider eight-domain "
-                     "zero-dose analytical framework, delivered as a working platform. Upload your "
+    st.caption(clean("A decision-support platform for the NPHCDA Digital Innovation Hub. Upload your "
                      "data or use the bundled sample to run every model live."))
 
     c1, c2 = st.columns([2, 1])
@@ -605,15 +604,17 @@ def page_agent():
             {"label": "Top-20% concentration", "value": f"{d5.get('top20_pct', 0):.0f}%", "color": C.STEEL},
             {"label": "Tier-1 states", "value": str(len(d5.get("tier1_states", []))), "color": C.GOLD},
         ])
-    st.caption(clean("This assistant reasons over the combined coverage, dropout, zero-dose and "
-                     "spatial results assembled from the live models. Ask cross-cutting questions."))
+    st.caption(clean("A senior biostatistics, epidemiology and immunization-programme advisor that "
+                     "reasons over the combined coverage, dropout, zero-dose and spatial results "
+                     "(national, state and LGA), grounding the numbers and adding domain expertise."))
     ai.chat_panel("analyst", "All workstream results (coverage, dropout, zero-dose, hotspots)",
                   "Combined live outputs: national antigen coverage forecasts and at-risk antigens; "
                   "dropout forecasts and drivers; state zero-dose forecasts, tiers and burden; "
                   "population-weighted LGA burden, Pareto concentration and the top LGAs.", ctx,
                   suggestions=["Which states and LGAs should we prioritize first, and why?",
                                "What is the single biggest risk across all workstreams?",
-                               "Draft three recommendations for the next quarter."])
+                               "Draft three recommendations for the next quarter."],
+                  system=llm.ANALYST_SYSTEM)
 
 
 # --------------------------------------------------------------------------------------

@@ -75,6 +75,28 @@ ANSWER STYLE:
   and 'programme'. Keep under about 180 words."""
 
 
+ANALYST_SYSTEM = f"""You are a senior biostatistician, epidemiologist and immunization-programme
+advisor supporting NPHCDA, GAVI and UNICEF in Nigeria. You combine TWO things:
+(a) the live platform RESULTS provided as context (coverage forecasts, dropout, zero-dose modelling
+and Gi* hotspots at national, state and LGA level), and
+(b) established domain knowledge in statistics and biostatistics (Bayesian inference, forecasting,
+hypothesis testing, uncertainty), epidemiology and vaccine-preventable diseases, and the operation
+of Nigeria's routine immunization (EPI) programme and the IA2030 / Gavi 6.0 zero-dose agenda.
+
+Rules:
+- Ground every QUANTITATIVE claim (numbers, places, dates, rankings) strictly in the RESULTS
+  context; never invent figures and quote them accurately. Where the data does not contain
+  something, say so.
+- You MAY apply general domain expertise to interpret results, explain methods, weigh evidence and
+  recommend actions - but clearly separate data-grounded statements from general professional
+  guidance, and flag uncertainty (credible/prediction intervals), confounding, the ecological
+  fallacy and small-sample caveats where relevant.
+- Be decision-useful for the Nigerian context: lead with a direct answer, cite the specific
+  numbers, and end with prioritized, feasible recommendations.
+- Refuse only harmful, unethical, or clearly unrelated requests, replying exactly: "{REFUSAL}"
+- House style: hyphen only (no em or en dashes); American -ize; keep British 'modelling'/'programme'."""
+
+
 def _payload(model: str, messages: list) -> dict:
     data = {"model": model, "messages": messages}
     if model.startswith(("gpt-5", "o1", "o3", "o4")):
@@ -134,14 +156,18 @@ def interpret(api_key: str, model: str, title: str, what: str, data) -> str:
     return _complete(api_key, model, messages)
 
 
-def chat(api_key: str, model: str, history: list, title: str, what: str, data) -> str:
-    """Multi-turn chat grounded in one output's context. history = [{role, content}, ...]."""
+def chat(api_key: str, model: str, history: list, title: str, what: str, data,
+         system: str | None = None) -> str:
+    """Multi-turn chat. Grounded in the output's context; pass system=ANALYST_SYSTEM for the
+    expert cross-domain analyst (which may add domain knowledge while grounding the numbers)."""
     last_user = next((m["content"] for m in reversed(history) if m["role"] == "user"), "")
     if blocked(last_user):
         return REFUSAL
-    messages = [{"role": "system", "content": SYSTEM},
-                {"role": "system", "content": "CONVERSATION CONTEXT (the only source of truth):\n"
-                 + _context_block(title, what, data)}]
+    sys = system or SYSTEM
+    ctx_line = ("RESULTS CONTEXT (ground all quantitative claims in this; you may add domain "
+                "expertise):\n" if system else "CONVERSATION CONTEXT (the only source of truth):\n")
+    messages = [{"role": "system", "content": sys},
+                {"role": "system", "content": ctx_line + _context_block(title, what, data)}]
     messages += [{"role": m["role"], "content": m["content"]} for m in history][-12:]
     return _complete(api_key, model, messages)
 
