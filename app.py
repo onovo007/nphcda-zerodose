@@ -246,10 +246,10 @@ def page_data():
 # Program document Q&A (RAG)
 # --------------------------------------------------------------------------------------
 def page_rag():
-    st.markdown("## Program document Q&A (RAG)")
-    st.caption(clean("Upload a programme report (PDF or Word). The app indexes it and answers your "
-                     "questions in real time, grounded in the document, with page citations and a "
-                     "retrieval-confidence score. Answers come only from the uploaded document."))
+    domain_banner("_banner_rag.jpg", "Program Document Q&A (RAG)",
+                  "Upload a programme report (PDF or Word). The app indexes it and answers your "
+                  "questions in real time, grounded in the document, with page citations and a "
+                  "retrieval-confidence score. Answers come only from the uploaded document.")
     cfg = st.session_state.get("llm") or {}
     if not cfg.get("key"):
         st.warning("Add your OpenAI API key in the sidebar to enable document Q&A.")
@@ -328,9 +328,9 @@ def page_rag():
 # --------------------------------------------------------------------------------------
 def page_reports():
     import streamlit.components.v1 as components
-    st.markdown("## Reports and Briefs")
-    st.caption(clean("Generate a premium factsheet or an editable policy brief from the live model "
-                     "outputs (Domains 1, 2 and 5). Every figure traces to the on-screen results."))
+    domain_banner("_banner_reports.jpg", "Reports and Briefs",
+                  "Generate a premium factsheet or an editable policy brief from the live model "
+                  "outputs. Every figure traces to the on-screen results.")
     data = io.get_active_data()
     if not data:
         st.warning("Load data first on Home or the Data and Quality page.")
@@ -402,7 +402,8 @@ def page_impsci():
         {"label": "Range across states", "value": f"{df[o].min():.0f}-{df[o].max():.0f}%",
          "color": C.GOLD},
     ])
-    tabs = st.tabs(["Descriptive stats", "Univariate", "Bivariate", "Validation (Bland-Altman)"])
+    tabs = st.tabs(["Descriptive stats", "Univariate", "Bivariate", "Validation (Bland-Altman)",
+                    "Hypothesis tests"])
 
     with tabs[0]:
         section("Descriptive statistics", "Summary of the zero-dose outcome and its candidate drivers.")
@@ -489,6 +490,67 @@ def page_impsci():
                     "Agreement between the two selected DTP1 coverage measures: the bias (mean "
                     "difference) and the 95 percent limits of agreement.",
                     {"measure_a": impsci.pretty(a), "measure_b": impsci.pretty(b), **bsum})
+
+    with tabs[4]:
+        section("Hypothesis testing",
+                "Pose a question, pick the variables and a test, then run it. Tests use a 0.05 "
+                "significance level.")
+        num = impsci.all_numeric(df)
+        test = st.selectbox("Statistical test",
+                            ["Independent t-test", "Paired t-test", "One-way ANOVA", "Chi-square test"],
+                            key="is_test")
+        params: dict = {}
+        if test == "Independent t-test":
+            c1, c2 = st.columns(2)
+            params["outcome"] = c1.selectbox("Outcome (numeric)", num,
+                                             index=num.index(impsci.OUTCOME) if impsci.OUTCOME in num else 0,
+                                             format_func=impsci.pretty, key="is_t_out")
+            params["group_var"] = c2.selectbox("Grouping variable (split at its median)",
+                                               [c for c in num if c != params["outcome"]],
+                                               format_func=impsci.pretty, key="is_t_grp")
+        elif test == "Paired t-test":
+            pair = [c for c in ["dtp1_2008", "dtp1_2013", "dtp1_2018", "dtp1_2024"] if c in num] or num
+            c1, c2 = st.columns(2)
+            params["col_a"] = c1.selectbox("Measure A", pair, index=max(len(pair) - 2, 0),
+                                           format_func=impsci.pretty, key="is_p_a")
+            params["col_b"] = c2.selectbox("Measure B", pair, index=len(pair) - 1,
+                                           format_func=impsci.pretty, key="is_p_b")
+        elif test == "One-way ANOVA":
+            params["outcome"] = st.selectbox("Outcome (numeric)", num,
+                                             index=num.index(impsci.OUTCOME) if impsci.OUTCOME in num else 0,
+                                             format_func=impsci.pretty, key="is_a_out")
+            params["group_var"] = "zone_name"
+            st.caption("Grouping: geopolitical zone.")
+        else:  # Chi-square
+            opts = ["zone_name"] + num
+            fmt = lambda c: "Zone" if c == "zone_name" else impsci.pretty(c)
+            c1, c2 = st.columns(2)
+            params["var1"] = c1.selectbox("Variable 1", opts, index=0, format_func=fmt, key="is_c_v1")
+            params["var2"] = c2.selectbox("Variable 2", opts,
+                                          index=1 if len(opts) > 1 else 0, format_func=fmt, key="is_c_v2")
+            st.caption("Numeric variables are split into Low/Mid/High thirds for the contingency table.")
+
+        if st.button("Run test", type="primary", key="is_run_test"):
+            st.session_state["is_test_res"] = impsci.hypothesis_test(df, test, **params)
+        res = st.session_state.get("is_test_res")
+        if res and not res.get("error"):
+            st.markdown(f"**Question:** {clean(res['question'])}")
+            m1, m2, m3 = st.columns(3)
+            m1.metric(res["statistic_name"], res["statistic"])
+            m2.metric("p-value", res["p_value"])
+            m3.metric("Significant (a=0.05)", "Yes" if res["significant"] else "No")
+            (st.success if res["significant"] else st.info)(clean(res["conclusion"]))
+            det = res["detail"]
+            if isinstance(det, dict) and det and isinstance(next(iter(det.values())), dict):
+                st.dataframe(pd.DataFrame(det), use_container_width=True)
+            else:
+                st.dataframe(pd.DataFrame([det]) if isinstance(det, dict) else pd.DataFrame(det),
+                             use_container_width=True, hide_index=True)
+            ai.ai_block("is_hyptest", f"Hypothesis test - {res['test']}",
+                        "A statistical test result (statistic, p-value, group/contingency detail) "
+                        "answering the stated question. Explain in plain language what the result "
+                        "means for programming, whether the difference/association is significant, and "
+                        "one action it supports. Note the small sample (37 states) as a caveat.", res)
 
     st.divider()
     ai.chat_panel("impsci", "Implementation Science - state zero-dose EDA",

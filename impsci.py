@@ -182,6 +182,72 @@ def band_bar_fig(df: pd.DataFrame):
     return style_fig(fig), summary
 
 
+def all_numeric(df: pd.DataFrame) -> list[str]:
+    return [c for c in df.columns if c not in ("state_name", "zone_name")
+            and pd.api.types.is_numeric_dtype(df[c])]
+
+
+def _as_categorical(series: pd.Series):
+    """Return a categorical version of a column (tertile-band numerics; pass strings through)."""
+    if pd.api.types.is_numeric_dtype(series):
+        try:
+            return pd.qcut(series, 3, labels=["Low", "Mid", "High"], duplicates="drop").astype(str)
+        except Exception:
+            return pd.cut(series, 3, labels=["Low", "Mid", "High"]).astype(str)
+    return series.astype(str)
+
+
+def hypothesis_test(df: pd.DataFrame, test: str, **kw) -> dict:
+    """Run a chosen statistical test and return a result dict (statistic, p, detail, question)."""
+    from scipy import stats as ss
+    alpha = 0.05
+    if test == "Independent t-test":
+        outcome, grp = kw["outcome"], kw["group_var"]
+        med = df[grp].median()
+        a = df[df[grp] <= med][outcome].dropna()
+        b = df[df[grp] > med][outcome].dropna()
+        t, p = ss.ttest_ind(a, b, equal_var=False)
+        res = {"statistic_name": "t", "statistic": round(float(t), 3), "p_value": round(float(p), 4),
+               "detail": {f"low {pretty(grp)} (n={len(a)}) mean {pretty(outcome)}": round(float(a.mean()), 1),
+                          f"high {pretty(grp)} (n={len(b)}) mean {pretty(outcome)}": round(float(b.mean()), 1)},
+               "question": f"Does {pretty(outcome)} differ between states with low vs high {pretty(grp)} "
+                           "(split at the median)?"}
+    elif test == "Paired t-test":
+        a, b = kw["col_a"], kw["col_b"]
+        d = df[[a, b]].dropna()
+        t, p = ss.ttest_rel(d[a], d[b])
+        res = {"statistic_name": "t", "statistic": round(float(t), 3), "p_value": round(float(p), 4),
+               "detail": {f"mean {pretty(a)}": round(float(d[a].mean()), 1),
+                          f"mean {pretty(b)}": round(float(d[b].mean()), 1),
+                          "mean paired difference": round(float((d[b] - d[a]).mean()), 1), "n": len(d)},
+               "question": f"Do {pretty(a)} and {pretty(b)} differ across the same states (paired)?"}
+    elif test == "One-way ANOVA":
+        outcome, grp = kw["outcome"], kw.get("group_var", "zone_name")
+        groups = [g[outcome].dropna() for _, g in df.groupby(grp) if len(g[outcome].dropna()) > 1]
+        f, p = ss.f_oneway(*groups)
+        res = {"statistic_name": "F", "statistic": round(float(f), 3), "p_value": round(float(p), 4),
+               "detail": {str(k): round(float(g[outcome].mean()), 1) for k, g in df.groupby(grp)},
+               "question": f"Does mean {pretty(outcome)} differ across {pretty(grp)}?"}
+    elif test == "Chi-square test":
+        v1, v2 = kw["var1"], kw["var2"]
+        ct = pd.crosstab(_as_categorical(df[v1]), _as_categorical(df[v2]))
+        chi2, p, dof, _ = ss.chi2_contingency(ct)
+        res = {"statistic_name": "chi-square", "statistic": round(float(chi2), 3),
+               "p_value": round(float(p), 4), "dof": int(dof),
+               "detail": ct.to_dict(),
+               "question": f"Are {pretty(v1)} and {pretty(v2)} associated (numeric variables are "
+                           "split into Low/Mid/High thirds)?"}
+    else:
+        return {"error": "Unknown test"}
+    res["test"] = test
+    res["alpha"] = alpha
+    res["significant"] = bool(res["p_value"] < alpha)
+    res["conclusion"] = ("Statistically significant at alpha 0.05 (reject the null hypothesis)."
+                         if res["significant"] else
+                         "Not statistically significant at alpha 0.05 (fail to reject the null).")
+    return res
+
+
 def bland_altman_fig(df: pd.DataFrame, a: str = "dtp1_2018", b: str = "dtp1_2024"):
     d = df[[a, b, "state_name"]].dropna()
     mean = (d[a] + d[b]) / 2

@@ -173,21 +173,55 @@ def md_to_html(md: str) -> str:
 # --------------------------------------------------------------------------------------
 # Factsheet (premium HTML)
 # --------------------------------------------------------------------------------------
+def _bignum(v: float) -> str:
+    if v >= 1e6:
+        return f"{v / 1e6:.2f}M"
+    if v >= 1000:
+        return f"{v / 1000:.0f}k"
+    return f"{v:,.0f}"
+
+
 def factsheet_html(f: dict, narrative_md: str) -> str:
     d5 = f.get("d5", {})
+    d1 = f.get("d1", {})
+    d2 = f.get("d2", {})
     logo = img_data_uri(C.LOGO_PATH)
-    logo_html = f"<img src='{logo}' style='height:54px'/>" if logo else "<b style='font-size:20px;color:#0F5226'>NPHCDA</b>"
-    kpis = []
+    logo_html = (f"<img src='{logo}' style='height:58px'/>" if logo
+                 else "<b style='font-size:22px;color:#0F5226'>NPHCDA</b>")
+
+    # GAVI-style big-number stat blocks.
+    stats = []
     if d5:
-        kpis = [
-            ("Zero-dose children, 2026", f"{d5.get('lga_total', 0):,}"),
-            ("Reporting LGAs", f"{d5.get('lga_count', 0)}"),
-            ("Burden in top 20% of LGAs", f"{d5.get('top20_pct', 0):.0f}%"),
-            ("Tier-1 critical states", str(len(d5.get('tier1_states', [])))),
-        ]
-    kpi_html = "".join(
-        f"<div class='k'><div class='kl'>{clean(l)}</div><div class='kv'>{clean(v)}</div></div>"
-        for l, v in kpis)
+        stats.append((_bignum(d5.get("lga_total", 0)), C.ACCENT, "zero-dose children projected in 2026",
+                      f"across {d5.get('lga_count', 0)} reporting LGAs"))
+        stats.append((f"{d5.get('top20_pct', 0):.0f}%", C.NAVY, "of the burden sits in the top 20% of LGAs",
+                      f"80% of the burden is in the top {d5.get('n80', 0)} LGAs"))
+        stats.append((str(len(d5.get("tier1_states", []))), C.NPHCDA_GREEN, "Tier-1 critical states",
+                      clean(", ".join(d5.get("tier1_states", [])) or "North-West")))
+    stat_html = "".join(
+        f"<div class='stat'><div class='big' style='color:{col}'>{clean(v)}</div>"
+        f"<div class='lab'>{clean(lab)}</div><div class='cap'>{clean(cap)}</div></div>"
+        for v, col, lab, cap in stats)
+
+    # Pill callouts (GAVI-style rounded outline).
+    pills = []
+    if d5.get("top_lgas"):
+        t = d5["top_lgas"][0]
+        pills.append((f"{t['zd_count']:,}", f"highest-burden LGA: {t['lga']} ({t['state']}), {t['zd_rate_pct']:.0f}% rate"))
+    if d5.get("top_states"):
+        ts = d5["top_states"][0]
+        pills.append((f"{ts['zd_2026_pct']:.0f}%", f"highest-risk state: {ts['state']} (predicted 2026)"))
+    ar = d1.get("at_risk_antigens")
+    pills.append((str(len(ar)) if ar else "0",
+                  ("antigens at risk below 80% in 6-12m: " + ", ".join(ar)) if ar
+                  else "antigens below the 80% target (all tracer antigens on track)"))
+    if d2.get("top_drivers"):
+        first = next(iter(d2["top_drivers"].items()))
+        pills.append(("Drivers", f"{first[0]} dropout: {', '.join(first[1][:3])}"))
+    pill_html = "".join(
+        f"<div class='pill'><span class='pn'>{clean(n)}</span><span class='pt'>{clean(txt)}</span></div>"
+        for n, txt in pills)
+
     rows = "".join(
         f"<tr><td>{i+1}</td><td>{clean(s['lga'])}</td><td>{clean(s['state'])}</td>"
         f"<td style='text-align:right'>{s['zd_count']:,}</td>"
@@ -196,35 +230,44 @@ def factsheet_html(f: dict, narrative_md: str) -> str:
     table_html = (f"<table class='tbl'><thead><tr><th>#</th><th>LGA</th><th>State</th>"
                   f"<th>Zero-dose children</th><th>Rate</th></tr></thead><tbody>{rows}</tbody></table>"
                   if rows else "")
+
     return f"""<!doctype html><html><head><meta charset='utf-8'>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=IBM+Plex+Serif:wght@600;700&display=swap');
 body{{font-family:'IBM Plex Sans',Segoe UI,sans-serif;color:#1A1A1A;margin:0;background:#fff}}
-.wrap{{max-width:900px;margin:0 auto;padding:34px 40px}}
+.wrap{{max-width:920px;margin:0 auto;padding:34px 42px}}
 .hd{{display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid {C.NPHCDA_GREEN};padding-bottom:14px}}
-.title{{font-family:'IBM Plex Serif',serif;font-size:26px;color:{C.NAVY};margin:14px 0 2px}}
+.tag{{color:{C.NPHCDA_GREEN};font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase}}
+.lead{{font-family:'IBM Plex Serif',serif;font-size:25px;line-height:1.3;color:{C.NAVY};margin:18px 0 6px}}
 .sub{{color:{C.MUTE};font-size:13px}}
-.kgrid{{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin:20px 0}}
-.k{{background:linear-gradient(180deg,#fff,#f5f9f6);border:1px solid rgba(28,122,61,.18);border-top:4px solid {C.NPHCDA_GREEN};border-radius:12px;padding:12px 14px}}
-.kl{{color:{C.MUTE};font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}}
-.kv{{color:{C.NAVY};font-size:24px;font-weight:700}}
-h2{{color:{C.NAVY};font-family:'IBM Plex Serif',serif;border-left:4px solid {C.GOLD};padding-left:10px;font-size:18px;margin-top:22px}}
-h3{{color:{C.NAVY};font-size:15px}}
-ul{{margin:6px 0 6px 0}} li{{margin:4px 0}}
-.tbl{{width:100%;border-collapse:collapse;margin-top:8px;font-size:13px}}
+.stats{{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:26px 0 8px;border-top:1px solid #e7eef4;padding-top:18px}}
+.big{{font-family:'IBM Plex Serif',serif;font-size:46px;font-weight:700;line-height:1}}
+.lab{{color:#1A1A1A;font-size:13px;margin-top:6px;max-width:15rem}}
+.cap{{color:{C.MUTE};font-size:11.5px;margin-top:4px}}
+.sect{{color:{C.NAVY};font-family:'IBM Plex Serif',serif;font-size:18px;border-left:4px solid {C.GOLD};padding-left:10px;margin:26px 0 10px}}
+.pills{{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}}
+.pill{{display:flex;align-items:center;gap:10px;border:1.5px solid {C.STEEL};border-radius:999px;padding:7px 14px;max-width:46%}}
+.pn{{color:{C.STEEL};font-weight:700;font-size:15px;white-space:nowrap}}
+.pt{{color:#33414d;font-size:11.5px;line-height:1.25}}
+h2,h3{{color:{C.NAVY};font-family:'IBM Plex Serif',serif}} h2{{font-size:17px;margin-top:18px}} h3{{font-size:14px}}
+ul{{margin:6px 0}} li{{margin:4px 0;font-size:13px}}
+.tbl{{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px}}
 .tbl th{{background:{C.NAVY};color:#fff;padding:7px 9px;text-align:left}}
 .tbl td{{padding:6px 9px;border-bottom:1px solid #e7eef4}}
-.ft{{margin-top:24px;border-top:1px solid #e0e7ee;padding-top:10px;color:{C.MUTE};font-size:11px}}
+.ft{{margin-top:26px;border-top:1px solid #e0e7ee;padding-top:10px;color:{C.MUTE};font-size:11px}}
 </style></head><body><div class='wrap'>
-<div class='hd'>{logo_html}<div style='text-align:right'><div class='sub'>FACTSHEET - {clean(f.get('generated',''))}</div></div></div>
-<div class='title'>Nigeria Zero-Dose Immunization - Key Findings</div>
+<div class='hd'>{logo_html}<div style='text-align:right'><div class='tag'>Factsheet</div>
+<div class='sub'>{clean(f.get('generated',''))}</div></div></div>
+<div class='lead'>Nigeria zero-dose modelling: where the unvaccinated children are, and where to act first.</div>
 <div class='sub'>{clean(f.get('consortium',''))}. For {clean(f.get('audience',''))}.</div>
-<div class='kgrid'>{kpi_html}</div>
+<div class='stats'>{stat_html}</div>
+<div class='sect'>Key statistics</div><div class='pills'>{pill_html}</div>
+<div class='sect'>Findings and recommended actions</div>
 {md_to_html(narrative_md)}
-<h2>Highest-burden LGAs</h2>{table_html}
+<div class='sect'>Highest-burden LGAs</div>{table_html}
 <div class='ft'>Generated by the NPHCDA Zero-Dose Predictive Modelling Platform from live model outputs
-(coverage, dropout and zero-dose workstreams). Figures are model estimates; review before use. LGA population denominator:
-City Population (NPC 2022 projection).</div>
+(coverage, dropout and zero-dose workstreams). Figures are model estimates; review before use.
+LGA population denominator: City Population (NPC 2022 projection).</div>
 </div></body></html>"""
 
 
