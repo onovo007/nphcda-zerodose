@@ -17,6 +17,25 @@ def _download(df, label, fname):
     st.download_button(label, df.to_csv(index=False).encode("utf-8"), fname, "text/csv")
 
 
+def _horizon_minima(series: dict, horizon_months: int) -> dict:
+    """For each antigen, the minimum forecast (% of baseline) within the chosen horizon."""
+    import numpy as np
+    out = {}
+    for antigen, s in series.items():
+        fx = pd.DatetimeIndex(pd.to_datetime(s["fore_x"]))
+        fy = np.asarray(s["fore_y"], dtype=float)
+        cut = pd.Timestamp(s["cutoff"])
+        ma = (fx.year - cut.year) * 12 + (fx.month - cut.month)
+        mask = np.asarray(ma) <= horizon_months
+        if not mask.any():
+            mask = np.ones(len(fy), dtype=bool)
+        sub = fy[mask]
+        j = int(sub.argmin())
+        month = fx[mask][j].strftime("%b %Y")
+        out[antigen] = (float(sub.min()), month, bool(sub.min() < 80))
+    return out
+
+
 def render(data: dict):
     domain_banner("_banner_d1.jpg", "Coverage Forecasting",
                   "Which routine antigens are projected to fall below the 80 percent coverage target "
@@ -32,27 +51,30 @@ def render(data: dict):
     out = national_forecasts(nat, key=kd)
     series, summary = out["series"], out["summary"]
 
-    at_risk = summary[summary["Crosses 80% in 6-12m"] == "Yes"]["Antigen"].tolist()
-    lowest = summary.loc[summary["Min forecast (% of 2024 baseline)"].idxmin()]
+    # Time-horizon selector: the scorecards and headline react to the chosen window.
+    hlabel = st.radio("Forecast horizon for the scorecards",
+                      ["3 months", "6 months", "12 months", "Full forecast"],
+                      index=2, horizontal=True, key="d1_horizon")
+    H = {"3 months": 3, "6 months": 6, "12 months": 12, "Full forecast": 999}[hlabel]
+    hm = _horizon_minima(series, H)  # antigen -> (min_pct, month_label, at_risk)
 
-    # Headline so users do not have to guess the main message.
+    at_risk = [a for a, v in hm.items() if v[2]]
+    low_antigen = min(hm, key=lambda a: hm[a][0]) if hm else None
+
     if at_risk:
-        st.error(clean(f"Headline: {len(at_risk)} of {len(series)} tracer antigens are projected to "
-                       f"fall below the 80 percent target within 6 to 12 months: {', '.join(at_risk)}."))
-    else:
+        st.error(clean(f"Headline ({hlabel}): {len(at_risk)} of {len(series)} tracer antigens are "
+                       f"projected to fall below the 80 percent target: {', '.join(at_risk)}."))
+    elif low_antigen:
         st.success(clean(
-            f"Headline: all {len(series)} tracer antigens are projected to stay at or above the 80 "
-            f"percent target nationally over the next 6 to 12 months. Lowest is {lowest['Antigen']} at "
-            f"{lowest['Min forecast (% of 2024 baseline)']:.0f} percent of the 2024 baseline "
-            f"({lowest['Month of minimum']})."))
+            f"Headline ({hlabel}): all {len(series)} tracer antigens are projected to stay at or above "
+            f"the 80 percent target nationally. Lowest is {low_antigen} at {hm[low_antigen][0]:.0f} "
+            f"percent of the 2024 baseline ({hm[low_antigen][1]})."))
 
-    # One KPI card per antigen (red if at risk, green if on target), so multiple at-risk antigens
-    # each show their own flagged card.
-    cards = [{"label": "Target line", "value": "80%", "sub": "of 2024 baseline", "color": C.STEEL}]
-    for _, r in summary.iterrows():
-        risk = r["Crosses 80% in 6-12m"] == "Yes"
-        cards.append({"label": r["Antigen"], "value": f"{r['Min forecast (% of 2024 baseline)']:.0f}%",
-                      "sub": clean(("at risk - " if risk else "on target - ") + str(r["Month of minimum"])),
+    cards = [{"label": f"Horizon", "value": hlabel, "sub": "of 2024 baseline target 80%", "color": C.STEEL}]
+    for antigen in series:
+        mn, mon, risk = hm[antigen]
+        cards.append({"label": antigen, "value": f"{mn:.0f}%",
+                      "sub": clean(("at risk - " if risk else "on target - ") + str(mon)),
                       "color": C.ACCENT if risk else C.NPHCDA_GREEN})
     kpi_row(cards)
 

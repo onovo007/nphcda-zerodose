@@ -1,6 +1,8 @@
 """Domain 2 view - Dropout and completion dynamics."""
 from __future__ import annotations
 
+import numpy as np
+import pandas as pd
 import streamlit as st
 
 import config as C
@@ -44,6 +46,25 @@ def render(data: dict):
             cards.append({"label": label, "value": f"{latest[col]:.1f}%", "sub": "latest observed",
                           "color": C.DROPOUT_COLORS[col]})
     kpi_row(cards)
+
+    # Time-horizon selector: forecast dropout for the next 3 / 6 / 12 months (micro-planning).
+    hlabel = st.radio("Forecast dropout for the next:", ["3 months", "6 months", "12 months"],
+                      index=2, horizontal=True, key="d2_horizon")
+    H = {"3 months": 3, "6 months": 6, "12 months": 12}[hlabel]
+    hcards = []
+    for col, s in fc.items():
+        fx = pd.DatetimeIndex(pd.to_datetime(s["fore_x"]))
+        fy = np.asarray(s["fore_y"], dtype=float)
+        cut = pd.Timestamp(s["cutoff"])
+        ma = np.asarray((fx.year - cut.year) * 12 + (fx.month - cut.month))
+        mask = ma <= H
+        val = float(fy[mask][-1]) if mask.any() else float(fy[-1])
+        delta = val - float(s["obs_y"][-1])
+        hcards.append({"label": s["label"], "value": f"{val:.1f}%",
+                       "sub": clean(f"forecast at +{H}m ({'+' if delta >= 0 else ''}{delta:.1f} vs now)"),
+                       "color": C.DROPOUT_COLORS[col]})
+    st.caption(clean(f"Projected dropout rate {hlabel} ahead, per antigen pair, for micro-planning."))
+    kpi_row(hcards)
 
     tabs = st.tabs(["Dropout forecasts", "Drivers (LASSO)", "State-year heatmap",
                     "Microplanning downloads"])

@@ -344,3 +344,132 @@ def policy_docx(f: dict, narrative_md: str) -> bytes:
     fr.italic = True; fr.font.size = Pt(8); fr.font.color.rgb = mute
 
     buf = io.BytesIO(); doc.save(buf); return buf.getvalue()
+
+
+def _section_lines(md: str, heads: list[str]) -> list[str]:
+    """Return the bullet/numbered lines under any heading whose text matches one of `heads`."""
+    out, cap = [], False
+    for ln in md.splitlines():
+        s = ln.strip()
+        if s.startswith("#"):
+            cap = any(h.lower() in s.lower() for h in heads)
+            continue
+        if cap and s:
+            out.append(_strip_md(re.sub(r"^\s*([-*]|\d+\.)\s*", "", s)))
+    return out
+
+
+def policy_pptx(f: dict, narrative_md: str) -> bytes:
+    """Branded PowerPoint policy deck (NPHCDA logo, navy title bars)."""
+    from pptx import Presentation
+    from pptx.util import Inches, Pt
+    from pptx.dml.color import RGBColor
+    from pptx.enum.text import PP_ALIGN
+
+    NAVY, GREEN, GOLD, INK = RGBColor(0x1F, 0x3B, 0x57), RGBColor(0x1C, 0x7A, 0x3D), \
+        RGBColor(0xC8, 0x90, 0x2A), RGBColor(0x1A, 0x1A, 0x1A)
+    prs = Presentation()
+    prs.slide_width, prs.slide_height = Inches(13.333), Inches(7.5)
+    blank = prs.slide_layouts[6]
+    SW = Inches(13.333)
+
+    def bar(slide, title):
+        rect = slide.shapes.add_shape(1, 0, 0, SW, Inches(1.0))
+        rect.fill.solid(); rect.fill.fore_color.rgb = NAVY; rect.line.fill.background()
+        tf = rect.text_frame; tf.margin_left = Inches(0.4)
+        tf.text = title
+        p = tf.paragraphs[0]; p.font.size = Pt(26); p.font.bold = True; p.font.color.rgb = RGBColor(255, 255, 255)
+        accent = slide.shapes.add_shape(1, 0, Inches(1.0), SW, Inches(0.06))
+        accent.fill.solid(); accent.fill.fore_color.rgb = GOLD; accent.line.fill.background()
+
+    def bullets(slide, items, top=1.4, size=18):
+        tb = slide.shapes.add_textbox(Inches(0.6), Inches(top), Inches(12.1), Inches(5.6))
+        tf = tb.text_frame; tf.word_wrap = True
+        for i, it in enumerate(items):
+            p = tf.paragraphs[0] if i == 0 else tf.add_paragraph()
+            p.text = "- " + clean(it); p.font.size = Pt(size); p.font.color.rgb = INK; p.space_after = Pt(8)
+
+    def table_slide(title, headers, rows):
+        s = prs.slides.add_slide(blank); bar(s, title)
+        n = len(rows) + 1
+        tbl = s.shapes.add_table(n, len(headers), Inches(0.6), Inches(1.4),
+                                 Inches(12.1), Inches(0.4 * n)).table
+        for j, h in enumerate(headers):
+            c = tbl.cell(0, j); c.text = h
+            c.fill.solid(); c.fill.fore_color.rgb = NAVY
+            c.text_frame.paragraphs[0].font.color.rgb = RGBColor(255, 255, 255)
+            c.text_frame.paragraphs[0].font.bold = True; c.text_frame.paragraphs[0].font.size = Pt(13)
+        for i, row in enumerate(rows, start=1):
+            for j, val in enumerate(row):
+                c = tbl.cell(i, j); c.text = str(val); c.text_frame.paragraphs[0].font.size = Pt(12)
+
+    d5, d1, d2 = f.get("d5", {}), f.get("d1", {}), f.get("d2", {})
+
+    # 1 - Title
+    s = prs.slides.add_slide(blank)
+    bg = s.shapes.add_shape(1, 0, 0, SW, prs.slide_height)
+    bg.fill.solid(); bg.fill.fore_color.rgb = NAVY; bg.line.fill.background()
+    if C.LOGO_PATH.exists():
+        try:
+            s.shapes.add_picture(str(C.LOGO_PATH), Inches(0.6), Inches(0.5), height=Inches(0.9))
+        except Exception:
+            pass
+    tb = s.shapes.add_textbox(Inches(0.8), Inches(2.6), Inches(11.7), Inches(2.4)); tf = tb.text_frame
+    tf.word_wrap = True
+    tf.text = "Nigeria Zero-Dose Immunization"
+    tf.paragraphs[0].font.size = Pt(40); tf.paragraphs[0].font.bold = True
+    tf.paragraphs[0].font.color.rgb = RGBColor(255, 255, 255)
+    p = tf.add_paragraph(); p.text = "Policy Brief"
+    p.font.size = Pt(28); p.font.color.rgb = GOLD
+    p = tf.add_paragraph()
+    p.text = f"{f.get('consortium', '')}.  For {f.get('audience', '')}.  |  {f.get('generated', '')}"
+    p.font.size = Pt(13); p.font.color.rgb = RGBColor(220, 230, 238)
+
+    # 2 - Headline numbers
+    s = prs.slides.add_slide(blank); bar(s, "The headline")
+    nums = []
+    if d5:
+        nums = [(f"{d5.get('lga_total', 0):,}", "zero-dose children, 2026"),
+                (f"{d5.get('top20_pct', 0):.0f}%", "of burden in the top 20% of LGAs"),
+                (str(len(d5.get('tier1_states', []))), "Tier-1 critical states")]
+    for i, (big, lab) in enumerate(nums):
+        x = Inches(0.6 + i * 4.2)
+        tbx = s.shapes.add_textbox(x, Inches(2.2), Inches(4.0), Inches(2.6)); tf = tbx.text_frame
+        tf.word_wrap = True
+        tf.text = big
+        tf.paragraphs[0].font.size = Pt(54); tf.paragraphs[0].font.bold = True
+        tf.paragraphs[0].font.color.rgb = [RGBColor(0xC0, 0x39, 0x2B), NAVY, GREEN][i]
+        p = tf.add_paragraph(); p.text = clean(lab); p.font.size = Pt(16); p.font.color.rgb = INK
+
+    # 3 - Key findings
+    s = prs.slides.add_slide(blank); bar(s, "Key findings")
+    kf = _section_lines(narrative_md, ["key findings"]) or [
+        f"About {d5.get('lga_total', 0):,} zero-dose children across {d5.get('lga_count', 0)} LGAs in 2026.",
+        "Tier-1 states: " + (", ".join(d5.get("tier1_states", [])) or "North-West") + "."]
+    bullets(s, kf[:7])
+
+    # 4 - Priority states
+    if d5.get("top_states"):
+        table_slide("Priority states (top 8 by risk)", ["State", "Zone", "ZD 2026 (%)", "ZD children 2026"],
+                    [[clean(x["state"]), clean(x["zone"]), f"{x['zd_2026_pct']:.1f}",
+                      f"{x['zd_2026_count']:,}" if x["zd_2026_count"] else "-"] for x in d5["top_states"]])
+    # 5 - Priority LGAs
+    if d5.get("top_lgas"):
+        table_slide("Highest-burden LGAs (top 10)", ["LGA", "State", "ZD children", "Rate (%)"],
+                    [[clean(x["lga"]), clean(x["state"]), f"{x['zd_count']:,}", f"{x['zd_rate_pct']:.0f}"]
+                     for x in d5["top_lgas"]])
+
+    # 6 - Recommendations
+    s = prs.slides.add_slide(blank); bar(s, "Recommendations")
+    recs = _section_lines(narrative_md, ["recommendation", "priority action", "implementation"]) or [
+        f"Prioritize the top {d5.get('n80', 0)} LGAs that hold 80 percent of the burden.",
+        "Concentrate first-line investment in the Tier-1 states.",
+        "Address dropout with reminder-recall and defaulter tracing.",
+        "Use the LGA hotspot map to micro-plan supervision."]
+    bullets(s, recs[:7])
+    foot = s.shapes.add_textbox(Inches(0.6), Inches(6.9), Inches(12.1), Inches(0.5))
+    fp = foot.text_frame; fp.text = ("Generated by the NPHCDA Zero-Dose Predictive Modelling Platform "
+                                     "from live model outputs. Figures are model estimates.")
+    fp.paragraphs[0].font.size = Pt(9); fp.paragraphs[0].font.color.rgb = RGBColor(0x6B, 0x7A, 0x88)
+
+    buf = io.BytesIO(); prs.save(buf); return buf.getvalue()

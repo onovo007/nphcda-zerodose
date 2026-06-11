@@ -43,8 +43,8 @@ def sidebar() -> str:
         st.caption(clean("CIDRE and Quantium Insights LLC, in technical support of NPHCDA. "
                          "Funders and reviewers: GAVI and UNICEF."))
         nav_options = ["Home", "Data and Quality", "Coverage Forecasting", "Dropout & Completion",
-                       "Zero-Dose & Hotspots", "Implementation Science", "Reports & Briefs",
-                       "Program Q&A (RAG)"]
+                       "Zero-Dose & Hotspots", "Implementation Science", "Ask the Analyst",
+                       "Reports & Briefs", "Program Q&A (RAG)"]
         # Allow other pages to request navigation (e.g. the Home "Upload your own data" button).
         if st.session_state.get("_goto") in nav_options:
             st.session_state["navradio"] = st.session_state.pop("_goto")
@@ -373,11 +373,17 @@ def page_reports():
     else:
         section("Policy brief preview")
         st.markdown(clean(rep["narrative"]))
+        d1, d2 = st.columns(2)
         docx_bytes = reports.policy_docx(rep["findings"], rep["narrative"])
-        st.download_button(
+        d1.download_button(
             "Download policy brief (Word .docx)", docx_bytes,
             "NPHCDA_zero_dose_policy_brief.docx",
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        pptx_bytes = reports.policy_pptx(rep["findings"], rep["narrative"])
+        d2.download_button(
+            "Download policy deck (PowerPoint .pptx)", pptx_bytes,
+            "NPHCDA_zero_dose_policy_deck.pptx",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation")
 
 
 # --------------------------------------------------------------------------------------
@@ -563,6 +569,41 @@ def page_impsci():
 
 
 # --------------------------------------------------------------------------------------
+# Ask the Analyst - cross-domain agent
+# --------------------------------------------------------------------------------------
+def page_agent():
+    domain_banner("_banner_agent.jpg", "Ask the Analyst",
+                  "A grounded assistant across all results - coverage forecasting, dropout, zero-dose "
+                  "modelling and hotspots, at national, state and LGA level.")
+    data = io.get_active_data()
+    if not data:
+        st.warning("Load data first on Home or the Data and Quality page.")
+        return
+    cfg = st.session_state.get("llm") or {}
+    if not cfg.get("key"):
+        st.info(clean("Add your OpenAI API key in the sidebar to chat with the cross-domain analyst."))
+    with st.spinner("Assembling results from all workstreams (first run may fit the zero-dose model)..."):
+        ctx = reports.build_findings(data)
+    d5 = ctx.get("d5", {})
+    if d5:
+        kpi_row([
+            {"label": "Zero-dose, 2026", "value": f"{d5.get('lga_total', 0):,}", "color": C.ACCENT},
+            {"label": "Reporting LGAs", "value": str(d5.get("lga_count", 0)), "color": C.NAVY},
+            {"label": "Top-20% concentration", "value": f"{d5.get('top20_pct', 0):.0f}%", "color": C.STEEL},
+            {"label": "Tier-1 states", "value": str(len(d5.get("tier1_states", []))), "color": C.GOLD},
+        ])
+    st.caption(clean("This assistant reasons over the combined coverage, dropout, zero-dose and "
+                     "spatial results assembled from the live models. Ask cross-cutting questions."))
+    ai.chat_panel("analyst", "All workstream results (coverage, dropout, zero-dose, hotspots)",
+                  "Combined live outputs: national antigen coverage forecasts and at-risk antigens; "
+                  "dropout forecasts and drivers; state zero-dose forecasts, tiers and burden; "
+                  "population-weighted LGA burden, Pareto concentration and the top LGAs.", ctx,
+                  suggestions=["Which states and LGAs should we prioritize first, and why?",
+                               "What is the single biggest risk across all workstreams?",
+                               "Draft three recommendations for the next quarter."])
+
+
+# --------------------------------------------------------------------------------------
 # Router
 # --------------------------------------------------------------------------------------
 def main():
@@ -580,6 +621,8 @@ def main():
         domain5.render(data)
     elif page.startswith("Implementation"):
         page_impsci()
+    elif page.startswith("Ask the Analyst"):
+        page_agent()
     elif page.startswith("Reports"):
         page_reports()
     elif page.startswith("Program Q&A"):
