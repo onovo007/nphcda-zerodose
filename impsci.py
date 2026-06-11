@@ -65,19 +65,48 @@ def corr_fig(df: pd.DataFrame):
                       height=640, xaxis=dict(tickangle=-45))
     top = corr[OUTCOME].drop(OUTCOME).reindex(corr[OUTCOME].drop(OUTCOME).abs().sort_values(
         ascending=False).index)
-    summary = {pretty(k): float(v) for k, v in top.head(6).items()}
+    # Multicollinearity: predictor pairs with |r| >= 0.8 (candidates to drop from a model).
+    preds = [c for c in cols if c != OUTCOME]
+    cp = df[preds].corr()
+    pairs = []
+    for i in range(len(preds)):
+        for j in range(i + 1, len(preds)):
+            r = float(cp.iloc[i, j])
+            if abs(r) >= 0.8:
+                # Suggest keeping the predictor more correlated with the outcome.
+                keep = preds[i] if abs(corr.loc[preds[i], OUTCOME]) >= abs(corr.loc[preds[j], OUTCOME]) else preds[j]
+                drop = preds[j] if keep == preds[i] else preds[i]
+                pairs.append({"var_1": pretty(preds[i]), "var_2": pretty(preds[j]), "r": round(r, 2),
+                              "suggest_keep": pretty(keep), "suggest_drop": pretty(drop)})
+    pairs.sort(key=lambda d: -abs(d["r"]))
+    summary = {"top_drivers_vs_zero_dose": {pretty(k): round(float(v), 2) for k, v in top.head(6).items()},
+               "multicollinear_pairs_|r|>=0.8": pairs}
     return style_fig(fig), summary
 
 
 def hist_box_fig(df: pd.DataFrame, col: str):
-    y = df[col].dropna()
-    fig = make_subplots(rows=1, cols=2, column_widths=[0.62, 0.38],
-                        subplot_titles=(f"Distribution of {pretty(col)}", "Boxplot"))
-    fig.add_trace(go.Histogram(x=y, nbinsx=12, marker_color=C.STEEL, name="count"), row=1, col=1)
-    fig.add_trace(go.Box(y=y, marker_color=C.NAVY, boxpoints="all", name=pretty(col)), row=1, col=2)
-    fig.update_layout(title=f"{pretty(col)} - univariate distribution", showlegend=False, height=420)
-    stats = {"mean": round(float(y.mean()), 1), "median": round(float(y.median()), 1),
-             "min": round(float(y.min()), 1), "max": round(float(y.max()), 1),
+    y = df[col].dropna().astype(float)
+    q0, q1, q2, q3, q4 = (float(np.percentile(y, p)) for p in (0, 25, 50, 75, 100))
+    mean = float(y.mean())
+    fig = make_subplots(rows=1, cols=2, column_widths=[0.66, 0.34], horizontal_spacing=0.10,
+                        subplot_titles=(f"Distribution of {pretty(col)}", "Boxplot (5-number summary)"))
+    fig.add_trace(go.Histogram(x=y, nbinsx=12, opacity=0.92, name="states",
+                               marker=dict(color=C.STEEL, line=dict(color="white", width=1))),
+                  row=1, col=1)
+    fig.add_vline(x=mean, line=dict(color=C.ACCENT, width=2, dash="dash"), row=1, col=1,
+                  annotation_text=f"mean {mean:.1f}", annotation_position="top")
+    fig.add_trace(go.Box(y=y, name=pretty(col), boxmean="sd", boxpoints="all", jitter=0.5,
+                         pointpos=-1.7, marker=dict(color=C.NAVY, size=5),
+                         fillcolor="rgba(31,59,87,0.12)", line=dict(color=C.NAVY)), row=1, col=2)
+    for val, lab in [(q4, "max"), (q3, "Q3"), (q2, "median"), (q1, "Q1"), (q0, "min")]:
+        fig.add_annotation(x=0.99, y=val, xref="x2 domain", yref="y2", xanchor="right",
+                           showarrow=False, text=f"{lab}: {val:.1f}",
+                           font=dict(size=10, color=C.NAVY), bgcolor="rgba(255,255,255,0.82)")
+    fig.update_xaxes(showticklabels=False, row=1, col=2)
+    fig.update_layout(title=f"{pretty(col)} - univariate distribution", showlegend=False,
+                      height=440, bargap=0.06)
+    stats = {"mean": round(mean, 1), "median": round(q2, 1), "Q1": round(q1, 1), "Q3": round(q3, 1),
+             "IQR": round(q3 - q1, 1), "min": round(q0, 1), "max": round(q4, 1),
              "std": round(float(y.std()), 1), "skew": round(float(y.skew()), 2)}
     return style_fig(fig), stats
 
@@ -131,60 +160,49 @@ def _band(s: pd.Series) -> pd.Series:
                  labels=["Low (<20%)", "Moderate (20-40%)", "High (>40%)"])
 
 
-def sankey_fig(df: pd.DataFrame):
+def band_bar_fig(df: pd.DataFrame):
+    """Stacked bar of state counts per zero-dose burden band, by zone (replaces the Sankey)."""
     d = df[["zone_name", OUTCOME]].dropna().copy()
     d["band"] = _band(d[OUTCOME])
     zones = [z for z in ZONE_ORDER if z in set(d["zone_name"])]
     bands = ["Low (<20%)", "Moderate (20-40%)", "High (>40%)"]
-    nodes = zones + bands
-    idx = {n: i for i, n in enumerate(nodes)}
-    ct = d.groupby(["zone_name", "band"], observed=True).size().reset_index(name="n")
     band_color = {"Low (<20%)": "#1A9850", "Moderate (20-40%)": "#FDAE61", "High (>40%)": "#D73027"}
-    fig = go.Figure(go.Sankey(
-        node=dict(label=nodes, pad=16, thickness=16,
-                  color=[C.ZONE_COLORS.get(z, C.STEEL) for z in zones] + [band_color[b] for b in bands]),
-        link=dict(source=[idx[r["zone_name"]] for _, r in ct.iterrows()],
-                  target=[idx[r["band"]] for _, r in ct.iterrows()],
-                  value=[int(r["n"]) for _, r in ct.iterrows()],
-                  color="rgba(46,110,142,0.35)")))
-    fig.update_layout(title="Flow of states: zone to zero-dose burden band", height=460)
-    counts = ct.groupby("band", observed=True)["n"].sum().to_dict()
-    return style_fig(fig), {"states_per_band": {str(k): int(v) for k, v in counts.items()}}
-
-
-def mosaic_fig(df: pd.DataFrame):
-    import matplotlib
-    matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
-    from statsmodels.graphics.mosaicplot import mosaic
-    d = df[["zone_name", OUTCOME]].dropna().copy()
-    d["band"] = _band(d[OUTCOME]).astype(str)
-    counts = d.groupby(["zone_name", "band"], observed=True).size().to_dict()
-    fig, ax = plt.subplots(figsize=(10, 5.2))
-    try:
-        mosaic(counts, ax=ax, gap=0.015, title="Zone x zero-dose band (mosaic)",
-               labelizer=lambda k: "")
-    except Exception:
-        ax.text(0.5, 0.5, "Mosaic unavailable for this data", ha="center")
-    fig.tight_layout()
-    return fig
+    ct = (d.groupby(["zone_name", "band"], observed=True).size()
+          .unstack(fill_value=0).reindex(index=zones, columns=bands, fill_value=0))
+    fig = go.Figure()
+    for b in bands:
+        vals = ct[b].tolist()
+        fig.add_trace(go.Bar(x=zones, y=vals, name=b, marker_color=band_color[b],
+                             text=[v if v else "" for v in vals], textposition="inside"))
+    fig.update_layout(barmode="stack", title="States per zero-dose burden band, by zone",
+                      xaxis_title="Geopolitical zone", yaxis_title="Number of states",
+                      legend=dict(orientation="h", y=-0.18), height=460)
+    summary = {"states_per_band": d["band"].astype(str).value_counts().to_dict(),
+               "high_band_zones": ct["High (>40%)"][ct["High (>40%)"] > 0].to_dict()}
+    return style_fig(fig), summary
 
 
 def bland_altman_fig(df: pd.DataFrame, a: str = "dtp1_2018", b: str = "dtp1_2024"):
     d = df[[a, b, "state_name"]].dropna()
     mean = (d[a] + d[b]) / 2
     diff = d[b] - d[a]
-    bias = float(diff.mean())
-    sd = float(diff.std())
+    bias, sd, n = float(diff.mean()), float(diff.std()), int(len(diff))
     lo, hi = bias - 1.96 * sd, bias + 1.96 * sd
+    within = int(((diff >= lo) & (diff <= hi)).sum())
     fig = go.Figure()
+    fig.add_hrect(y0=lo, y1=hi, fillcolor="rgba(46,110,142,0.08)", line_width=0)
     fig.add_trace(go.Scatter(x=mean, y=diff, mode="markers", text=d["state_name"],
                              marker=dict(size=9, color=C.STEEL, line=dict(color="white", width=0.6)),
                              hovertemplate="%{text}<br>mean %{x:.1f}, diff %{y:.1f}<extra></extra>"))
-    for yv, lab, col in [(bias, f"bias {bias:.1f}", C.NAVY), (lo, f"-1.96 SD {lo:.1f}", C.ACCENT),
-                         (hi, f"+1.96 SD {hi:.1f}", C.ACCENT)]:
-        fig.add_hline(y=yv, line=dict(color=col, width=1.4, dash="dash"),
+    fig.add_hline(y=0, line=dict(color="#94A3B8", width=1.2, dash="dot"),
+                  annotation_text="no difference", annotation_position="bottom right")
+    for yv, lab, col in [(bias, f"mean bias {bias:.1f}", C.NAVY),
+                         (lo, f"lower LoA {lo:.1f}", C.ACCENT), (hi, f"upper LoA {hi:.1f}", C.ACCENT)]:
+        fig.add_hline(y=yv, line=dict(color=col, width=1.6, dash="dash"),
                       annotation_text=lab, annotation_position="right")
     fig.update_layout(title=f"Bland-Altman agreement: {pretty(a)} vs {pretty(b)}",
-                      xaxis_title="Mean of the two measures", yaxis_title="Difference", height=460)
-    return style_fig(fig), {"bias": round(bias, 1), "lower_loa": round(lo, 1), "upper_loa": round(hi, 1)}
+                      xaxis_title="Mean of the two measures (%)",
+                      yaxis_title=f"Difference ({pretty(b)} - {pretty(a)}, % points)", height=480)
+    return style_fig(fig), {"bias": round(bias, 1), "sd_of_diff": round(sd, 1),
+                            "lower_loa": round(lo, 1), "upper_loa": round(hi, 1),
+                            "within_95pct_loa": f"{within}/{n}"}

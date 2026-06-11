@@ -416,9 +416,13 @@ def page_impsci():
         section("Correlation matrix", "Pearson correlations among zero-dose and its drivers.")
         cfig, csum = impsci.corr_fig(df)
         st.plotly_chart(cfig, use_container_width=True)
-        ai.ai_block("is_corr", "Implementation Science - correlation with zero-dose",
-                    "The drivers most strongly correlated with the 2024 zero-dose rate (signed Pearson "
-                    "r). Positive means higher driver goes with higher zero-dose.", csum)
+        ai.ai_block("is_corr", "Implementation Science - correlation and multicollinearity",
+                    "Two things: (1) the drivers most strongly correlated with the 2024 zero-dose rate "
+                    "(signed Pearson r; positive means higher driver goes with higher zero-dose); and "
+                    "(2) MULTICOLLINEARITY - the 'multicollinear_pairs' list gives predictor pairs with "
+                    "|r| >= 0.8. For each such pair, flag it and recommend dropping the suggested "
+                    "variable (keep the one more associated with the outcome) before fitting a "
+                    "regression, to avoid unstable, hard-to-interpret coefficients.", csum)
         section("Distribution of a variable")
         var = st.selectbox("Variable", cols, format_func=impsci.pretty, key="is_hist_var")
         hfig, hstats = impsci.hist_box_fig(df, var)
@@ -444,23 +448,37 @@ def page_impsci():
                     "Distribution of state zero-dose rates within each zone and whether zones differ "
                     "significantly (Kruskal-Wallis p).", vsum)
 
-        section("Zone to burden-band flow (Sankey)")
-        kfig, ksum = impsci.sankey_fig(df)
+        section("Burden band composition by zone",
+                "How many states in each zone fall in the Low (<20%), Moderate (20-40%) and High "
+                "(>40%) zero-dose bands.")
+        kfig, ksum = impsci.band_bar_fig(df)
         st.plotly_chart(kfig, use_container_width=True)
-        ai.ai_block("is_sankey", "States flowing from zone to zero-dose band",
-                    "How states in each zone distribute across Low (<20%), Moderate (20-40%) and High "
-                    "(>40%) zero-dose bands.", ksum)
-
-        section("Zone by band association (mosaic)")
-        try:
-            st.pyplot(impsci.mosaic_fig(df))
-        except Exception as exc:
-            st.info(clean(f"Mosaic unavailable: {exc}"))
+        ai.ai_block("is_band", "States per zero-dose burden band, by zone",
+                    "The distribution of states across Low, Moderate and High zero-dose bands within "
+                    "each zone. Name the zones dominated by the High band and what that implies for "
+                    "where to concentrate effort.", ksum)
 
     with tabs[3]:
         section("Bland-Altman agreement",
                 "Agreement between two coverage measures across states: bias (mean difference) and "
-                "95 percent limits of agreement.")
+                "95 percent limits of agreement (LoA).")
+        with st.expander("How to read a Bland-Altman plot (and when to use it)", expanded=False):
+            st.markdown(clean(
+                "- **Purpose.** Bland-Altman assesses whether two ways of measuring the same thing "
+                "*agree*, which a correlation cannot tell you (two methods can correlate strongly yet "
+                "disagree by a constant offset).\n"
+                "- **Axes.** Each point is one state: x = the average of the two measures, y = their "
+                "difference (Measure B minus Measure A).\n"
+                "- **Bias** (solid navy line) = the mean difference. Near 0 means no systematic over- or "
+                "under-statement; a large bias means one measure is consistently higher.\n"
+                "- **Limits of agreement** (dashed red, bias +/- 1.96 SD) = the band within which about "
+                "95 percent of differences fall. Narrow limits = good agreement; wide limits = the two "
+                "measures can diverge a lot for an individual state.\n"
+                "- **Look for:** points outside the limits (outlier states), and any funnel shape "
+                "(disagreement growing with the level).\n"
+                "- **Use cases here.** Compare survey rounds (e.g. DTP1 2018 vs 2024) to see if the "
+                "shift is uniform, or compare a survey measure against an administrative/model estimate "
+                "to check whether the two data sources can be used interchangeably for planning."))
         cmp_cols = [c for c in ["dtp1_2008", "dtp1_2013", "dtp1_2018", "dtp1_2024"] if c in df.columns]
         c1, c2 = st.columns(2)
         a = c1.selectbox("Measure A", cmp_cols, index=max(len(cmp_cols) - 2, 0), key="is_ba_a")
