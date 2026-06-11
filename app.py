@@ -29,6 +29,7 @@ import rag  # noqa: E402
 import reports  # noqa: E402
 import ai  # noqa: E402
 import impsci  # noqa: E402
+import auth  # noqa: E402
 import domain1, domain2, domain5  # noqa: E402
 
 STATUS_ICON = {"ok": "🟢", "partial": "🟡", "invalid": "🔴", "missing": "⚪"}
@@ -70,6 +71,14 @@ def sidebar() -> str:
                    clean("Optional. Add a key for AI interpretation, chat, and document Q&A."))
         st.caption(clean("Responses are grounded in the on-screen outputs only; off-topic or "
                          "harmful requests are declined."))
+
+        user = auth.current_user()
+        if user and user.get("email"):
+            st.divider()
+            st.caption(clean(f"Signed in: {user['name']} ({user['email']})"))
+            if st.button("Sign out", use_container_width=True):
+                auth.logout()
+                st.rerun()
         return page
 
 
@@ -607,6 +616,8 @@ def page_agent():
 # Router
 # --------------------------------------------------------------------------------------
 def main():
+    if not auth.require_login():
+        return
     page = sidebar()
     data = io.get_active_data()
     if page == "Home":
