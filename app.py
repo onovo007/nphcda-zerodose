@@ -87,12 +87,15 @@ def sidebar() -> str:
 # --------------------------------------------------------------------------------------
 def page_home():
     hero("Zero-Dose Predictive Modelling Platform",
-         "Upload the routine immunization data and run the coverage, dropout and zero-dose models in "
-         "real time.",
+         "One analytical framework that integrates immunization data from many sources into real-time "
+         "predictive intelligence and programme oversight - pinpointing where zero-dose children are, "
+         "why they are missed, and where to act first, so NPHCDA can optimize Nigeria's immunization "
+         "programme and ensure that no child is left behind or exposed to vaccine-preventable disease.",
          ["Coverage Forecasting", "Dropout & Completion", "Zero-Dose & Hotspots",
           "Bayesian + Prophet + spatial"])
     st.caption(clean("These are the GAVI-priority workstreams of NPHCDA's wider eight-domain "
-                     "zero-dose analytical framework, delivered as a working platform."))
+                     "zero-dose analytical framework, delivered as a working platform. Upload your "
+                     "data or use the bundled sample to run every model live."))
 
     c1, c2 = st.columns([2, 1])
     with c1:
