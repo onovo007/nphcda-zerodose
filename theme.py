@@ -288,8 +288,7 @@ def sidebar_brand() -> None:
                  f"style='height:30px;width:30px;border-radius:4px;margin-left:auto'/>" if flag else "")
     st.markdown(
         f"<div class='brand-chip'>{logo_html}"
-        f"<div><div class='bt'>Zero-Dose Platform</div>"
-        f"<div class='bs'>NPHCDA - GAVI - UNICEF</div></div>{flag_html}</div>",
+        f"<div><div class='bt'>Zero-Dose Platform</div></div>{flag_html}</div>",
         unsafe_allow_html=True)
 
 
