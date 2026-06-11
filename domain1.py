@@ -39,7 +39,7 @@ def _horizon_minima(series: dict, horizon_months: int) -> dict:
 def render(data: dict):
     domain_banner("_banner_d1.jpg", "Coverage Forecasting",
                   "Which routine antigens are projected to fall below the 80 percent coverage target "
-                  "in the next 6 to 12 months? National Prophet forecasts as a percent of the 2024 baseline.")
+                  "in the next 6 to 12 months?")
 
     if not data or data.get("dhis2") is None:
         st.warning("Coverage Forecasting needs the DHIS2 export. Load the bundled sample data or upload it.")
