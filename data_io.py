@@ -138,4 +138,4 @@ def get_active_data() -> dict[str, pd.DataFrame] | None:
 
 def set_sample_data() -> None:
     st.session_state["data"] = load_sample()
-    st.session_state["data_source"] = "Bundled sample data (canonical project inputs)"
+    st.session_state["data_source"] = "Bundled project sample data"

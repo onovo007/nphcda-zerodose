@@ -19,7 +19,7 @@ DATA_DIR = APP_DIR / "data" / "sample"
 GEO_DIR = DATA_DIR / "geo"
 ASSETS_DIR = APP_DIR / "assets"
 
-# Bundled sample inputs (the canonical raw sources, so the demo runs with zero upload)
+# Bundled project sample inputs (so the demo runs with zero upload)
 SAMPLE_FILES = {
     "dhis2": DATA_DIR / "dhis2_data_all_states.csv",
     "ndhs_long": DATA_DIR / "nigeria_ndhs_zero_dose_VERIFIED_long.csv",

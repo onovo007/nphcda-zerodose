@@ -122,7 +122,7 @@ def page_home():
             "uploaded data; heavy steps are scoped so each click returns quickly."))
     with c2:
         section("Start here")
-        st.write(clean("Option A - explore now with the canonical project inputs:"))
+        st.write(clean("Option A - explore now with the bundled project sample data:"))
         if st.button("Use bundled sample data", type="primary", use_container_width=True):
             io.set_sample_data()
             st.rerun()
