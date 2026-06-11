@@ -76,10 +76,24 @@ def outliers(national_monthly_df: pd.DataFrame) -> pd.DataFrame:
         if col not in nat:
             continue
         y = nat[col].astype(float)
-        z = (y - y.mean()) / (y.std() + 1e-6)
-        flagged = nat.loc[np.abs(z) > 2, ["ds"]].copy()
-        for _, r in flagged.iterrows():
-            i = r.name
-            rows.append({"Antigen": label, "Month": pd.Timestamp(nat.loc[i, "ds"]).strftime("%b %Y"),
-                         "Doses": int(nat.loc[i, col]), "Z-score": round(float(z.loc[i]), 2)})
-    return pd.DataFrame(rows)
+        mu, sd = y.mean(), (y.std() + 1e-9)
+        z = (y - mu) / sd
+        for i in nat.index:
+            zi = float(z.loc[i])
+            if abs(zi) <= 2:
+                continue
+            doses = float(nat.loc[i, col])
+            rows.append({
+                "Antigen": label,
+                "Month": pd.Timestamp(nat.loc[i, "ds"]).strftime("%b %Y"),
+                "Doses": int(doses),
+                "Series mean": int(mu),
+                "Z-score": round(zi, 2),
+                "Deviation from mean (%)": round((doses - mu) / mu * 100, 1) if mu else 0.0,
+                "Direction": "Spike" if zi > 0 else "Drop",
+                "Severity": "High" if abs(zi) >= 3 else "Moderate",
+            })
+    df = pd.DataFrame(rows)
+    if not df.empty:
+        df = df.reindex(df["Z-score"].abs().sort_values(ascending=False).index).reset_index(drop=True)
+    return df

@@ -15,7 +15,8 @@ import pandas as pd
 import streamlit as st
 
 import config as C
-from theme import inject_theme, hero, section, kpi_row, clean, sidebar_brand, domain_banner
+from theme import (inject_theme, hero, section, kpi_row, clean, sidebar_brand,
+                   domain_banner, highlight_severity)
 
 st.set_page_config(page_title="NPHCDA Zero-Dose Modelling Platform",
                    page_icon="💉", layout="wide", initial_sidebar_state="expanded")
@@ -176,43 +177,61 @@ def page_data():
 
     d = io.prep_dhis2(data["dhis2"])
     q = dq.dhis2_quality(d)
-    section("DHIS2 data quality")
+    nat = io.national_monthly(d)
     span = q["span"]
     span_txt = f"{span[0]:%b %Y} to {span[1]:%b %Y}" if span[0] is not None else "-"
-    kpi_row([
-        {"label": "States", "value": str(q["n_states"]), "color": C.NAVY},
-        {"label": "LGAs in file", "value": str(q["n_lgas"]), "color": C.STEEL},
-        {"label": "Reporting LGAs", "value": f"{q['reporting_lgas']} / {q['total_lgas']}",
-         "sub": "non-zero Penta1, latest year", "color": C.GOLD},
-        {"label": "Count completeness", "value": f"{q['completeness']:.0f}%", "color": C.STEEL},
-        {"label": "Reporting rate", "value": f"{q['reporting_rate']:.0f}%" if pd.notna(q["reporting_rate"]) else "-",
-         "sub": clean(span_txt), "color": C.STEEL},
-    ])
-    ai.ai_block("dq_overview", "DHIS2 data quality overview",
-                "Headline data-quality metrics: number of states and LGAs in the file, LGAs reporting "
-                "non-zero Penta1 in the latest year (of 774), count completeness, the state-month "
-                "reporting rate, and the reporting period.", q)
 
-    st.plotly_chart(dq.missingness_by_state(d), use_container_width=True)
-    miss = (d.groupby("state")["penta_1_count"]
-            .apply(lambda s: int((s.fillna(0) <= 0).sum())).sort_values(ascending=False))
-    miss_ctx = {"reporting_rate_pct": q["reporting_rate"], "period": span_txt,
-                "states_with_most_missing_months": miss.head(8).to_dict()}
-    ai.ai_block("dq_missing", "DHIS2 reporting completeness by state and month",
-                "Which states have the most missing or zero Penta1 state-months (reporting gaps), "
-                "and the overall state-month reporting rate.", miss_ctx)
+    qtab, atab = st.tabs(["Data quality", "Anomaly detection"])
 
-    nat = io.national_monthly(d)
-    out = dq.outliers(nat)
-    section("Outlier flags (national series, |z| > 2)")
-    if out.empty:
-        st.success("No national-series outliers flagged.")
-    else:
-        st.dataframe(out, use_container_width=True, hide_index=True)
-        ai.ai_block("dq_outliers", "National-series outlier flags",
-                    "Months where a national antigen dose count is more than 2 standard deviations "
-                    "from its mean (z-score), which may indicate data-entry spikes, campaigns, or "
-                    "reporting changes worth checking.", out)
+    with qtab:
+        section("DHIS2 data quality")
+        kpi_row([
+            {"label": "States", "value": str(q["n_states"]), "color": C.NAVY},
+            {"label": "LGAs in file", "value": str(q["n_lgas"]), "color": C.STEEL},
+            {"label": "Reporting LGAs", "value": f"{q['reporting_lgas']} / {q['total_lgas']}",
+             "sub": "non-zero Penta1, latest year", "color": C.GOLD},
+            {"label": "Count completeness", "value": f"{q['completeness']:.0f}%", "color": C.STEEL},
+            {"label": "Reporting rate",
+             "value": f"{q['reporting_rate']:.0f}%" if pd.notna(q["reporting_rate"]) else "-",
+             "sub": clean(span_txt), "color": C.STEEL},
+        ])
+        ai.ai_block("dq_overview", "DHIS2 data quality overview",
+                    "Headline data-quality metrics: number of states and LGAs in the file, LGAs "
+                    "reporting non-zero Penta1 in the latest year (of 774), count completeness, the "
+                    "state-month reporting rate, and the reporting period.", q)
+
+        st.plotly_chart(dq.missingness_by_state(d), use_container_width=True)
+        miss = (d.groupby("state")["penta_1_count"]
+                .apply(lambda s: int((s.fillna(0) <= 0).sum())).sort_values(ascending=False))
+        miss_ctx = {"reporting_rate_pct": q["reporting_rate"], "period": span_txt,
+                    "states_with_most_missing_months": miss.head(8).to_dict()}
+        ai.ai_block("dq_missing", "DHIS2 reporting completeness by state and month",
+                    "Which states have the most missing or zero Penta1 state-months (reporting gaps), "
+                    "and the overall state-month reporting rate.", miss_ctx)
+
+    with atab:
+        section("Anomaly detection (national antigen series)",
+                "Months where a national dose count deviates sharply from its own history (z-score).")
+        st.caption(clean("How to read this: Severity 'Moderate' = |z| between 2 and 3 (amber); 'High' "
+                         "= |z| at or above 3 (red). Direction 'Spike' = unusually high, 'Drop' = "
+                         "unusually low. Investigate High anomalies first - they often signal "
+                         "data-entry errors, campaigns, or reporting changes."))
+        out = dq.outliers(nat)
+        if out.empty:
+            st.success("No anomalies flagged - every month is within 2 standard deviations of its series mean.")
+        else:
+            kpi_row([
+                {"label": "Anomalies flagged", "value": str(len(out)), "color": C.ACCENT},
+                {"label": "High severity", "value": str(int((out["Severity"] == "High").sum())),
+                 "sub": "|z| >= 3", "color": C.ACCENT},
+                {"label": "Spikes", "value": str(int((out["Direction"] == "Spike").sum())), "color": C.GOLD},
+                {"label": "Drops", "value": str(int((out["Direction"] == "Drop").sum())), "color": C.STEEL},
+            ])
+            st.dataframe(highlight_severity(out), use_container_width=True, hide_index=True)
+            ai.ai_block("dq_outliers", "National-series anomaly flags",
+                        "Months where a national antigen dose count is more than 2 standard deviations "
+                        "from its series mean, with z-score, percent deviation, direction and severity. "
+                        "Flag which anomalies most warrant a data check.", out)
 
 
 # --------------------------------------------------------------------------------------

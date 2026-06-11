@@ -45,6 +45,22 @@ def highlight_below(df: pd.DataFrame, col: str, thresh: float = 80.0):
         return df
 
 
+def highlight_severity(df: pd.DataFrame, col: str = "Severity"):
+    """Colour-code a severity column (High = red, Moderate = amber)."""
+    if df is None or df.empty or col not in df.columns:
+        return df
+    cmap = {"High": "background-color:#FDE2E0; color:#7F1D1D; font-weight:700",
+            "Moderate": "background-color:#FEF3C7; color:#7A5B00; font-weight:600"}
+
+    def _row(s):
+        return [cmap.get(str(v), "") for v in s]
+
+    try:
+        return df.style.apply(_row, subset=[col])
+    except Exception:
+        return df
+
+
 def img_data_uri(path: Path) -> str | None:
     """Return a base64 data URI for an image on disk, or None if missing."""
     try:
