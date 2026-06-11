@@ -28,6 +28,7 @@ import llm  # noqa: E402
 import rag  # noqa: E402
 import reports  # noqa: E402
 import ai  # noqa: E402
+import impsci  # noqa: E402
 import domain1, domain2, domain5  # noqa: E402
 
 STATUS_ICON = {"ok": "🟢", "partial": "🟡", "invalid": "🔴", "missing": "⚪"}
@@ -42,7 +43,8 @@ def sidebar() -> str:
         st.caption(clean("CIDRE and Quantium Insights LLC, in technical support of NPHCDA. "
                          "Funders and reviewers: GAVI and UNICEF."))
         nav_options = ["Home", "Data and Quality", "Domain 1 - Coverage", "Domain 2 - Dropout",
-                       "Domain 5 - Zero-dose", "Reports & Briefs", "Program Q&A (RAG)"]
+                       "Domain 5 - Zero-dose", "Implementation Science", "Reports & Briefs",
+                       "Program Q&A (RAG)"]
         # Allow other pages to request navigation (e.g. the Home "Upload your own data" button).
         if st.session_state.get("_goto") in nav_options:
             st.session_state["navradio"] = st.session_state.pop("_goto")
@@ -92,6 +94,9 @@ def page_home():
             "- **Domain 5.** A Bayesian hierarchical Beta regression of state zero-dose rates with "
             "credible intervals, population-weighted LGA burden, Pareto prioritization and Getis-Ord "
             "Gi* hotspot maps.\n"
+            "- **Implementation Science.** Exploratory analysis of the state zero-dose dataset - "
+            "correlation matrix, distributions, scatter with Pearson r and p, violin by zone with a "
+            "Kruskal-Wallis test, Sankey, mosaic and a Bland-Altman agreement plot.\n"
             "- **Data and Quality.** Schema validation, completeness, reporting rates, and anomaly "
             "detection on the uploaded data.\n"
             "- **Reports and Briefs.** One-click generation of a premium factsheet and an editable "
@@ -373,6 +378,108 @@ def page_reports():
 
 
 # --------------------------------------------------------------------------------------
+# Implementation Science - EDA
+# --------------------------------------------------------------------------------------
+def page_impsci():
+    domain_banner("_banner_impsci.jpg", "Implementation Science - Exploratory Data Analysis",
+                  "Descriptive statistics and univariate / bivariate analysis of the state zero-dose "
+                  "dataset to surface the drivers that should shape implementation.")
+    data = io.get_active_data()
+    if not data or data.get("model_dataset") is None:
+        st.warning("This domain needs the zero-dose model dataset (equity covariates). Load the "
+                   "bundled sample data or upload it on the Data and Quality page.")
+        return
+    df = impsci.prep(data["model_dataset"])
+    cols = impsci.numeric_cols(df)
+    o = impsci.OUTCOME
+    kpi_row([
+        {"label": "States", "value": str(len(df)), "color": C.NAVY},
+        {"label": "Variables analysed", "value": str(len(cols)), "color": C.STEEL},
+        {"label": "Mean zero-dose 2024", "value": f"{df[o].mean():.0f}%", "color": C.ACCENT},
+        {"label": "Range across states", "value": f"{df[o].min():.0f}-{df[o].max():.0f}%",
+         "color": C.GOLD},
+    ])
+    tabs = st.tabs(["Descriptive stats", "Univariate", "Bivariate", "Validation (Bland-Altman)"])
+
+    with tabs[0]:
+        section("Descriptive statistics", "Summary of the zero-dose outcome and its candidate drivers.")
+        desc = impsci.describe_table(df)
+        st.dataframe(desc, use_container_width=True, hide_index=True)
+        ai.ai_block("is_desc", "Implementation Science - descriptive statistics",
+                    "Summary statistics (mean, spread, min, max) of the state zero-dose rate and its "
+                    "candidate equity/socioeconomic drivers.", desc.to_dict(orient="records"))
+
+    with tabs[1]:
+        section("Correlation matrix", "Pearson correlations among zero-dose and its drivers.")
+        cfig, csum = impsci.corr_fig(df)
+        st.plotly_chart(cfig, use_container_width=True)
+        ai.ai_block("is_corr", "Implementation Science - correlation with zero-dose",
+                    "The drivers most strongly correlated with the 2024 zero-dose rate (signed Pearson "
+                    "r). Positive means higher driver goes with higher zero-dose.", csum)
+        section("Distribution of a variable")
+        var = st.selectbox("Variable", cols, format_func=impsci.pretty, key="is_hist_var")
+        hfig, hstats = impsci.hist_box_fig(df, var)
+        st.plotly_chart(hfig, use_container_width=True)
+        ai.ai_block("is_hist", f"Distribution of {impsci.pretty(var)}",
+                    "Histogram and boxplot statistics (mean, median, spread, skew) for the selected "
+                    "variable across the 37 states.", {"variable": impsci.pretty(var), **hstats})
+
+    with tabs[2]:
+        section("Driver vs zero-dose (scatter, Pearson r and p)")
+        x = st.selectbox("Driver (x-axis)", [c for c in cols if c != o],
+                         format_func=impsci.pretty, key="is_scatter_x")
+        sfig, ssum = impsci.scatter_fig(df, x)
+        st.plotly_chart(sfig, use_container_width=True)
+        ai.ai_block("is_scatter", f"{impsci.pretty(x)} vs zero-dose rate",
+                    "Association between the selected driver and the 2024 zero-dose rate across states, "
+                    "with the Pearson correlation and its p-value.", {"driver": impsci.pretty(x), **ssum})
+
+        section("Zero-dose by zone (violin, Kruskal-Wallis)")
+        vfig, vsum = impsci.violin_fig(df)
+        st.plotly_chart(vfig, use_container_width=True)
+        ai.ai_block("is_violin", "Zero-dose rate by geopolitical zone",
+                    "Distribution of state zero-dose rates within each zone and whether zones differ "
+                    "significantly (Kruskal-Wallis p).", vsum)
+
+        section("Zone to burden-band flow (Sankey)")
+        kfig, ksum = impsci.sankey_fig(df)
+        st.plotly_chart(kfig, use_container_width=True)
+        ai.ai_block("is_sankey", "States flowing from zone to zero-dose band",
+                    "How states in each zone distribute across Low (<20%), Moderate (20-40%) and High "
+                    "(>40%) zero-dose bands.", ksum)
+
+        section("Zone by band association (mosaic)")
+        try:
+            st.pyplot(impsci.mosaic_fig(df))
+        except Exception as exc:
+            st.info(clean(f"Mosaic unavailable: {exc}"))
+
+    with tabs[3]:
+        section("Bland-Altman agreement",
+                "Agreement between two coverage measures across states: bias (mean difference) and "
+                "95 percent limits of agreement.")
+        cmp_cols = [c for c in ["dtp1_2008", "dtp1_2013", "dtp1_2018", "dtp1_2024"] if c in df.columns]
+        c1, c2 = st.columns(2)
+        a = c1.selectbox("Measure A", cmp_cols, index=max(len(cmp_cols) - 2, 0), key="is_ba_a")
+        b = c2.selectbox("Measure B", cmp_cols, index=len(cmp_cols) - 1, key="is_ba_b")
+        bfig, bsum = impsci.bland_altman_fig(df, a, b)
+        st.plotly_chart(bfig, use_container_width=True)
+        ai.ai_block("is_ba", f"Bland-Altman: {impsci.pretty(a)} vs {impsci.pretty(b)}",
+                    "Agreement between the two selected DTP1 coverage measures: the bias (mean "
+                    "difference) and the 95 percent limits of agreement.",
+                    {"measure_a": impsci.pretty(a), "measure_b": impsci.pretty(b), **bsum})
+
+    st.divider()
+    ai.chat_panel("impsci", "Implementation Science - state zero-dose EDA",
+                  "State-level zero-dose rate and equity/socioeconomic drivers; correlations, "
+                  "distributions and zone differences.",
+                  {"top_correlations": impsci.corr_fig(df)[1],
+                   "mean_zero_dose_2024": round(float(df[o].mean()), 1)},
+                  suggestions=["Which driver correlates most with zero-dose?",
+                               "Do zones differ significantly?"])
+
+
+# --------------------------------------------------------------------------------------
 # Router
 # --------------------------------------------------------------------------------------
 def main():
@@ -388,6 +495,8 @@ def main():
         domain2.render(data)
     elif page.startswith("Domain 5"):
         domain5.render(data)
+    elif page.startswith("Implementation"):
+        page_impsci()
     elif page.startswith("Reports"):
         page_reports()
     elif page.startswith("Program Q&A"):
