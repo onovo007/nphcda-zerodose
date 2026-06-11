@@ -40,6 +40,9 @@ def render(data: dict):
                                              else "stable")} for s in fc.values()}
 
     latest = {col: nat[col].dropna().iloc[-1] for col in C.DROPOUT_TARGETS if col in nat}
+    st.markdown("**Where dropout is now (latest observed)**")
+    st.caption(clean("Most recent reported dropout per antigen pair - a fixed snapshot of the current "
+                     "situation. This row does not change with the horizon selector below."))
     cards = [{"label": "Dropout pairs", "value": str(len(fc)), "sub": "Prophet forecast", "color": C.NAVY}]
     for col, label in C.DROPOUT_TARGETS.items():
         if col in latest:
@@ -48,6 +51,7 @@ def render(data: dict):
     kpi_row(cards)
 
     # Time-horizon selector: forecast dropout for the next 3 / 6 / 12 months (micro-planning).
+    st.markdown("**Where dropout is heading (Prophet forecast)**")
     hlabel = st.radio("Forecast dropout for the next:", ["3 months", "6 months", "12 months"],
                       index=2, horizontal=True, key="d2_horizon")
     H = {"3 months": 3, "6 months": 6, "12 months": 12}[hlabel]
