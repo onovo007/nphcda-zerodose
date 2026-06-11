@@ -3,7 +3,11 @@ Lightweight login + usage tracking for the NPHCDA Digital Innovation Hub.
 
 Behaviour (all configured via Hugging Face Space *Secrets*, never in code):
 - REQUIRE_LOGIN (default "true"): if "false", the app is open (guest) - useful for an open demo.
-- ACCESS_CODE (optional): if set, users must also enter this shared code to enter.
+- ACCESS_CODE (optional): if set, name/email users must also enter this shared code to enter.
+- ALLOWED_EMAILS (optional): comma-separated allow-list; in name/email mode only these emails get in.
+- USERS (optional): per-user accounts as JSON {"user":"pass"} or 'u1:p1,u2:p2' - sign-in by
+  username + password. Add a user to allow them; remove a user to disable them.
+- ADMIN_CODE (optional): reveals the sidebar usage-log download.
 - LOG_WEBHOOK (optional): a URL (e.g. a Google Apps Script / Zapier endpoint). Each login is
   POSTed there as JSON so the DIH gets a persistent, cross-user record (HF disk is ephemeral).
 
@@ -175,6 +179,14 @@ def require_login() -> bool:
                 if code_required and code != _secret("ACCESS_CODE"):
                     st.error("Invalid access code.")
                     return False
+                allow = _secret("ALLOWED_EMAILS")
+                if allow:
+                    allowed = {e.strip().lower() for e in str(allow).replace(";", ",").split(",")
+                               if e.strip()}
+                    if email.strip().lower() not in allowed:
+                        st.error("This email is not on the access list. Contact the NPHCDA Digital "
+                                 "Innovation Hub administrator for access.")
+                        return False
                 user = {"name": name.strip(), "email": email.strip(), "org": org.strip()}
                 st.session_state["auth_user"] = user
                 log_event({"event": "login", **user})
