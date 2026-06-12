@@ -117,6 +117,10 @@ def render(data: dict):
                 "decline tripwire, not literal coverage.")
         + f" Forecast starts after the last observed data ({last_obs:%b %Y}) to Dec {end_year}; "
           "longer horizons widen the prediction intervals."))
+    if metric == "baseline":
+        st.info(clean("Tip: switch the Coverage metric above to 'WHO administrative coverage' to choose "
+                      "the eligible-infant denominator (under-five proxy or DHIS2 live births) and to "
+                      "show the NDHS survey reference lines on all four antigen charts."))
 
     # Time-horizon selector: the scorecards and headline react to the chosen window.
     hlabel = st.radio("Forecast horizon for the scorecards",
