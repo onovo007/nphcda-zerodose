@@ -32,7 +32,8 @@ def _add_band(fig, x, lo, hi, color, alpha, name, legend=True):
 # Forecast with prediction bands (D1 antigen %-baseline, D2 dropout)
 # --------------------------------------------------------------------------------------
 def forecast_band_fig(s: dict, color: str, title: str, ylabel: str, *,
-                      threshold: float | None = None, mark_below: bool = False) -> go.Figure:
+                      threshold: float | None = None, mark_below: bool = False,
+                      ref_line: float | None = None, ref_label: str = "") -> go.Figure:
     ox = pd.to_datetime(s["obs_x"]); fx = pd.to_datetime(s["fore_x"]); hx = pd.to_datetime(s["hist_x"])
     fig = go.Figure()
     _add_band(fig, fx, s["lo95"], s["hi95"], color, 0.13, "95% PI")
@@ -56,6 +57,11 @@ def forecast_band_fig(s: dict, color: str, title: str, ylabel: str, *,
                                 line=dict(color="white", width=0.8))))
     else:
         fig.add_hline(y=0, line=dict(color="#333", width=1.2, dash="dot"))
+    if ref_line is not None:
+        fig.add_hline(y=ref_line, line=dict(color="#6A2C91", width=1.8, dash="dot"),
+                      annotation_text=ref_label or f"survey {ref_line:.0f}%",
+                      annotation_position="bottom left",
+                      annotation_font=dict(color="#6A2C91"))
     fig.add_vline(x=pd.to_datetime(s["cutoff"]), line=dict(color="#888", width=1.1, dash="dot"))
     fig.update_layout(title=title, yaxis_title=ylabel, xaxis_title="Month",
                       hovermode="x unified", legend=dict(orientation="h", y=-0.18))

@@ -73,6 +73,21 @@ def render(data: dict):
                              metric=metric, cohort_annual=cohort_annual)
     series, summary = out["series"], out["summary"]
     unit_label, value_col = out["unit_label"], out["value_col"]
+
+    # NDHS survey coverage for triangulation (only Penta1 is derivable: 100 - zero-dose).
+    survey_cov = {}
+    if metric == "coverage" and data.get("ndhs_long") is not None:
+        try:
+            nd = data["ndhs_long"].copy()
+            nd["year"] = pd.to_numeric(nd["year"], errors="coerce")
+            sub = nd[nd["year"] == 2024][["zero_dose_pct", "n_children_12_23m"]].apply(
+                pd.to_numeric, errors="coerce").dropna()
+            if len(sub):
+                w = sub["n_children_12_23m"]
+                zd_nat = ((sub["zero_dose_pct"] * w).sum() / w.sum()) if w.sum() else sub["zero_dose_pct"].mean()
+                survey_cov["Penta1"] = round(100 - float(zd_nat), 1)
+        except Exception:
+            pass
     st.caption(clean(
         f"Metric: {unit_label}"
         + (" - WHO-style administrative coverage using under-five / 5 as the annual eligible "
@@ -119,13 +134,22 @@ def render(data: dict):
         section(f"National coverage forecasts ({unit_label})",
                 f"Forecast period {period}. Solid line fitted, dashed forecast, shaded 80/95 percent "
                 "prediction intervals, red 80 percent target line.")
+        if survey_cov:
+            st.caption(clean(
+                "Dotted purple line = NDHS survey coverage (100 - zero-dose, 2024) for admin-vs-survey "
+                "triangulation. A survey line is shown only where survey coverage exists in the data "
+                "(Penta1); a large admin-vs-survey gap usually points to denominator or reporting-"
+                "completeness issues to reconcile."))
         cols = st.columns(2)
         for i, (antigen, s) in enumerate(series.items()):
             with cols[i % 2]:
+                rl = survey_cov.get(antigen)
                 st.plotly_chart(
                     viz.forecast_band_fig(s, C.ANTIGEN_PAL[antigen],
                                           f"{antigen} - national coverage forecast",
-                                          unit_label, threshold=C.THRESHOLD_PCT, mark_below=True),
+                                          unit_label, threshold=C.THRESHOLD_PCT, mark_below=True,
+                                          ref_line=rl,
+                                          ref_label=(f"NDHS {antigen} survey {rl:.0f}%" if rl else "")),
                     use_container_width=True)
 
         ai.ai_block("d1_charts", f"Coverage Forecasting - national antigen forecasts ({unit_label})",
