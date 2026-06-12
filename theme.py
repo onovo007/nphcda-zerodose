@@ -197,6 +197,9 @@ def inject_theme() -> None:
         section[data-testid="stSidebar"] [data-testid="stExpander"] * {{ color:{C.INK} !important; }}
         section[data-testid="stSidebar"] [data-testid="stExpander"] summary p {{ color:{C.NAVY} !important; font-weight:600; }}
         section[data-testid="stSidebar"] [data-testid="stExpander"] label {{ color:{C.INK} !important; }}
+        /* Selectbox (e.g. Model) sits on a light control, so its value must be dark to be legible. */
+        section[data-testid="stSidebar"] div[data-baseweb="select"] *,
+        section[data-testid="stSidebar"] div[data-baseweb="select"] div {{ color:{C.INK} !important; }}
 
         /* Hero (photographic or gradient) */
         @keyframes heroPan {{ 0%{{background-position:50% 40%}} 100%{{background-position:50% 60%}} }}
