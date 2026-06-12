@@ -34,15 +34,25 @@ def _horizon_to(last_ds, year: int = 2027, month: int = 12) -> int:
 
 
 @st.cache_data(show_spinner="Fitting national antigen forecasts (Prophet)...")
-def national_forecasts(_nat, key: str, end_year: int = 2027) -> dict:
-    """Return per-antigen series (% of 2024 baseline) + the at-risk summary table.
+def national_forecasts(_nat, key: str, end_year: int = 2027,
+                       metric: str = "baseline", cohort_annual: float | None = None) -> dict:
+    """Return per-antigen series + the at-risk summary table.
 
     end_year sets how far ahead Prophet forecasts (to December of that year). The forecast
     always starts the month after the last observed data point.
+
+    metric:
+      - "baseline": each antigen is expressed as a percent of its own mean 2024 monthly doses
+        (a denominator-free performance index; 80% = 80% of the 2024 level).
+      - "coverage": WHO-style administrative coverage = monthly doses / (annual cohort / 12),
+        using cohort_annual as the eligible denominator (here under-five / 5, a labelled proxy).
     """
     nat = _nat
     cutoff = nat["ds"].max()
     periods = _horizon_to(cutoff, year=end_year)
+    coverage = (metric == "coverage" and cohort_annual and cohort_annual > 0)
+    unit_label = "% coverage (admin)" if coverage else "% of 2024 baseline"
+    value_col = f"Min forecast ({unit_label})"
     series = {}
     summary = []
     monthly_long = []
@@ -51,13 +61,13 @@ def national_forecasts(_nat, key: str, end_year: int = 2027) -> dict:
             continue
         ts = nat[["ds", col]].rename(columns={col: "y"})
         fc = run_prophet(ts, periods=periods)
-        base = ts[ts["ds"].dt.year == 2024]["y"].mean()
+        base = (cohort_annual / 12.0) if coverage else ts[ts["ds"].dt.year == 2024]["y"].mean()
         fr = fc[fc["ds"] > cutoff]
         monthly_long.append(pd.DataFrame({
             "Antigen": antigen, "Month": fr["ds"].dt.strftime("%Y-%m"), "Year": fr["ds"].dt.year,
             "Forecast doses": fr["yhat"].round(0), "Lower 95% doses": fr["yhat_lower"].round(0),
             "Upper 95% doses": fr["yhat_upper"].round(0),
-            "% of 2024 baseline": (fr["yhat"] / base * 100).round(1) if base else None,
+            unit_label: (fr["yhat"] / base * 100).round(1) if base else None,
         }))
         fc_pct = fc.copy()
         for c in ["yhat", "yhat_lower", "yhat_upper"]:
@@ -89,13 +99,14 @@ def national_forecasts(_nat, key: str, end_year: int = 2027) -> dict:
         )
         summary.append({
             "Antigen": antigen,
-            "Min forecast (% of 2024 baseline)": round(min_pct, 1),
+            value_col: round(min_pct, 1),
             "Month of minimum": min_when.strftime("%b %Y"),
             "Crosses 80% in 6-12m": "Yes" if crosses else "No",
             "First month below 80%": first_below.strftime("%b %Y") if first_below is not None else "-",
         })
     monthly = pd.concat(monthly_long, ignore_index=True) if monthly_long else pd.DataFrame()
-    return {"series": series, "summary": pd.DataFrame(summary), "monthly": monthly}
+    return {"series": series, "summary": pd.DataFrame(summary), "monthly": monthly,
+            "unit_label": unit_label, "value_col": value_col}
 
 
 @st.cache_data(show_spinner="Forecasting antigen coverage by state (Prophet, 2026-2027)...")

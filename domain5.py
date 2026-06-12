@@ -63,6 +63,37 @@ def render(data: dict):
          "sub": f"min ESS {out['min_ess']} | {out['n_draws']} draws", "color": C.STEEL},
     ])
 
+    with st.expander("Population sensitivity: 2024 vs 2025 under-five (affects burden counts only)"):
+        try:
+            pop25 = io.prep_under5(pd.read_csv(C.UNDER5_2025_PATH))
+            m25 = dict(zip(pop25["jk"], pop25["cohort_12_23m"]))
+            t = res[["state", "zd_pred_2026_mean", "cohort_12_23m", "zd_count_2026"]].copy()
+            t["jk"] = (t["state"].astype(str).str.upper().str.replace(" ", "", regex=False)
+                       .str.replace(",ABUJA", "", regex=False).str.replace(",", "", regex=False))
+            t["cohort_2025"] = t["jk"].map(m25).fillna(t["cohort_12_23m"])
+            t["burden_2025"] = t["zd_pred_2026_mean"] / 100 * t["cohort_2025"]
+            b24, b25 = float(t["zd_count_2026"].sum()), float(t["burden_2025"].sum())
+            cc = st.columns(3)
+            cc[0].metric("Burden on 2024 population", f"{b24:,.0f}")
+            cc[1].metric("Burden on 2025 population", f"{b25:,.0f}")
+            cc[2].metric("Change", f"{(b25 / b24 - 1) * 100:+.1f}%")
+            st.caption(clean(
+                "Zero-dose rates, priority tiers and rate-based rankings are unchanged - only the cohort "
+                "denominator (so the burden counts) differ. 2024 is the published basis; 2025 is shown "
+                "for sensitivity. The large single-year state swings suggest the 2025 file is a "
+                "re-projection, so verify its source before adopting it as the basis."))
+            t["change_pct"] = (t["cohort_2025"] / t["cohort_12_23m"] - 1) * 100
+            mv = t.sort_values("change_pct")
+            show = pd.concat([mv.head(3), mv.tail(3)])[["state", "cohort_12_23m", "cohort_2025",
+                                                        "change_pct"]].copy()
+            show.columns = ["State", "Cohort 2024", "Cohort 2025", "Change %"]
+            show["Cohort 2024"] = show["Cohort 2024"].round(0).astype(int)
+            show["Cohort 2025"] = show["Cohort 2025"].round(0).astype(int)
+            show["Change %"] = show["Change %"].round(1)
+            st.dataframe(show, use_container_width=True, hide_index=True)
+        except Exception as exc:
+            st.info(clean(f"Population sensitivity unavailable: {exc}"))
+
     tabs = st.tabs(["State forecasts", "LGA burden and Pareto", "Hotspot maps",
                     "Ranked LGA table", "Diagnostics"])
 

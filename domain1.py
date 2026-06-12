@@ -8,7 +8,7 @@ import config as C
 import viz
 import ai
 from theme import section, kpi_row, clean, highlight_below, domain_banner
-from data_io import prep_dhis2, national_monthly, df_hash
+from data_io import prep_dhis2, national_monthly, df_hash, prep_under5
 from models.d1_forecast import (national_forecasts, lga_at_risk_screen,
                                 state_antigen_forecasts, lga_antigen_projections)
 
@@ -50,15 +50,37 @@ def render(data: dict):
     nat = national_monthly(d)
 
     last_obs = nat["ds"].max()
-    c_left, c_right = st.columns([1, 2])
+    c_left, c_right = st.columns(2)
     end_year = c_left.selectbox("Run the forecast through (end of year)",
                                 [2027, 2028, 2029, 2030, 2031, 2032], index=0, key="d1_end_year")
-    c_right.caption(clean(
-        f"The forecast starts the month after the last observed data ({last_obs:%b %Y}) and runs to "
-        f"Dec {end_year}. Prophet extrapolates the fitted trend and seasonality; the further out you "
-        "go, the wider the prediction intervals - treat long horizons as directional."))
-    out = national_forecasts(nat, key=kd, end_year=end_year)
+    metric_choice = c_right.radio(
+        "Coverage metric",
+        ["Relative to 2024 baseline", "WHO administrative coverage"],
+        index=0, horizontal=True, key="d1_metric",
+        help=("Relative index = doses vs the antigen's mean 2024 level (denominator-free). "
+              "WHO administrative coverage = doses / eligible cohort (under-five / 5 as a labelled "
+              "proxy until LGA live births are supplied)."))
+    metric = "coverage" if metric_choice.startswith("WHO") else "baseline"
+    cohort_annual = None
+    if metric == "coverage":
+        if data.get("under5") is not None:
+            cohort_annual = float(prep_under5(data["under5"])["cohort_12_23m"].sum())
+        else:
+            st.info(clean("Load the under-five population file (Data and Quality) to use WHO "
+                          "administrative coverage. Showing the 2024-baseline index instead."))
+            metric = "baseline"
+    out = national_forecasts(nat, key=f"{kd}-{metric}", end_year=end_year,
+                             metric=metric, cohort_annual=cohort_annual)
     series, summary = out["series"], out["summary"]
+    unit_label, value_col = out["unit_label"], out["value_col"]
+    st.caption(clean(
+        f"Metric: {unit_label}"
+        + (" - WHO-style administrative coverage using under-five / 5 as the annual eligible "
+           "denominator (a labelled proxy)." if metric == "coverage"
+           else " - each antigen vs its own mean 2024 monthly level; the 80% line marks an 80%-of-2024 "
+                "decline tripwire, not literal coverage.")
+        + f" Forecast starts after the last observed data ({last_obs:%b %Y}) to Dec {end_year}; "
+          "longer horizons widen the prediction intervals."))
 
     # Time-horizon selector: the scorecards and headline react to the chosen window.
     hlabel = st.radio("Forecast horizon for the scorecards",
@@ -77,9 +99,10 @@ def render(data: dict):
         st.success(clean(
             f"Headline ({hlabel}): all {len(series)} tracer antigens are projected to stay at or above "
             f"the 80 percent target nationally. Lowest is {low_antigen} at {hm[low_antigen][0]:.0f} "
-            f"percent of the 2024 baseline ({hm[low_antigen][1]})."))
+            f"{unit_label} ({hm[low_antigen][1]})."))
 
-    cards = [{"label": f"Horizon", "value": hlabel, "sub": "of 2024 baseline target 80%", "color": C.STEEL}]
+    cards = [{"label": "Horizon", "value": hlabel, "sub": clean(f"{unit_label}; target 80%"),
+              "color": C.STEEL}]
     for antigen in series:
         mn, mon, risk = hm[antigen]
         cards.append({"label": antigen, "value": f"{mn:.0f}%",
@@ -93,7 +116,7 @@ def render(data: dict):
     tabs = st.tabs(["National forecast", "LGA at-risk screen", "Microplanning downloads"])
 
     with tabs[0]:
-        section("National coverage forecasts (% of 2024 baseline)",
+        section(f"National coverage forecasts ({unit_label})",
                 f"Forecast period {period}. Solid line fitted, dashed forecast, shaded 80/95 percent "
                 "prediction intervals, red 80 percent target line.")
         cols = st.columns(2)
@@ -102,27 +125,26 @@ def render(data: dict):
                 st.plotly_chart(
                     viz.forecast_band_fig(s, C.ANTIGEN_PAL[antigen],
                                           f"{antigen} - national coverage forecast",
-                                          "% of 2024 baseline", threshold=C.THRESHOLD_PCT, mark_below=True),
+                                          unit_label, threshold=C.THRESHOLD_PCT, mark_below=True),
                     use_container_width=True)
 
-        ai.ai_block("d1_charts", "Coverage Forecasting - national antigen coverage forecasts (% of 2024 baseline)",
-                    "Four national Prophet forecasts (BCG, Penta1, Penta3, Measles1) as a percent of the "
-                    "2024 baseline against the 80 percent target. For each antigen give the minimum "
-                    "projected value and the month it occurs, and whether it crosses 80 percent within 6 "
-                    "to 12 months. State the overall verdict clearly (which antigens are at risk, or that "
-                    "all stay above target), name the lowest antigen, and give one priority action.",
+        ai.ai_block("d1_charts", f"Coverage Forecasting - national antigen forecasts ({unit_label})",
+                    f"Four national Prophet forecasts (BCG, Penta1, Penta3, Measles1) in {unit_label} "
+                    "against the 80 percent target. For each antigen give the minimum projected value and "
+                    "the month it occurs, and whether it crosses 80 percent within 6 to 12 months. State "
+                    "the overall verdict clearly (which antigens are at risk, or that all stay above "
+                    "target), name the lowest antigen, and give one priority action.",
                     summary)
 
         section("National at-risk summary")
-        st.caption(clean("Values below 80 percent of the 2024 baseline are flagged in red."))
-        st.dataframe(highlight_below(summary, "Min forecast (% of 2024 baseline)"),
-                     use_container_width=True)
+        st.caption(clean(f"Values below 80 ({unit_label}) are flagged in red."))
+        st.dataframe(highlight_below(summary, value_col), use_container_width=True)
         _download(summary, "Download national forecast summary (CSV)", "D1_national_antigen_forecast.csv")
         st.divider()
         ai.chat_panel("d1", "Coverage Forecasting - national antigen forecast",
-                      "Per-antigen national Prophet forecast as a percent of the 2024 baseline: the "
-                      "minimum value, the month it occurs, and whether each crosses the 80 percent "
-                      "target within 6 to 12 months.",
+                      f"Per-antigen national Prophet forecast in {unit_label}: the minimum value, the "
+                      "month it occurs, and whether each crosses the 80 percent target within 6 to 12 "
+                      "months.",
                       summary.to_dict(orient="records"),
                       suggestions=["Which antigen is most at risk?", "When does Penta3 bottom out?"])
 

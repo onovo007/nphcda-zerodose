@@ -30,6 +30,9 @@ SAMPLE_FILES = {
 GEO_STATES = GEO_DIR / "nga_states.geojson"
 GEO_LGAS = GEO_DIR / "nga_lgas.geojson"
 
+# Alternative under-five population vintage for the Domain 5 population sensitivity view.
+UNDER5_2025_PATH = DATA_DIR / "under_5_2025.csv"
+
 # --------------------------------------------------------------------------------------
 # Model constants (verbatim from the notebooks)
 # --------------------------------------------------------------------------------------
