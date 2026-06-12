@@ -8,7 +8,8 @@ import config as C
 import viz
 import ai
 from theme import section, kpi_row, clean, highlight_below, domain_banner
-from data_io import prep_dhis2, national_monthly, df_hash, prep_under5
+from data_io import (prep_dhis2, national_monthly, df_hash, prep_under5,
+                     national_live_births, survey_national_coverage)
 from models.d1_forecast import (national_forecasts, lga_at_risk_screen,
                                 state_antigen_forecasts, lga_antigen_projections)
 
@@ -62,42 +63,56 @@ def render(data: dict):
               "proxy until LGA live births are supplied)."))
     metric = "coverage" if metric_choice.startswith("WHO") else "baseline"
     cohort_annual = None
+    denom_label = ""
     if metric == "coverage":
-        if data.get("under5") is not None:
-            cohort_annual = float(prep_under5(data["under5"])["cohort_12_23m"].sum())
-        else:
-            st.info(clean("Load the under-five population file (Data and Quality) to use WHO "
+        u5_cohort = (float(prep_under5(data["under5"])["cohort_12_23m"].sum())
+                     if data.get("under5") is not None else None)
+        lb_2024 = (national_live_births(data["live_births"], 2024)
+                   if data.get("live_births") is not None else None)
+        opts = []
+        if u5_cohort:
+            opts.append("Under-five / 5 (demographic proxy)")
+        if lb_2024:
+            opts.append("DHIS2 live births (2024)")
+        if not opts:
+            st.info(clean("Load the under-five population (or live births) file to use WHO "
                           "administrative coverage. Showing the 2024-baseline index instead."))
             metric = "baseline"
-    out = national_forecasts(nat, key=f"{kd}-{metric}", end_year=end_year,
+        else:
+            denom_choice = st.radio(
+                "Eligible-infant denominator", opts, index=0, horizontal=True, key="d1_denom",
+                help="The demographic proxy (~7.0M) approximates Nigeria's true annual birth cohort. "
+                     "DHIS2 live births are facility-reported and under-count true births, so they can "
+                     "push administrative coverage above 100%.")
+            if denom_choice.startswith("DHIS2"):
+                cohort_annual, denom_label = lb_2024, "DHIS2 live births 2024"
+                st.warning(clean(
+                    f"DHIS2 live births 2024 (~{lb_2024/1e6:.2f}M) are facility-reported and under-count "
+                    f"true births (the demographic cohort is ~{(u5_cohort or 0)/1e6:.1f}M), so coverage "
+                    "here may exceed 100%. Use the demographic proxy for WHO/GAVI-comparable coverage; "
+                    "this option is for sensitivity comparison only."))
+            else:
+                cohort_annual, denom_label = u5_cohort, "under-five / 5 proxy"
+    out = national_forecasts(nat, key=f"{kd}-{metric}-{denom_label}", end_year=end_year,
                              metric=metric, cohort_annual=cohort_annual)
     series, summary = out["series"], out["summary"]
     unit_label, value_col = out["unit_label"], out["value_col"]
 
-    # NDHS survey coverage for admin-vs-survey triangulation. Penta1 is computed live from the
-    # uploaded zero-dose data (100 - national zero-dose); the other antigens use the published NDHS
-    # national figures in config (editable). Shown only in WHO admin-coverage mode.
+    # NDHS survey coverage for admin-vs-survey triangulation, from ndhs_antigens2024 (the central
+    # source: national, population-weighted by under-five). Shown only in WHO admin-coverage mode.
     survey_cov = {}
-    survey_live_penta1 = False
+    survey_src = ""
     if metric == "coverage":
-        survey_cov = dict(C.SURVEY_COVERAGE)
-        if data.get("ndhs_long") is not None:
-            try:
-                nd = data["ndhs_long"].copy()
-                nd["year"] = pd.to_numeric(nd["year"], errors="coerce")
-                sub = nd[nd["year"] == 2024][["zero_dose_pct", "n_children_12_23m"]].apply(
-                    pd.to_numeric, errors="coerce").dropna()
-                if len(sub):
-                    w = sub["n_children_12_23m"]
-                    zd_nat = ((sub["zero_dose_pct"] * w).sum() / w.sum()) if w.sum() else sub["zero_dose_pct"].mean()
-                    survey_cov["Penta1"] = round(100 - float(zd_nat), 1)
-                    survey_live_penta1 = True
-            except Exception:
-                pass
+        if data.get("ndhs_antigens") is not None:
+            survey_cov = survey_national_coverage(data["ndhs_antigens"], data.get("under5"))
+            survey_src = "NDHS 2024 antigens file (national, population-weighted)"
+        if not survey_cov:
+            survey_cov = dict(C.SURVEY_COVERAGE)
+            survey_src = C.SURVEY_COVERAGE_SOURCE
     st.caption(clean(
         f"Metric: {unit_label}"
-        + (" - WHO-style administrative coverage using under-five / 5 as the annual eligible "
-           "denominator (a labelled proxy)." if metric == "coverage"
+        + (f" - WHO-style administrative coverage = monthly doses / (annual {denom_label} / 12)."
+           if metric == "coverage"
            else " - each antigen vs its own mean 2024 monthly level; the 80% line marks an 80%-of-2024 "
                 "decline tripwire, not literal coverage.")
         + f" Forecast starts after the last observed data ({last_obs:%b %Y}) to Dec {end_year}; "
@@ -141,12 +156,10 @@ def render(data: dict):
                 f"Forecast period {period}. Solid line fitted, dashed forecast, shaded 80/95 percent "
                 "prediction intervals, red 80 percent target line.")
         if survey_cov:
-            p1 = "computed live from the uploaded zero-dose data" if survey_live_penta1 else "from config"
             st.caption(clean(
-                f"Dotted purple line = NDHS survey coverage for admin-vs-survey triangulation. Penta1 is "
-                f"{p1} (100 - national zero-dose, 2024); BCG, Penta3 and Measles1 use {C.SURVEY_COVERAGE_SOURCE} "
-                "published national coverage (editable in config). A large admin-vs-survey gap usually "
-                "points to denominator or reporting-completeness issues to reconcile."))
+                f"Dotted purple line = NDHS survey coverage for all four antigens ({survey_src}). A large "
+                "admin-vs-survey gap usually points to denominator or reporting-completeness issues to "
+                "reconcile."))
         cols = st.columns(2)
         for i, (antigen, s) in enumerate(series.items()):
             with cols[i % 2]:

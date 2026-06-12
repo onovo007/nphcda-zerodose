@@ -26,6 +26,17 @@ SAMPLE_FILES = {
     "model_dataset": DATA_DIR / "nigeria_zero_dose_model_dataset.csv",
     "under5": DATA_DIR / "under_5_2024.csv",
     "lga_population": DATA_DIR / "administrative_lga_population.csv",
+    "ndhs_antigens": DATA_DIR / "ndhs_antigens2024.csv",
+    "live_births": DATA_DIR / "dhis2_data_live_births.csv",
+}
+
+# Map each tracer antigen to its survey-coverage column in ndhs_antigens2024.csv (the central
+# source for the admin-vs-survey reference lines).
+SURVEY_ANTIGEN_COLS = {
+    "BCG": "BCG vaccination received",
+    "Penta1": "Pentavalent 1 vaccination received",
+    "Penta3": "Pentavalent 3 vaccination received",
+    "Measles1": "Measles vaccination received",
 }
 GEO_STATES = GEO_DIR / "nga_states.geojson"
 GEO_LGAS = GEO_DIR / "nga_lgas.geojson"

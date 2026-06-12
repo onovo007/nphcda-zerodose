@@ -131,6 +131,62 @@ def prep_under5(df: pd.DataFrame) -> pd.DataFrame:
     return pop.dropna(subset=["under5_n"])
 
 
+def prep_live_births(df: pd.DataFrame) -> pd.DataFrame:
+    """Parse the DHIS2 live-births file (period like '21-Jan' = %y-%b) -> ds/year + numeric count."""
+    d = df.copy()
+    d.columns = [c.strip() for c in d.columns]
+    if "live_births_count" in d.columns:
+        d["live_births_count"] = pd.to_numeric(
+            d["live_births_count"].astype(str).str.replace(",", "", regex=False), errors="coerce")
+    d["ds"] = pd.to_datetime(d["period"], format="%y-%b", errors="coerce")
+    if d["ds"].isna().mean() > 0.5:  # fall back to the doses-file format if needed
+        d["ds"] = pd.to_datetime(d["period"], format="%b-%y", errors="coerce")
+    d["year"] = d["ds"].dt.year
+    for c in ("zone", "state", "lga"):
+        if c in d.columns:
+            d[c] = d[c].astype(str).str.strip()
+    return d
+
+
+def national_live_births(df: pd.DataFrame, year: int = 2024) -> float | None:
+    """National total DHIS2 live births for a year (the eligible-infant denominator candidate)."""
+    d = prep_live_births(df)
+    s = float(d[d["year"] == year]["live_births_count"].sum())
+    return s if s > 0 else None
+
+
+def _state_key(s) -> str:
+    return "".join(ch for ch in str(s).upper() if ch.isalpha())
+
+
+def survey_national_coverage(ndhs_antigens: pd.DataFrame, under5: pd.DataFrame | None = None) -> dict:
+    """National survey coverage per tracer antigen from ndhs_antigens2024 (population-weighted by
+    under-five when available, else a simple mean across states)."""
+    nd = ndhs_antigens.copy()
+    nd.columns = [c.strip() for c in nd.columns]
+    weights = None
+    if under5 is not None:
+        try:
+            u = prep_under5(under5)
+            wmap = {_state_key(r["state_raw"]): r["under5_n"] for _, r in u.iterrows()}
+            w = nd["State"].map(lambda s: wmap.get(_state_key(s)))
+            if w.notna().sum() >= 30:
+                weights = pd.to_numeric(w, errors="coerce")
+        except Exception:
+            weights = None
+    cov = {}
+    for antigen, col in C.SURVEY_ANTIGEN_COLS.items():
+        if col not in nd.columns:
+            continue
+        vals = pd.to_numeric(nd[col], errors="coerce")
+        if weights is not None:
+            m = vals.notna() & weights.notna()
+            cov[antigen] = round(float((vals[m] * weights[m]).sum() / weights[m].sum()), 1)
+        else:
+            cov[antigen] = round(float(vals.mean()), 1)
+    return cov
+
+
 def get_active_data() -> dict[str, pd.DataFrame] | None:
     """Return the dataset dict currently in session (uploaded overrides sample)."""
     return st.session_state.get("data")
