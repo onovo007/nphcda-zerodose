@@ -473,3 +473,122 @@ def policy_pptx(f: dict, narrative_md: str) -> bytes:
     fp.paragraphs[0].font.size = Pt(9); fp.paragraphs[0].font.color.rgb = RGBColor(0x6B, 0x7A, 0x88)
 
     buf = io.BytesIO(); prs.save(buf); return buf.getvalue()
+
+
+# --------------------------------------------------------------------------------------
+# Standard Operating Procedure (branded Word .docx)
+# --------------------------------------------------------------------------------------
+def sop_docx() -> bytes:
+    """Branded SOP document for DIH capacity building (Print to PDF for a PDF copy)."""
+    from docx import Document
+    from docx.shared import Pt, Inches, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+    navy, green, mute, gold = (RGBColor(0x1F, 0x3B, 0x57), RGBColor(0x1C, 0x7A, 0x3D),
+                               RGBColor(0x6B, 0x7A, 0x88), RGBColor(0xC8, 0x90, 0x2A))
+    doc = Document()
+    doc.styles["Normal"].font.name = "Calibri"
+    doc.styles["Normal"].font.size = Pt(10.5)
+
+    if C.LOGO_PATH.exists():
+        try:
+            p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            p.add_run().add_picture(str(C.LOGO_PATH), height=Inches(0.55))
+        except Exception:
+            pass
+    t = doc.add_paragraph(); tr = t.add_run("Standard Operating Procedure")
+    tr.bold = True; tr.font.size = Pt(20); tr.font.color.rgb = navy
+    s = doc.add_paragraph(); sr = s.add_run("NPHCDA Zero-Dose Predictive Modelling Platform")
+    sr.font.size = Pt(13); sr.font.color.rgb = green
+    d = doc.add_paragraph(); dr = d.add_run(
+        "For the NPHCDA Digital Innovation Hub and new users.  Generated "
+        + datetime.now().strftime("%d %B %Y"))
+    dr.italic = True; dr.font.size = Pt(9); dr.font.color.rgb = mute
+
+    def h(text, color=navy, size=13):
+        p = doc.add_paragraph(); r = p.add_run(text)
+        r.bold = True; r.font.size = Pt(size); r.font.color.rgb = color
+        return p
+
+    def bullets(items, style="List Bullet"):
+        for it in items:
+            doc.add_paragraph(clean(it), style=style)
+
+    def table(headers, rows):
+        tb = doc.add_table(rows=1, cols=len(headers)); tb.style = "Light Grid Accent 1"
+        for i, c in enumerate(headers):
+            run = tb.rows[0].cells[i].paragraphs[0].add_run(c); run.bold = True
+        for row in rows:
+            cells = tb.add_row().cells
+            for i, v in enumerate(row):
+                cells[i].text = clean(str(v))
+
+    h("Purpose and audience")
+    doc.add_paragraph(clean(
+        "This SOP enables any new user to access and use the platform to model the zero-dose dataset "
+        "end to end: forecasting antigen coverage, analysing dropout, estimating state and LGA zero-dose "
+        "burden and hotspots, exploring drivers, and generating reports. Estimated time end to end is "
+        "about 5 to 10 minutes on the bundled sample data."))
+
+    h("Workflow at a glance")
+    doc.add_paragraph(clean("Sign in  ->  Load data  ->  Check quality  ->  Run models  ->  "
+                            "Explore and test  ->  Ask the Analyst  ->  Generate reports"))
+
+    h("Before you start - data you need")
+    doc.add_paragraph(clean("Fastest path: use the bundled project sample data (no upload). To model your "
+                            "own data, prepare these five CSVs with the same columns as the sample:"))
+    table(["File", "Holds", "Used by"], [
+        ["DHIS2 export", "Monthly antigen doses by state and LGA", "Coverage, Dropout, Zero-Dose"],
+        ["NDHS zero-dose (long)", "Survey zero-dose rate by state and year", "Zero-Dose"],
+        ["Under-five population", "Under-5 cohort by state", "Zero-Dose burden"],
+        ["LGA population", "Population by LGA (NPC 2022)", "LGA burden, hotspots"],
+        ["Zero-dose model dataset", "State equity / socioeconomic covariates", "Implementation Science, drivers"],
+    ])
+
+    h("Step-by-step")
+    steps = [
+        "Sign in: enter your name and email (and access code if required). Your sign-in is recorded for usage tracking.",
+        "Load the data: on Home, click Use bundled project sample data, or Upload your own data on the Data and Quality page.",
+        "Check data quality and anomalies: review completeness, reporting rates, the missing-value heatmap and the Anomaly detection tab.",
+        "Run the models: Coverage Forecasting (80% target, 3/6/12-month horizon, LGA at-risk screen); Dropout & Completion (forecasts, LASSO drivers, heatmap); Zero-Dose & Hotspots (Bayesian model, LGA burden, Pareto, Gi* maps).",
+        "Explore and test (Implementation Science): correlation with multicollinearity flags, distributions, scatter, zone violins, and the Hypothesis tests tab (t-test, ANOVA, chi-square).",
+        "Ask the Analyst: add your OpenAI key in the sidebar, then ask grounded cross-domain questions.",
+        "Generate reports: on Reports & Briefs, produce the factsheet, the Word policy brief and the PowerPoint deck.",
+        "Optional - Program Q&A: upload a programme report (PDF or Word) and ask questions with page-cited answers.",
+    ]
+    for i, stp in enumerate(steps, 1):
+        doc.add_paragraph(clean(f"{i}. {stp}"), style="List Number")
+
+    h("How to read the outputs")
+    table(["Signal", "Meaning"], [
+        ["Coverage / at-risk", "Red = below the 80% target; green = on target"],
+        ["Anomaly severity", "High (|z| >= 3) vs Moderate; spike or drop flagged"],
+        ["Priority tier (LGA)", "Tier 1 Critical (red) to Tier 4 (blue), by burden"],
+        ["Pareto severity", "Critical/High/Moderate/Lower within state; band A/B/C of burden"],
+        ["Gi* hotspot", "Hot Spot (red) = significant high-burden cluster; p<0.01 most confident"],
+        ["Credible / prediction interval", "The plausible range; wider = more uncertainty"],
+    ])
+
+    h("Tips and troubleshooting")
+    bullets([
+        "No data loaded: go to Home and load the sample or upload your files.",
+        "AI says add a key: paste your OpenAI key in the sidebar (kept for the session only).",
+        "A heavy step is slow: the full Bayesian posterior and per-state forecasts run on demand; use defaults for a fast live run.",
+        "Access denied at login: your email may not be on the access list - contact the DIH administrator.",
+        "Save a report as PDF: open the factsheet or this SOP and use the browser Print to PDF.",
+    ])
+
+    h("Data governance and good practice")
+    bullets([
+        "All figures are model estimates - review before use in official decisions.",
+        "Uploaded data stays in the session and is not written to disk; the OpenAI key is never stored.",
+        "Cite the data vintage (DHIS2 month, NDHS round, NPC 2022 denominator) when sharing.",
+        "Align zero-dose definitions and targets with IA2030 and the national RI guidelines.",
+    ])
+
+    fp = doc.add_paragraph(); fr = fp.add_run(
+        "NPHCDA Zero-Dose Predictive Modelling Platform. In technical support of NPHCDA; for NPHCDA, "
+        "GAVI and UNICEF. Figures are model estimates; review before use.")
+    fr.italic = True; fr.font.size = Pt(8); fr.font.color.rgb = mute
+
+    buf = io.BytesIO(); doc.save(buf); return buf.getvalue()

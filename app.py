@@ -611,6 +611,9 @@ def page_sop():
         f"<div class='sopflow'>{chips}</div>", unsafe_allow_html=True)
     st.caption(clean("Estimated time end to end: about 5-10 minutes on the bundled sample data; longer "
                      "if you run the full Bayesian posterior or per-state forecasts."))
+    st.download_button("Download this SOP (Word .docx)", reports.sop_docx(),
+                       "NPHCDA_Zero_Dose_Platform_SOP.docx",
+                       "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
 
     section("Before you start - what you need")
     st.markdown(clean(
