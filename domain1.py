@@ -48,7 +48,16 @@ def render(data: dict):
     kd = df_hash(data["dhis2"])
     d = prep_dhis2(data["dhis2"])
     nat = national_monthly(d)
-    out = national_forecasts(nat, key=kd)
+
+    last_obs = nat["ds"].max()
+    c_left, c_right = st.columns([1, 2])
+    end_year = c_left.selectbox("Run the forecast through (end of year)",
+                                [2027, 2028, 2029, 2030, 2031, 2032], index=0, key="d1_end_year")
+    c_right.caption(clean(
+        f"The forecast starts the month after the last observed data ({last_obs:%b %Y}) and runs to "
+        f"Dec {end_year}. Prophet extrapolates the fitted trend and seasonality; the further out you "
+        "go, the wider the prediction intervals - treat long horizons as directional."))
+    out = national_forecasts(nat, key=kd, end_year=end_year)
     series, summary = out["series"], out["summary"]
 
     # Time-horizon selector: the scorecards and headline react to the chosen window.

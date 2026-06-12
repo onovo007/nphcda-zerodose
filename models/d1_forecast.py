@@ -34,11 +34,15 @@ def _horizon_to(last_ds, year: int = 2027, month: int = 12) -> int:
 
 
 @st.cache_data(show_spinner="Fitting national antigen forecasts (Prophet)...")
-def national_forecasts(_nat, key: str) -> dict:
-    """Return per-antigen series (% of 2024 baseline) + the at-risk summary table."""
+def national_forecasts(_nat, key: str, end_year: int = 2027) -> dict:
+    """Return per-antigen series (% of 2024 baseline) + the at-risk summary table.
+
+    end_year sets how far ahead Prophet forecasts (to December of that year). The forecast
+    always starts the month after the last observed data point.
+    """
     nat = _nat
     cutoff = nat["ds"].max()
-    periods = _horizon_to(cutoff)
+    periods = _horizon_to(cutoff, year=end_year)
     series = {}
     summary = []
     monthly_long = []
