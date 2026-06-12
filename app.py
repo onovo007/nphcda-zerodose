@@ -45,7 +45,7 @@ def sidebar() -> str:
                          "Funders and reviewers: GAVI and UNICEF."))
         nav_options = ["Home", "Data and Quality", "Coverage Forecasting", "Dropout & Completion",
                        "Zero-Dose & Hotspots", "Implementation Science", "Ask the Analyst",
-                       "Reports & Briefs", "Program Q&A (RAG)"]
+                       "Reports & Briefs", "Program Q&A (RAG)", "User Guide (SOP)"]
         # Allow other pages to request navigation (e.g. the Home "Upload your own data" button).
         if st.session_state.get("_goto") in nav_options:
             st.session_state["navradio"] = st.session_state.pop("_goto")
@@ -109,9 +109,11 @@ def page_home():
             "- **Zero-Dose & Hotspots.** A Bayesian hierarchical Beta regression of state zero-dose "
             "rates with credible intervals, population-weighted LGA burden, Pareto prioritization and "
             "Getis-Ord Gi* hotspot maps.\n"
-            "- **Implementation Science.** Exploratory analysis of the state zero-dose dataset - "
-            "correlation matrix, distributions, scatter with Pearson r and p, violin by zone with a "
-            "Kruskal-Wallis test, Sankey, mosaic and a Bland-Altman agreement plot.\n"
+            "- **Implementation Science.** Exploratory analysis of the state zero-dose dataset - a "
+            "correlation matrix with multicollinearity flags, distributions, scatter with Pearson r "
+            "and p, violin by zone with a Kruskal-Wallis test, burden-band bars, a Bland-Altman "
+            "agreement plot, and a build-your-own hypothesis test (t-test, paired t-test, ANOVA, "
+            "chi-square).\n"
             "- **Data and Quality.** Schema validation, completeness, reporting rates, and anomaly "
             "detection on the uploaded data.\n"
             "- **Reports and Briefs.** One-click generation of a premium factsheet and an editable "
@@ -581,6 +583,114 @@ def page_impsci():
 
 
 # --------------------------------------------------------------------------------------
+# User Guide / SOP
+# --------------------------------------------------------------------------------------
+def page_sop():
+    domain_banner("_banner_sop.jpg", "User Guide - Standard Operating Procedure",
+                  "A premium SOP for the NPHCDA Digital Innovation Hub: how any new user accesses and "
+                  "uses the platform to model the zero-dose dataset, end to end.")
+
+    # Workflow at a glance (illustrated step strip).
+    steps = ["Sign in", "Load data", "Check quality", "Run models", "Explore & test",
+             "Ask the Analyst", "Generate reports"]
+    chips = ""
+    for i, s in enumerate(steps):
+        chips += (f"<div class='sopchip'><span class='sopn'>{i+1}</span>{s}</div>")
+        if i < len(steps) - 1:
+            chips += "<div class='soparr'>&rarr;</div>"
+    st.markdown(
+        "<style>"
+        ".sopflow{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:6px 0 4px}"
+        f".sopchip{{display:flex;align-items:center;gap:8px;background:linear-gradient(180deg,#fff,#f3f8f4);"
+        f"border:1px solid rgba(28,122,61,.25);border-radius:999px;padding:7px 14px;font-weight:600;"
+        f"color:{C.NAVY};font-size:.86rem}}"
+        f".sopn{{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;"
+        f"border-radius:50%;background:{C.NPHCDA_GREEN};color:#fff;font-size:.78rem}}"
+        f".soparr{{color:{C.GOLD};font-weight:800}}"
+        "</style>"
+        f"<div class='sopflow'>{chips}</div>", unsafe_allow_html=True)
+    st.caption(clean("Estimated time end to end: about 5-10 minutes on the bundled sample data; longer "
+                     "if you run the full Bayesian posterior or per-state forecasts."))
+
+    section("Before you start - what you need")
+    st.markdown(clean(
+        "- **Fastest path:** nothing - use the bundled project sample data to explore immediately.\n"
+        "- **To model your own data**, prepare these five CSVs (same columns as the sample):"))
+    st.dataframe(pd.DataFrame([
+        {"File": "DHIS2 export", "Holds": "Monthly antigen doses by state and LGA", "Used by": "Coverage, Dropout, Zero-Dose"},
+        {"File": "NDHS zero-dose (long)", "Holds": "Survey zero-dose rate by state and year", "Used by": "Zero-Dose"},
+        {"File": "Under-five population", "Holds": "Under-5 cohort by state", "Used by": "Zero-Dose burden"},
+        {"File": "LGA population", "Holds": "Population by LGA (NPC 2022)", "Used by": "LGA burden, hotspots"},
+        {"File": "Zero-dose model dataset", "Holds": "State equity / socioeconomic covariates", "Used by": "Implementation Science, drivers"},
+    ]), use_container_width=True, hide_index=True)
+
+    section("Step-by-step")
+    st.markdown("#### 1. Sign in")
+    st.markdown(clean("Open the platform link. Enter your name and email (and the access code if your "
+                      "administrator set one). Your sign-in is recorded for usage tracking."))
+    st.markdown("#### 2. Load the data")
+    st.markdown(clean("On **Home**, click **Use bundled project sample data** to explore now, or click "
+                      "**Upload your own data** to go to **Data and Quality** and add your five CSVs. A "
+                      "green confirmation shows the data is loaded."))
+    st.info(clean("Tip: start with the sample data on your first run so you can see every output before "
+                  "using your own files."))
+    st.markdown("#### 3. Check data quality and anomalies")
+    st.markdown(clean("Open **Data and Quality**. Review completeness, reporting rates and the missing-"
+                      "value heatmap, then the **Anomaly detection** tab for spikes or drops (colour-coded "
+                      "by severity). Fix obvious data issues before modelling."))
+    st.markdown("#### 4. Run the models")
+    st.markdown(clean(
+        "- **Coverage Forecasting** - see which antigens fall below the 80% target; use the 3/6/12-month "
+        "horizon buttons; review the LGA at-risk screen.\n"
+        "- **Dropout & Completion** - dropout forecasts, LASSO drivers and the state-by-year heatmap.\n"
+        "- **Zero-Dose & Hotspots** - the Bayesian state model, LGA burden, Pareto priorities and the "
+        "Getis-Ord Gi* hotspot maps (run automatically)."))
+    st.markdown("#### 5. Explore and test (Implementation Science)")
+    st.markdown(clean("Use the correlation matrix (with multicollinearity flags), distributions, scatter "
+                      "and zone violins, and the **Hypothesis tests** tab to run a t-test, ANOVA or "
+                      "chi-square on variables you choose."))
+    st.markdown("#### 6. Ask the Analyst")
+    st.markdown(clean("Add your OpenAI API key in the sidebar, then open **Ask the Analyst** for grounded, "
+                      "cross-domain answers and recommendations across all results."))
+    st.markdown("#### 7. Generate reports")
+    st.markdown(clean("On **Reports & Briefs**, generate the premium factsheet, the editable Word policy "
+                      "brief, and the PowerPoint policy deck - all built from the live results."))
+    st.markdown("#### 8. (Optional) Program Q&A")
+    st.markdown(clean("On **Program Q&A (RAG)**, upload a programme report (PDF or Word) and ask questions "
+                      "with page-cited, document-grounded answers."))
+
+    section("How to read the outputs")
+    st.dataframe(pd.DataFrame([
+        {"Signal": "Coverage / at-risk", "Meaning": "Red = below the 80% target; green = on target"},
+        {"Signal": "Anomaly severity", "Meaning": "High (|z| >= 3) vs Moderate; spike or drop flagged"},
+        {"Signal": "Priority tier (LGA)", "Meaning": "Tier 1 Critical (red) to Tier 4 (blue), by burden"},
+        {"Signal": "Pareto severity", "Meaning": "Critical/High/Moderate/Lower within state; band A/B/C of burden"},
+        {"Signal": "Gi* hotspot", "Meaning": "Hot Spot (red) = significant high-burden cluster; p<0.01 most confident"},
+        {"Signal": "Credible / prediction interval", "Meaning": "The plausible range; wider = more uncertainty"},
+    ]), use_container_width=True, hide_index=True)
+
+    with st.expander("Tips and troubleshooting"):
+        st.markdown(clean(
+            "- **No data loaded** message: go to Home and load the sample or upload your files.\n"
+            "- **AI says add a key:** paste your OpenAI key in the sidebar (kept for the session only).\n"
+            "- **A heavy step is slow:** the full Bayesian posterior and per-state forecasts run on "
+            "demand; use the defaults for a fast live run.\n"
+            "- **Access denied at login:** your email may not be on the access list - contact the DIH "
+            "administrator.\n"
+            "- **Save a report as PDF:** open the factsheet and use your browser's Print to PDF."))
+
+    with st.expander("Data governance and good practice"):
+        st.markdown(clean(
+            "- All figures are model estimates - review before use in official decisions.\n"
+            "- Uploaded data stays in the session and is not written to disk; the OpenAI key is never "
+            "stored.\n"
+            "- Cite the data vintage (DHIS2 month, NDHS round, NPC 2022 denominator) when sharing.\n"
+            "- For zero-dose definitions and targets, align with IA2030 and the national RI guidelines."))
+    st.caption(clean("Print this page (browser Print to PDF) to share the SOP offline. For capacity "
+                     "building, walk a new user through steps 1-7 once on the sample data."))
+
+
+# --------------------------------------------------------------------------------------
 # Ask the Analyst - cross-domain agent
 # --------------------------------------------------------------------------------------
 def page_agent():
@@ -639,6 +749,8 @@ def main():
         page_impsci()
     elif page.startswith("Ask the Analyst"):
         page_agent()
+    elif page.startswith("User Guide"):
+        page_sop()
     elif page.startswith("Reports"):
         page_reports()
     elif page.startswith("Program Q&A"):
