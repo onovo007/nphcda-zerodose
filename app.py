@@ -222,14 +222,63 @@ def page_data():
                     "reporting non-zero Penta1 in the latest year (of 774), count completeness, the "
                     "state-month reporting rate, and the reporting period.", q)
 
-        st.plotly_chart(dq.missingness_by_state(d), use_container_width=True)
-        miss = (d.groupby("state")["penta_1_count"]
-                .apply(lambda s: int((s.fillna(0) <= 0).sum())).sort_values(ascending=False))
-        miss_ctx = {"reporting_rate_pct": q["reporting_rate"], "period": span_txt,
-                    "states_with_most_missing_months": miss.head(8).to_dict()}
-        ai.ai_block("dq_missing", "DHIS2 reporting completeness by state and month",
-                    "Which states have the most missing or zero Penta1 state-months (reporting gaps), "
-                    "and the overall state-month reporting rate.", miss_ctx)
+        section("DHIS2 reporting completeness")
+        st.markdown(clean(
+            "<div style='display:flex;gap:18px;align-items:center;font-size:.85rem'>"
+            "<span><span style='display:inline-block;width:14px;height:14px;background:#2E6E8E;"
+            "border-radius:3px;vertical-align:middle'></span> Reporting (non-zero Penta1)</span>"
+            "<span><span style='display:inline-block;width:14px;height:14px;background:#E8746C;"
+            "border-radius:3px;vertical-align:middle'></span> Missing or zero (no report)</span></div>"),
+            unsafe_allow_html=True)
+        with st.expander("What 'completeness' and 'reporting rate' mean (and how they are calculated)"):
+            st.markdown(clean(
+                "- **Count completeness** = of all expected antigen-count cells in the file (the count "
+                "columns across every LGA-month row), the percentage that are present (not blank). "
+                "Formula: 1 - (blank cells / total cells). It measures whether values were entered.\n"
+                "- **Reporting rate (state-month)** = of the full grid of states x months, the percentage "
+                "of state-months with a reported, non-zero Penta1. Formula: filled state-months / "
+                "(states x months). It measures whether the unit reported at all that month.\n"
+                "- **On the heatmap:** blue = reported non-zero Penta1 that month; red = missing or zero.\n"
+                "- **Why state vs LGA differ:** a state can always report at state level (all blue) yet "
+                "have many missing LGA-months underneath - the LGA drill-down reveals that local gap."))
+
+        months = dq.month_list(d)
+        start = end = None
+        if len(months) > 1:
+            labels = [m.strftime("%b %Y") for m in months]
+            sl, el = st.select_slider("Month range to display", options=labels,
+                                      value=(labels[0], labels[-1]), key="dq_month_range")
+            start, end = months[labels.index(sl)], months[labels.index(el)]
+
+        rtab_s, rtab_l = st.tabs(["By state", "By LGA (drill-down)"])
+        with rtab_s:
+            st.plotly_chart(dq.missingness_by_state(d, start, end), use_container_width=True)
+            pres_s = dq.present_matrix(d, "state", start, end)
+            miss_sm = (pres_s == 0).sum(axis=1).sort_values(ascending=False)
+            miss_sm = miss_sm[miss_sm > 0]
+            sm_ctx = {"reporting_rate_pct": q["reporting_rate"], "period": span_txt,
+                      "states_with_missing_state_months": miss_sm.head(10).to_dict(),
+                      "note": "counts are missing STATE-months (a state reported nothing that month)"}
+            ai.ai_block("dq_missing", "DHIS2 state-month reporting (filled vs missing)",
+                        "The state-month reporting rate and which states have missing state-months "
+                        "(months where the whole state reported no or zero Penta1). Counts are out of "
+                        "the number of months in view.", sm_ctx)
+        with rtab_l:
+            state_sel = st.selectbox("State to drill into", sorted(d["state"].dropna().unique()),
+                                     key="dq_lga_state")
+            lfig, pres_l = dq.missingness_by_lga(d, state_sel, start, end)
+            st.plotly_chart(lfig, use_container_width=True)
+            miss_lga = (pres_l == 0).sum(axis=1).sort_values(ascending=False)
+            miss_lga = miss_lga[miss_lga > 0]
+            n_cols = pres_l.shape[1]
+            lga_ctx = {"state": state_sel, "months_in_view": int(n_cols),
+                       "n_lgas": int(pres_l.shape[0]),
+                       "total_missing_lga_months": int((pres_l == 0).sum().sum()),
+                       "lgas_with_most_missing_months": miss_lga.head(12).to_dict()}
+            ai.ai_block("dq_lga_missing", f"DHIS2 LGA reporting gaps - {state_sel}",
+                        "Within the selected state, which LGAs have the most missing or zero Penta1 "
+                        "months (out of the months in view), and the total missing LGA-months. Name the "
+                        "worst LGAs and give one action to close the reporting gap.", lga_ctx)
 
     with atab:
         section("Anomaly detection (national antigen series)",

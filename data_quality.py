@@ -11,7 +11,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 import config as C
-from theme import style_fig
+from theme import style_fig, clean
 
 TOTAL_LGAS = 774
 
@@ -49,23 +49,52 @@ def dhis2_quality(dhis2_prepped: pd.DataFrame) -> dict:
     }
 
 
-def missingness_by_state(dhis2_prepped: pd.DataFrame) -> go.Figure:
-    """Heatmap of state-month Penta1 reporting (present vs missing)."""
-    d = dhis2_prepped.dropna(subset=["ds"])
-    piv = (d.groupby(["state", "ds"])["penta_1_count"].sum().reset_index()
-           .pivot(index="state", columns="ds", values="penta_1_count"))
-    present = (~piv.isna() & (piv.fillna(0) > 0)).astype(int)
+def month_list(dhis2_prepped: pd.DataFrame) -> list:
+    """Sorted list of month timestamps present in the data."""
+    return sorted(pd.to_datetime(pd.Series(dhis2_prepped["ds"].dropna().unique())))
+
+
+def present_matrix(dhis2_prepped: pd.DataFrame, by: str = "state",
+                   start=None, end=None) -> pd.DataFrame:
+    """1 = reported non-zero Penta1 that month, 0 = missing or zero, indexed by `by` x month."""
+    d = dhis2_prepped.dropna(subset=["ds"]).copy()
+    d["ds"] = pd.to_datetime(d["ds"])
+    if start is not None:
+        d = d[d["ds"] >= pd.Timestamp(start)]
+    if end is not None:
+        d = d[d["ds"] <= pd.Timestamp(end)]
+    piv = (d.groupby([by, "ds"])["penta_1_count"].sum().reset_index()
+           .pivot(index=by, columns="ds", values="penta_1_count"))
+    return (~piv.isna() & (piv.fillna(0) > 0)).astype(int)
+
+
+def _heatmap(present: pd.DataFrame, title: str, height: int) -> go.Figure:
     fig = go.Figure(go.Heatmap(
         z=present.values,
         x=[pd.Timestamp(c).strftime("%b-%y") for c in present.columns],
         y=present.index.tolist(),
-        colorscale=[[0, "#F4C7C3"], [1, C.STEEL]],
-        showscale=False, xgap=1, ygap=1,
-        hovertemplate="%{y}<br>%{x}<br>%{z}<extra></extra>",
+        colorscale=[[0, "#E8746C"], [1, C.STEEL]],
+        zmin=0, zmax=1, showscale=False, xgap=1, ygap=1,
+        hovertemplate="%{y}<br>%{x}<br>%{customdata}<extra></extra>",
+        customdata=np.where(present.values == 1, "Reporting", "Missing / zero"),
     ))
-    fig.update_layout(title="DHIS2 reporting by state and month (filled vs missing)",
-                      height=760, yaxis=dict(autorange="reversed"))
+    fig.update_layout(title=title, height=height, yaxis=dict(autorange="reversed"))
     return style_fig(fig)
+
+
+def missingness_by_state(dhis2_prepped: pd.DataFrame, start=None, end=None) -> go.Figure:
+    """Heatmap of state-month Penta1 reporting (present vs missing)."""
+    present = present_matrix(dhis2_prepped, "state", start, end)
+    return _heatmap(present, "DHIS2 reporting by state and month (filled vs missing)", 760)
+
+
+def missingness_by_lga(dhis2_prepped: pd.DataFrame, state: str, start=None, end=None):
+    """LGA-level reporting heatmap within one state; returns (figure, present-matrix)."""
+    sub = dhis2_prepped[dhis2_prepped["state"] == state]
+    present = present_matrix(sub, "lga", start, end)
+    height = int(max(280, min(1000, 70 + 20 * len(present.index))))
+    fig = _heatmap(present, f"DHIS2 reporting by LGA and month - {clean(state)} (filled vs missing)", height)
+    return fig, present
 
 
 def outliers(national_monthly_df: pd.DataFrame) -> pd.DataFrame:
