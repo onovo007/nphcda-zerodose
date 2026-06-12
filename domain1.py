@@ -74,20 +74,26 @@ def render(data: dict):
     series, summary = out["series"], out["summary"]
     unit_label, value_col = out["unit_label"], out["value_col"]
 
-    # NDHS survey coverage for triangulation (only Penta1 is derivable: 100 - zero-dose).
+    # NDHS survey coverage for admin-vs-survey triangulation. Penta1 is computed live from the
+    # uploaded zero-dose data (100 - national zero-dose); the other antigens use the published NDHS
+    # national figures in config (editable). Shown only in WHO admin-coverage mode.
     survey_cov = {}
-    if metric == "coverage" and data.get("ndhs_long") is not None:
-        try:
-            nd = data["ndhs_long"].copy()
-            nd["year"] = pd.to_numeric(nd["year"], errors="coerce")
-            sub = nd[nd["year"] == 2024][["zero_dose_pct", "n_children_12_23m"]].apply(
-                pd.to_numeric, errors="coerce").dropna()
-            if len(sub):
-                w = sub["n_children_12_23m"]
-                zd_nat = ((sub["zero_dose_pct"] * w).sum() / w.sum()) if w.sum() else sub["zero_dose_pct"].mean()
-                survey_cov["Penta1"] = round(100 - float(zd_nat), 1)
-        except Exception:
-            pass
+    survey_live_penta1 = False
+    if metric == "coverage":
+        survey_cov = dict(C.SURVEY_COVERAGE)
+        if data.get("ndhs_long") is not None:
+            try:
+                nd = data["ndhs_long"].copy()
+                nd["year"] = pd.to_numeric(nd["year"], errors="coerce")
+                sub = nd[nd["year"] == 2024][["zero_dose_pct", "n_children_12_23m"]].apply(
+                    pd.to_numeric, errors="coerce").dropna()
+                if len(sub):
+                    w = sub["n_children_12_23m"]
+                    zd_nat = ((sub["zero_dose_pct"] * w).sum() / w.sum()) if w.sum() else sub["zero_dose_pct"].mean()
+                    survey_cov["Penta1"] = round(100 - float(zd_nat), 1)
+                    survey_live_penta1 = True
+            except Exception:
+                pass
     st.caption(clean(
         f"Metric: {unit_label}"
         + (" - WHO-style administrative coverage using under-five / 5 as the annual eligible "
@@ -135,11 +141,12 @@ def render(data: dict):
                 f"Forecast period {period}. Solid line fitted, dashed forecast, shaded 80/95 percent "
                 "prediction intervals, red 80 percent target line.")
         if survey_cov:
+            p1 = "computed live from the uploaded zero-dose data" if survey_live_penta1 else "from config"
             st.caption(clean(
-                "Dotted purple line = NDHS survey coverage (100 - zero-dose, 2024) for admin-vs-survey "
-                "triangulation. A survey line is shown only where survey coverage exists in the data "
-                "(Penta1); a large admin-vs-survey gap usually points to denominator or reporting-"
-                "completeness issues to reconcile."))
+                f"Dotted purple line = NDHS survey coverage for admin-vs-survey triangulation. Penta1 is "
+                f"{p1} (100 - national zero-dose, 2024); BCG, Penta3 and Measles1 use {C.SURVEY_COVERAGE_SOURCE} "
+                "published national coverage (editable in config). A large admin-vs-survey gap usually "
+                "points to denominator or reporting-completeness issues to reconcile."))
         cols = st.columns(2)
         for i, (antigen, s) in enumerate(series.items()):
             with cols[i % 2]:

@@ -55,6 +55,13 @@ THRESHOLD_PCT = 80.0
 AT_RISK_WINDOW_MONTHS = (6, 12)
 PI_80_FACTOR = 0.53  # 80% PI derived from the 95% PI in the notebook figures
 
+# NDHS national survey coverage (% of children 12-23 months), used as the admin-vs-survey
+# reference line in Coverage Forecasting (WHO admin-coverage mode). Penta1 is recomputed live from
+# the uploaded zero-dose data (100 - national zero-dose); the other antigens use these published
+# NDHS 2023-24 national figures. EDIT to match the exact values in your NDHS report.
+SURVEY_COVERAGE = {"BCG": 70.0, "Penta1": 62.0, "Penta3": 57.0, "Measles1": 59.0}
+SURVEY_COVERAGE_SOURCE = "NDHS 2023-24 (national, 12-23 months)"
+
 ANTIGEN_TS = {
     "BCG": "bcg_count",
     "Penta1": "penta_1_count",
