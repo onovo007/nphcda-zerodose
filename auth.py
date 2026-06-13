@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import csv
 import datetime
+import hmac
 import json
 import os
 
@@ -76,6 +77,11 @@ def log_event(rec: dict) -> None:
             pass
 
 
+def _eq(a, b) -> bool:
+    """Constant-time string comparison (avoids credential timing leaks)."""
+    return hmac.compare_digest(str(a or ""), str(b or ""))
+
+
 def current_user() -> dict | None:
     return st.session_state.get("auth_user")
 
@@ -111,7 +117,7 @@ def admin_panel() -> None:
         entered = st.text_input("Admin code", type="password", key="admin_code_in")
         if not entered:
             return
-        if entered != code:
+        if not _eq(entered, code):
             st.error("Invalid admin code.")
             return
         data = usage_log_bytes()
@@ -155,7 +161,7 @@ def require_login() -> bool:
                 password = st.text_input("Password", type="password")
                 ok = st.form_submit_button("Sign in", type="primary", use_container_width=True)
             if ok:
-                if users.get(username.strip()) and password == users.get(username.strip()):
+                if users.get(username.strip()) and _eq(password, users.get(username.strip())):
                     user = {"name": username.strip(), "email": username.strip(), "org": "NPHCDA"}
                     st.session_state["auth_user"] = user
                     log_event({"event": "login", **user})
@@ -164,7 +170,10 @@ def require_login() -> bool:
                     st.error("Invalid username or password.")
         else:
             st.markdown("##### Identify yourself to continue")
-            st.caption(clean("Your details are recorded for NPHCDA Digital Innovation Hub usage tracking."))
+            st.caption(clean("Your name, email and organisation are recorded by the NPHCDA Digital "
+                             "Innovation Hub solely to track platform usage. They are not used for any "
+                             "other purpose and uploaded data is processed only in your session, not "
+                             "stored. By continuing you consent to this usage logging."))
             code_required = bool(_secret("ACCESS_CODE"))
             with st.form("login_form"):
                 name = st.text_input("Full name")
@@ -176,7 +185,7 @@ def require_login() -> bool:
                 if not name.strip() or not email.strip():
                     st.error("Please enter your name and email.")
                     return False
-                if code_required and code != _secret("ACCESS_CODE"):
+                if code_required and not _eq(code, _secret("ACCESS_CODE")):
                     st.error("Invalid access code.")
                     return False
                 allow = _secret("ALLOWED_EMAILS")

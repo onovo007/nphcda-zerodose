@@ -199,6 +199,11 @@ def page_data():
         return
 
     d = io.prep_dhis2(data["dhis2"])
+    bad = float(d["ds"].isna().mean()) if "ds" in d else 1.0
+    if bad > 0.02:
+        st.warning(clean(f"{bad*100:.0f}% of DHIS2 'period' values could not be parsed into a date - "
+                         "expected formats like Jan-21, 21-Jan or 2021-01. Forecasts and reporting "
+                         "rates use only the parsed rows; please check the period column."))
     q = dq.dhis2_quality(d)
     nat = io.national_monthly(d)
     span = q["span"]

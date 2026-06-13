@@ -76,6 +76,23 @@ def validate(key: str, df: pd.DataFrame | None) -> dict:
 # --------------------------------------------------------------------------------------
 # Shared light transforms (lifted from the notebooks)
 # --------------------------------------------------------------------------------------
+def parse_period(s: pd.Series) -> pd.Series:
+    """Robustly parse a DHIS2 'period' column across common formats (Jan-21, 21-Jan, 2021-01, ...)."""
+    s = s.astype(str).str.strip()
+    best = pd.to_datetime(pd.Series([pd.NaT] * len(s)), errors="coerce")
+    best_ok = -1
+    for fmt in ("%b-%y", "%y-%b", "%Y-%m", "%m/%Y", "%b %Y", "%Y-%m-%d"):
+        cur = pd.to_datetime(s, format=fmt, errors="coerce")
+        ok = cur.notna().sum()
+        if ok > best_ok:
+            best, best_ok = cur, ok
+    if best_ok < 0.5 * len(s):  # last resort: let pandas infer
+        inferred = pd.to_datetime(s, errors="coerce")
+        if inferred.notna().sum() > best_ok:
+            best = inferred
+    return best
+
+
 def prep_dhis2(df: pd.DataFrame) -> pd.DataFrame:
     """Parse period, coerce counts, add year/month and dropout columns (D1_D2 cell 9)."""
     d = df.copy()
@@ -83,7 +100,7 @@ def prep_dhis2(df: pd.DataFrame) -> pd.DataFrame:
     for c in C.COUNT_COLS:
         if c in d.columns:
             d[c] = pd.to_numeric(d[c], errors="coerce")
-    d["ds"] = pd.to_datetime(d["period"], format="%b-%y", errors="coerce")
+    d["ds"] = parse_period(d["period"])
     d["year"] = d["ds"].dt.year
     d["month"] = d["ds"].dt.month
     for c in ("zone", "state", "lga"):

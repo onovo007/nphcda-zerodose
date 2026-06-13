@@ -64,7 +64,7 @@ YEAR_CENTER = 2024  # year_mean used to standardise the year covariate
 FORECAST_MONTHS = 18
 THRESHOLD_PCT = 80.0
 AT_RISK_WINDOW_MONTHS = (6, 12)
-PI_80_FACTOR = 0.53  # 80% PI derived from the 95% PI in the notebook figures
+PI_80_FACTOR = 0.654  # 80% PI half-width = z(0.90)/z(0.975) = 1.2816/1.9600 of the 95% PI half-width
 
 # NDHS national survey coverage (% of children 12-23 months), used as the admin-vs-survey
 # reference line in Coverage Forecasting (WHO admin-coverage mode). Penta1 is recomputed live from
