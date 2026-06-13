@@ -595,3 +595,146 @@ def sop_docx() -> bytes:
     fr.italic = True; fr.font.size = Pt(8); fr.font.color.rgb = mute
 
     buf = io.BytesIO(); doc.save(buf); return buf.getvalue()
+
+
+# --------------------------------------------------------------------------------------
+# Methods & validation summary (reviewer-facing; shared by the in-app page and the .docx)
+# --------------------------------------------------------------------------------------
+def methods_sections() -> list:
+    """Structured Methods & Validation content. Each item: (heading, kind, payload).
+    kind in {'para','bullets','table'}; rendered by both the app page and the Word export."""
+    return [
+        ("Purpose", "para",
+         ["This summary documents the methods and validation behind the NPHCDA Zero-Dose Predictive "
+          "Modelling Platform for technical reviewers (GAVI, UNICEF, NPHCDA). Every model runs live on "
+          "the loaded data and reproduces the project report. Figures are model estimates for decision "
+          "support, to be reviewed before official use."]),
+        ("Data sources and vintage", "table",
+         (["Source", "Vintage", "Used for"],
+          [[clean(a), clean(c), clean(d_)] for a, b, c, d_ in C.PROVENANCE])),
+        ("Antigen coverage forecasting", "bullets",
+         ["Model: Prophet additive time series per antigen (BCG, Penta1, Penta3, Measles1) - "
+          "piecewise-linear trend with automatic changepoints, yearly plus an added semi-annual "
+          "seasonality; 95% and 80% prediction intervals.",
+          "Two reporting modes: a denominator-free index (percent of the 2024 baseline; the 80% line is "
+          "a decline tripwire) and WHO-style administrative coverage (doses divided by an eligible "
+          "infant denominator: under-five/5 demographic proxy by default, or DHIS2 live births).",
+          "Admin-vs-survey triangulation: NDHS 2024 survey coverage is overlaid per antigen so a large "
+          "admin-vs-survey gap flags a denominator or reporting-completeness issue.",
+          "User-set forecast horizon (to 2032) and a 3/6/12-month scorecard window; an LGA at-risk "
+          "trend screen flags LGA-antigen series projected below 80%."]),
+        ("Validation - coverage forecasts", "bullets",
+         ["Out-of-sample hold-out back-test: refit on all but the last 6 months and score the forecast "
+          "against the held-out actuals (MAPE and empirical 95% prediction-interval coverage), shown on "
+          "the Coverage Forecasting page. On the project data MAPE is about 3-4% with well-calibrated "
+          "intervals."]),
+        ("Dropout and completion", "bullets",
+         ["Prophet forecasts of three dropout transitions (Penta1-Penta3, Penta1-Measles1, "
+          "Measles1-Measles2), nationally and by state, with prediction intervals.",
+          "Drivers: cross-validated LASSO selection with 200-resample bootstrap stability, then a "
+          "parsimonious model on the top stably-selected drivers per pair reporting the standardized "
+          "coefficient, direction and 95% CI. Because dropout can be negative, a linear model with HC3 "
+          "robust standard errors is used (Beta applies only to the bounded zero-dose outcome)."]),
+        ("Zero-dose and hotspots", "bullets",
+         ["Model: Bayesian hierarchical Beta regression in PyMC on the NDHS 2008-2024 panel - partially "
+          "pooled intercepts and time slopes at national, zone and state levels; a Beta likelihood whose "
+          "precision scales with each survey's sample size; non-centred parameterization; sampled with "
+          "NUTS (nutpie). Convergence reported via R-hat and ESS.",
+          "Forecasts to 2026-2028 are posterior-predictive (mean with 95% credible intervals).",
+          "LGA burden: each LGA's DHIS2-derived rate is calibrated to its state's 2026 posterior and the "
+          "state cohort is distributed across LGAs by population (NPC 2022); the state credible interval "
+          "is allocated down to each LGA (ZD count low/high 95%).",
+          "Spatial: Getis-Ord Gi* hotspots (k=5 nearest neighbours, row-standardized, permutation "
+          "inference) on the LGA zero-dose surface."]),
+        ("Validation - zero-dose model (leave-one-wave-out)", "bullets",
+         ["Each NDHS survey wave is held out in turn, the model refit, and that wave predicted and "
+          "compared to observed (MAE/RMSE in percentage points and 95% CI coverage), in the Diagnostics "
+          "tab.",
+          "On the project data, out-of-sample MAE is about 8-10 percentage points and 95% credible-"
+          "interval coverage is roughly 60-85%, i.e. the intervals are somewhat over-confident out of "
+          "sample - forecasts should be read as central estimates with intervals likely a touch narrow."]),
+        ("Drivers and inference (Implementation Science)", "bullets",
+         ["Exploratory analysis of the state zero-dose dataset: correlation matrix with "
+          "multicollinearity flags, distributions, scatter (Pearson r), zone violins (Kruskal-Wallis), "
+          "burden-band bars and a Bland-Altman agreement plot.",
+          "A parsimonious Beta regression of the zero-dose rate on the top LASSO-selected drivers reports "
+          "the coefficient, direction and 95% CI; a build-your-own hypothesis-test tab supports t-test, "
+          "paired t-test, ANOVA and chi-square.",
+          "All driver results are cross-sectional, ecological state-level associations (n=37), framed as "
+          "directional and uncertainty-quantified - not causal effects."]),
+        ("Key parameters", "table",
+         (["Component", "Setting"],
+          [["Prophet", "yearly + semi-annual seasonality; changepoint_prior_scale 0.05; 95% PI (80% PI = 0.654x half-width)"],
+           ["Bayesian Beta", "hierarchical national-zone-state; precision scaled by survey n; nutpie NUTS, 2 chains, target_accept 0.92; live 1000 draws (full 3000)"],
+           ["Getis-Ord Gi*", "k=5 nearest neighbours; row-standardized; permutation p (0.01/0.05/0.10)"],
+           ["LASSO drivers", "standardized; 5-fold CV; 200-bootstrap stability; parsimonious top-4 with HC3 robust SE or Beta + 95% CI"]])),
+        ("Limitations and honest caveats", "bullets",
+         ["DHIS2 is administrative data; reporting completeness affects counts. The coverage index is "
+          "relative to 2024 unless a proper denominator is supplied. DHIS2-reported live births "
+          "under-count true births, so using them as a denominator can push coverage above 100%.",
+          "Driver associations are ecological (state-level, n=37), not causal; read direction and CI "
+          "width, not a significance verdict.",
+          "The LGA burden is a population-share allocation of the state posterior (carrying the state "
+          "credible interval), not an independently fitted LGA model.",
+          "Out-of-sample credible-interval coverage is below nominal, so forecast intervals are likely "
+          "slightly narrow; the zero-dose model extrapolates a linear-in-logit time trend from four NDHS "
+          "waves.",
+          "Unmatched geographies in the Gi* step are median-imputed; the LGA reporting drill-down and "
+          "anomaly tab help surface data-quality issues before modelling."]),
+        ("Reproducibility and governance", "bullets",
+         ["Content-hashed caching means re-runs are instant but genuinely recomputed when data changes; "
+          "dependencies are version-pinned and the container is reproducible.",
+          "Uploaded data is processed only in the session and not written to disk; any OpenAI key is "
+          "session-only and never stored; login PII is used solely for DIH usage tracking.",
+          "Every output is labelled as a model estimate; cite the data vintage when sharing."]),
+    ]
+
+
+def methods_docx() -> bytes:
+    """Reviewer-facing Methods & Validation summary as a branded Word document."""
+    from docx import Document
+    from docx.shared import Pt, Inches, RGBColor
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+
+    navy, green, mute = RGBColor(0x1F, 0x3B, 0x57), RGBColor(0x1C, 0x7A, 0x3D), RGBColor(0x6B, 0x7A, 0x88)
+    doc = Document()
+    doc.styles["Normal"].font.name = "Calibri"
+    doc.styles["Normal"].font.size = Pt(10.5)
+    if C.LOGO_PATH.exists():
+        try:
+            p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+            p.add_run().add_picture(str(C.LOGO_PATH), height=Inches(0.55))
+        except Exception:
+            pass
+    t = doc.add_paragraph(); tr = t.add_run("Methods and Validation Summary")
+    tr.bold = True; tr.font.size = Pt(20); tr.font.color.rgb = navy
+    s = doc.add_paragraph(); sr = s.add_run("NPHCDA Zero-Dose Predictive Modelling Platform")
+    sr.font.size = Pt(13); sr.font.color.rgb = green
+    d = doc.add_paragraph(); dr = d.add_run("For GAVI, UNICEF and NPHCDA technical review.  Generated "
+                                            + datetime.now().strftime("%d %B %Y"))
+    dr.italic = True; dr.font.size = Pt(9); dr.font.color.rgb = mute
+
+    for heading, kind, payload in methods_sections():
+        h = doc.add_paragraph(); hr = h.add_run(heading)
+        hr.bold = True; hr.font.size = Pt(13); hr.font.color.rgb = navy
+        if kind == "para":
+            for para in payload:
+                doc.add_paragraph(clean(para))
+        elif kind == "bullets":
+            for b in payload:
+                doc.add_paragraph(clean(b), style="List Bullet")
+        elif kind == "table":
+            headers, trows = payload
+            tb = doc.add_table(rows=1, cols=len(headers)); tb.style = "Light Grid Accent 1"
+            for i, c in enumerate(headers):
+                run = tb.rows[0].cells[i].paragraphs[0].add_run(c); run.bold = True
+            for row in trows:
+                cells = tb.add_row().cells
+                for i, v in enumerate(row):
+                    cells[i].text = clean(str(v))
+
+    fp = doc.add_paragraph(); fr = fp.add_run(
+        "Generated by the NPHCDA Zero-Dose Predictive Modelling Platform. Figures are model estimates; "
+        "review before use.")
+    fr.italic = True; fr.font.size = Pt(8); fr.font.color.rgb = mute
+    buf = io.BytesIO(); doc.save(buf); return buf.getvalue()

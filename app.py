@@ -45,7 +45,8 @@ def sidebar() -> str:
                          "Funders and reviewers: GAVI and UNICEF."))
         nav_options = ["Home", "Data and Quality", "Coverage Forecasting", "Dropout & Completion",
                        "Zero-Dose & Hotspots", "Implementation Science", "Ask the Analyst",
-                       "Reports & Briefs", "Program Q&A (RAG)", "User Guide (SOP)"]
+                       "Reports & Briefs", "Program Q&A (RAG)", "User Guide (SOP)",
+                       "Methods & Validation"]
         # Allow other pages to request navigation (e.g. the Home "Upload your own data" button).
         if st.session_state.get("_goto") in nav_options:
             st.session_state["navradio"] = st.session_state.pop("_goto")
@@ -824,6 +825,28 @@ def page_sop():
 
 
 # --------------------------------------------------------------------------------------
+# Methods & Validation (reviewer-facing)
+# --------------------------------------------------------------------------------------
+def page_methods():
+    domain_banner("_banner_methods.jpg", "Methods and Validation",
+                  "A reviewer-facing summary of the models, parameters, validation and honest caveats "
+                  "- for GAVI, UNICEF and NPHCDA technical review.")
+    st.download_button("Download Methods & Validation (Word .docx)", reports.methods_docx(),
+                       "NPHCDA_Methods_and_Validation.docx",
+                       "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    for heading, kind, payload in reports.methods_sections():
+        section(heading)
+        if kind == "para":
+            for para in payload:
+                st.markdown(clean(para))
+        elif kind == "bullets":
+            st.markdown("\n".join(f"- {clean(b)}" for b in payload))
+        elif kind == "table":
+            headers, trows = payload
+            st.dataframe(pd.DataFrame(trows, columns=headers), use_container_width=True, hide_index=True)
+
+
+# --------------------------------------------------------------------------------------
 # Ask the Analyst - cross-domain agent
 # --------------------------------------------------------------------------------------
 def page_agent():
@@ -884,6 +907,8 @@ def main():
         page_agent()
     elif page.startswith("User Guide"):
         page_sop()
+    elif page.startswith("Methods"):
+        page_methods()
     elif page.startswith("Reports"):
         page_reports()
     elif page.startswith("Program Q&A"):
