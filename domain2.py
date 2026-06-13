@@ -116,16 +116,17 @@ def render(data: dict):
                         drivers_summary)
 
             st.divider()
-            section("Driver stability and inference (LASSO bootstrap + robust regression)",
-                    "Selection stability over 200 bootstrap resamples, plus a regression on the "
-                    "LASSO-selected drivers with HC3 robust standard errors, p-values and a "
-                    "Benjamini-Hochberg FDR adjustment.")
+            section("Driver stability and effect size (parsimonious model per pair)",
+                    "Bootstrap LASSO selection stability, then a parsimonious model on the top 4 most "
+                    "stably selected drivers per pair, reporting the standardized coefficient, its "
+                    "direction and a 95 percent confidence interval.")
             st.caption(clean(
-                "These are cross-sectional, ecological associations across 37 states (one row per "
-                "state), not causal effects, and the sample is small relative to the number of "
-                "candidate drivers - read selection frequency and FDR-adjusted p-values together, and "
-                "treat single-state inference with caution (ecological fallacy)."))
-            if st.button("Run LASSO stability + robust regression", key="d2_infer_btn"):
+                "Uncertainty quantification, not a significance verdict: with 37 states (one row per "
+                "state) these are ecological, directional associations to prioritize intervention "
+                "hypotheses - not causal effects. Read selection frequency (how often LASSO keeps a "
+                "driver) with the coefficient direction and CI width. Dropout can be negative, so a "
+                "linear model with robust SEs is used (Beta applies to the bounded zero-dose outcome)."))
+            if st.button("Run driver stability + effect-size models", key="d2_infer_btn"):
                 st.session_state["d2_infer"] = lasso_drivers_inference(agg, data["model_dataset"],
                                                                        key=f"{kd}-infer")
             inf = st.session_state.get("d2_infer")
@@ -133,12 +134,12 @@ def render(data: dict):
                 for pair, tbl in inf.items():
                     st.markdown(f"**{clean(pair)}**")
                     st.dataframe(tbl, use_container_width=True, hide_index=True)
-                ai.ai_block("d2_drivers_infer", "Dropout & Completion - driver stability and robust inference",
-                            "For each dropout pair: bootstrap selection frequency (how often LASSO keeps "
-                            "each driver), the standardized coefficient with HC3 robust SE, the p-value and "
-                            "the FDR-adjusted p. Explain which drivers are both stably selected (high "
-                            "frequency) and statistically supported (low FDR p), and caution that with 37 "
-                            "states these are ecological associations, not causal effects.",
+                ai.ai_block("d2_drivers_infer", "Dropout & Completion - driver stability and effect sizes",
+                            "For each of the three dropout pairs: the top stably-selected drivers, their "
+                            "standardized coefficient, direction (higher/lower dropout) and 95% CI. Frame "
+                            "as directional associations with uncertainty (not causal), name the most "
+                            "stable driver per pair and the intervention it points to, and note when a CI "
+                            "is wide or crosses zero. These are ecological state-level associations.",
                             {p: t.to_dict(orient="records") for p, t in inf.items()})
 
     with tabs[2]:

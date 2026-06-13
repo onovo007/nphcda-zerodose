@@ -78,12 +78,13 @@ def _driver_design(agg: pd.DataFrame, model_dataset: pd.DataFrame):
     return merged, feats, targets
 
 
-@st.cache_data(show_spinner="Bootstrapping LASSO drivers and fitting robust regressions...")
-def lasso_drivers_inference(_agg, _model_dataset, key: str, n_boot: int = 200) -> dict:
-    """For each dropout pair: LASSO selection-stability (bootstrap selection frequency) plus an
-    inferential regression on the LASSO-selected drivers with HC3 robust SEs, p-values and a
-    Benjamini-Hochberg FDR adjustment. Dropout can be negative, so the inferential model is OLS
-    with robust SEs (the statistically correct family for an unbounded rate)."""
+@st.cache_data(show_spinner="Bootstrapping LASSO drivers and fitting parsimonious models...")
+def lasso_drivers_inference(_agg, _model_dataset, key: str, n_boot: int = 200, top_k: int = 4) -> dict:
+    """For each dropout pair: bootstrap LASSO selection-stability, then a PARSIMONIOUS regression on
+    the top-k most stably selected drivers, reporting the standardized coefficient, its DIRECTION and
+    a 95% confidence interval (uncertainty quantification, not a significance verdict - appropriate
+    for an ecological n=37 dataset). Dropout can be negative, so a linear model with HC3 robust SEs
+    is used (Beta/fractional-logit apply only to the bounded zero-dose outcome)."""
     from sklearn.preprocessing import StandardScaler
     from sklearn.linear_model import LassoCV
     import stats_infer as si
@@ -91,9 +92,7 @@ def lasso_drivers_inference(_agg, _model_dataset, key: str, n_boot: int = 200) -
     merged, feats, targets = _driver_design(_agg, _model_dataset)
     if merged.empty or not feats:
         return {}
-    Xraw = merged[feats].fillna(merged[feats].median())
-    scaler = StandardScaler().fit(Xraw)
-    X_sc = scaler.transform(Xraw)
+    X_sc = StandardScaler().fit_transform(merged[feats].fillna(merged[feats].median()))
     Xz = pd.DataFrame(X_sc, columns=feats)
     rng = np.random.default_rng(42)
     n = len(merged)
@@ -101,8 +100,7 @@ def lasso_drivers_inference(_agg, _model_dataset, key: str, n_boot: int = 200) -
     for target in targets:
         y = merged[target].fillna(merged[target].median()).values.astype(float)
         base = LassoCV(cv=5, random_state=42, max_iter=5000).fit(X_sc, y)
-        selected = [f for f, c in zip(feats, base.coef_) if abs(c) > 0]
-        # Bootstrap selection frequency.
+        lasso_abs = {f: abs(c) for f, c in zip(feats, base.coef_)}
         freq = {f: 0 for f in feats}
         for _ in range(n_boot):
             idx = rng.integers(0, n, n)
@@ -113,20 +111,20 @@ def lasso_drivers_inference(_agg, _model_dataset, key: str, n_boot: int = 200) -
             for f, c in zip(feats, lb.coef_):
                 if abs(c) > 0:
                     freq[f] += 1
-        sel = selected or sorted(feats, key=lambda f: freq[f], reverse=True)[:5]
+        # Parsimonious: the top-k most stably selected drivers (ties broken by LASSO magnitude).
+        ranked = sorted(feats, key=lambda f: (freq[f], lasso_abs[f]), reverse=True)
+        sel = ranked[:top_k]
         reg = si.ols_robust(y, Xz[sel])
         reg = reg[reg["term"] != "(intercept)"].copy()
-        reg["p_FDR"] = si.bh_fdr(reg["p_value"].values)
-        lasso_abs = {f: abs(c) for f, c in zip(feats, base.coef_)}
-        reg.insert(1, "selection_freq_pct", reg["term"].map(lambda f: round(100 * freq[f] / max(n_boot, 1), 0)))
-        reg.insert(1, "lasso_abs_coef", reg["term"].map(lambda f: round(lasso_abs.get(f, 0), 3)))
-        reg = reg.rename(columns={"term": "Driver", "lasso_abs_coef": "|LASSO coef|",
-                                  "selection_freq_pct": "Selection freq (%)", "coef": "Std beta",
-                                  "robust_SE": "Robust SE", "p_value": "p-value", "p_FDR": "p (FDR)"})
-        for c in ["Std beta", "Robust SE", "t", "p-value", "p (FDR)"]:
-            reg[c] = reg[c].round(3)
-        reg["Driver"] = reg["Driver"].map(lambda s: s.replace("pct_", "").replace("_", " ").title())
-        out[C.DROPOUT_TARGETS[target]] = reg.sort_values("p (FDR)").reset_index(drop=True)
+        reg = si.add_ci(reg, "coef", "robust_SE")
+        reg["Selection freq (%)"] = reg["term"].map(lambda f: int(round(100 * freq[f] / max(n_boot, 1))))
+        reg["Std coef"] = reg["coef"].round(2)
+        reg["95% CI"] = reg.apply(lambda r: f"{r['CI_low']:.1f} to {r['CI_high']:.1f}", axis=1)
+        reg["Direction"] = reg["coef"].map(lambda c: "Higher dropout" if c > 0 else "Lower dropout")
+        reg["Driver"] = reg["term"].map(lambda s: s.replace("pct_", "").replace("_", " ").title())
+        out[C.DROPOUT_TARGETS[target]] = (reg.sort_values("Selection freq (%)", ascending=False)
+                                          [["Driver", "Selection freq (%)", "Std coef", "95% CI", "Direction"]]
+                                          .reset_index(drop=True))
     return out
 
 

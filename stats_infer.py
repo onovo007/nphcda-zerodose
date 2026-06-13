@@ -30,6 +30,14 @@ def bh_fdr(pvals) -> np.ndarray:
     return out
 
 
+def add_ci(df: pd.DataFrame, coef_col: str, se_col: str, z: float = 1.96) -> pd.DataFrame:
+    """Add 95% confidence-interval bounds (coef +/- z*SE) to an inference table."""
+    df = df.copy()
+    df["CI_low"] = df[coef_col] - z * df[se_col]
+    df["CI_high"] = df[coef_col] + z * df[se_col]
+    return df
+
+
 def ols_robust(y, X_df: pd.DataFrame) -> pd.DataFrame:
     """OLS with HC3 robust SEs. Returns term, coef, robust_SE, t, p_value (intercept first)."""
     y = np.asarray(y, dtype=float)

@@ -581,25 +581,26 @@ def page_impsci():
                     "where to concentrate effort.", ksum)
 
         st.divider()
-        section("Multivariable drivers of zero-dose (Beta regression on the LASSO-selected set)",
-                "LASSO selects the drivers (on the logit scale); the selected set is then fit with a "
-                "Beta regression reporting coefficients, standard errors, p-values and an FDR adjustment.")
-        st.caption(clean("Cross-sectional, ecological association across 37 states - not causal. A "
-                         "positive logit coefficient means the driver is associated with higher "
-                         "zero-dose; read the FDR-adjusted p-values given the small sample."))
-        if st.button("Run Beta regression on zero-dose drivers", key="is_beta_btn"):
+        section("Drivers of zero-dose (parsimonious Beta regression, top LASSO-selected)",
+                "LASSO selects drivers on the logit scale; the top 4 are fit with a Beta (or "
+                "fractional-logit) model reporting the coefficient, its direction and a 95% CI.")
+        st.caption(clean("Uncertainty quantification, not a significance verdict. A positive logit "
+                         "coefficient means the driver is associated with higher zero-dose. These are "
+                         "cross-sectional, ecological associations across 37 states (not causal); read "
+                         "the direction and the CI width given the small sample."))
+        if st.button("Run zero-dose driver model", key="is_beta_btn"):
             tbl, method, n = impsci.beta_drivers(df)
             st.session_state["is_beta"] = {"tbl": tbl, "method": method, "n": n}
         bres = st.session_state.get("is_beta")
         if bres and bres["tbl"] is not None:
-            st.caption(clean(f"Model: {bres['method']} - {bres['n']} states."))
+            st.caption(clean(f"Model: {bres['method']} - {bres['n']} states, top 4 LASSO-selected drivers."))
             st.dataframe(bres["tbl"], use_container_width=True, hide_index=True)
-            ai.ai_block("is_beta_block", "Zero-dose drivers - Beta regression on LASSO-selected set",
-                        "A Beta regression of the state zero-dose rate on the LASSO-selected equity "
-                        "drivers, with coefficients (logit scale), robust SEs/p-values and FDR-adjusted "
-                        "p. State which drivers are statistically supported after FDR correction, the "
-                        "direction of each, and one programming implication; caution that these are "
-                        "ecological state-level associations, not causal effects.",
+            ai.ai_block("is_beta_block", "Zero-dose drivers - parsimonious Beta regression",
+                        "A parsimonious Beta regression of the state zero-dose rate on the top "
+                        "LASSO-selected drivers: coefficient (logit scale), direction and 95% CI. Frame "
+                        "as directional associations with uncertainty (not causal); name the strongest "
+                        "driver and its direction, note any CI that crosses zero, and give one "
+                        "programming implication. These are ecological state-level associations.",
                         bres["tbl"].to_dict(orient="records"))
 
     with tabs[3]:

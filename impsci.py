@@ -182,12 +182,13 @@ def band_bar_fig(df: pd.DataFrame):
     return style_fig(fig), summary
 
 
-def beta_drivers(df: pd.DataFrame, n_min: int = 6):
-    """Beta regression of the 2024 zero-dose rate on the LASSO-selected equity drivers.
+def beta_drivers(df: pd.DataFrame, top_k: int = 4):
+    """Parsimonious Beta regression of the 2024 ZERO-DOSE rate on the top-k LASSO-selected drivers.
 
-    LASSO selects on the logit scale (matching the Beta logit link); the selected set is then fit
-    with a Beta regression reporting coefficients, SEs, p-values and an FDR adjustment. Returns
-    (table, method_label, n_states)."""
+    LASSO selects on the logit scale (matching the Beta logit link); the top-k drivers by magnitude
+    are then fit with a Beta (or fractional-logit fallback) model reporting the coefficient, its
+    DIRECTION and a 95% confidence interval - uncertainty quantification, not a significance verdict.
+    Returns (table, method_label, n_states)."""
     from sklearn.preprocessing import StandardScaler
     from sklearn.linear_model import LassoCV
     import stats_infer as si
@@ -201,18 +202,19 @@ def beta_drivers(df: pd.DataFrame, n_min: int = 6):
     logit = np.log(p / (1 - p))
     lasso = LassoCV(cv=5, random_state=42, max_iter=5000).fit(Xz.values, logit)
     coefs = dict(zip(feats, lasso.coef_))
-    selected = [f for f in feats if abs(coefs[f]) > 0]
-    if not selected:
-        selected = sorted(feats, key=lambda f: abs(coefs[f]), reverse=True)[:n_min]
+    ranked = sorted(feats, key=lambda f: abs(coefs[f]), reverse=True)
+    selected = [f for f in ranked if abs(coefs[f]) > 0][:top_k] or ranked[:top_k]
     tbl, method = si.beta_regression(p, Xz[selected])
     tbl = tbl[tbl["term"] != "(intercept)"].copy()
-    tbl["p_FDR"] = si.bh_fdr(tbl["p_value"].values)
-    tbl["term"] = tbl["term"].map(pretty)
-    for c in [c for c in tbl.columns if c != "term"]:
-        tbl[c] = tbl[c].round(3)
-    tbl = tbl.rename(columns={"term": "Driver", "coef": "Coef (logit)", "SE": "SE", "z": "z / t",
-                              "p_value": "p-value", "p_FDR": "p (FDR)"})
-    return tbl.sort_values("p (FDR)").reset_index(drop=True), method, len(sub)
+    tbl = si.add_ci(tbl, "coef", "SE")
+    tbl["Driver"] = tbl["term"].map(pretty)
+    tbl["Coef (logit)"] = tbl["coef"].round(2)
+    tbl["95% CI"] = tbl.apply(lambda r: f"{r['CI_low']:.2f} to {r['CI_high']:.2f}", axis=1)
+    tbl["Direction"] = tbl["coef"].map(lambda c: "Higher zero-dose" if c > 0 else "Lower zero-dose")
+    tbl["abs"] = tbl["coef"].abs()
+    out = (tbl.sort_values("abs", ascending=False)
+           [["Driver", "Coef (logit)", "95% CI", "Direction"]].reset_index(drop=True))
+    return out, method, len(sub)
 
 
 def all_numeric(df: pd.DataFrame) -> list[str]:
