@@ -195,6 +195,14 @@ def page_data():
                      "Rows": v["n_rows"], "Missing required": miss})
     st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
+    with st.expander("Data dictionary and provenance (source, vintage)"):
+        st.dataframe(pd.DataFrame(
+            [{"Dataset": clean(a), "Source": clean(b), "Vintage": clean(c), "Holds": clean(d_)}
+             for a, b, c, d_ in C.PROVENANCE], ), use_container_width=True, hide_index=True)
+        st.caption(clean("Figures are model estimates from these sources; cite the vintage when "
+                         "sharing. Denominators: under-five from NPC 2022 projections (City "
+                         "Population); LGA population NPC 2022."))
+
     if data.get("dhis2") is None:
         return
 

@@ -73,6 +73,17 @@ PI_80_FACTOR = 0.654  # 80% PI half-width = z(0.90)/z(0.975) = 1.2816/1.9600 of 
 SURVEY_COVERAGE = {"BCG": 70.0, "Penta1": 62.0, "Penta3": 57.0, "Measles1": 59.0}
 SURVEY_COVERAGE_SOURCE = "NDHS 2023-24 (national, 12-23 months)"
 
+# Data dictionary / provenance shown on the Data and Quality page (source, vintage, what it holds).
+PROVENANCE = [
+    ("DHIS2 routine immunization", "NPHCDA DHIS2 export", "2021-2025 monthly", "Antigen dose counts by LGA-month"),
+    ("NDHS zero-dose (state-year)", "NDHS, verified from report PDFs", "2008-2024 rounds", "Survey zero-dose rate by state"),
+    ("NDHS antigen coverage", "NDHS 2023-24", "2024", "State survey coverage per antigen"),
+    ("Zero-dose model dataset", "NDHS / NPC / composite", "to 2024", "State equity & socioeconomic covariates"),
+    ("Under-five population", "City Population (NPC 2022 projection)", "2024", "Under-5 by state; birth cohort = /5"),
+    ("DHIS2 live births", "NPHCDA DHIS2 export", "2021-2025 monthly", "Facility-reported live births by LGA"),
+    ("LGA population", "City Population / NPC 2022 projection", "2022", "Population by LGA for burden weighting"),
+]
+
 ANTIGEN_TS = {
     "BCG": "bcg_count",
     "Penta1": "penta_1_count",
@@ -130,13 +141,15 @@ ANTIGEN_PAL = {
     "Penta3": "#E65100",
     "Measles1": "#880E4F",
 }
+# Okabe-Ito colour-blind-safe categorical palette (north = warm, south = cool, all distinguishable
+# under deuteranopia/protanopia).
 ZONE_COLORS = {
-    "North West": "#D73027",
-    "North East": "#FC8D59",
-    "North Central": "#FDAE61",
-    "South West": "#1A9850",
-    "South East": "#91CF60",
-    "South South": "#66C2A5",
+    "North West": "#D55E00",
+    "North East": "#E69F00",
+    "North Central": "#CC79A7",
+    "South West": "#0072B2",
+    "South East": "#009E73",
+    "South South": "#56B4E9",
 }
 TIER_COLORS = {
     "Tier 1: Critical": "#D73027",

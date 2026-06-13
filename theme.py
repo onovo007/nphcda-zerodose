@@ -338,8 +338,10 @@ def kpi_row(cards: list[dict]) -> None:
     for c in cards:
         color = c.get("color", C.STEEL)
         sub = f"<div class='sub'>{clean(c.get('sub',''))}</div>" if c.get("sub") else ""
-        html += (f"<div class='kpi' style='--accent-c:{color}'>"
-                 f"<div class='label'>{clean(c['label'])}</div>"
+        tip = f" title='{clean(c['help'])}'" if c.get("help") else ""
+        mark = " &#9432;" if c.get("help") else ""
+        html += (f"<div class='kpi' style='--accent-c:{color}'{tip}>"
+                 f"<div class='label'>{clean(c['label'])}{mark}</div>"
                  f"<div class='value'>{clean(c['value'])}</div>{sub}</div>")
     html += "</div>"
     st.markdown(html, unsafe_allow_html=True)

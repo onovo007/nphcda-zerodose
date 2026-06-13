@@ -58,9 +58,13 @@ def render(data: dict):
         {"label": "Highest-risk state", "value": clean(top_state["state"]),
          "sub": f"{top_state['zd_pred_2026_mean']:.0f}% predicted 2026", "color": C.GOLD},
         {"label": "Pareto concentration", "value": f"top 20% = {lga['top20_pct']:.0f}%",
-         "sub": f"80% of burden in {lga['n80']} LGAs", "color": C.STEEL},
+         "sub": f"80% of burden in {lga['n80']} LGAs", "color": C.STEEL,
+         "help": "Share of all zero-dose children living in the top 20% of LGAs by burden. Higher "
+                 "means more concentrated, so targeting fewer LGAs reaches more children."},
         {"label": "Convergence", "value": f"R-hat {out['max_rhat']}",
-         "sub": f"min ESS {out['min_ess']} | {out['n_draws']} draws", "color": C.STEEL},
+         "sub": f"min ESS {out['min_ess']} | {out['n_draws']} draws", "color": C.STEEL,
+         "help": "MCMC convergence check. R-hat near 1.00 with high effective sample size (ESS) means "
+                 "the Bayesian sampler converged; R-hat above 1.01 would flag non-convergence."},
     ])
 
     with st.expander("Population sensitivity: 2024 vs 2025 under-five (affects burden counts only)"):
