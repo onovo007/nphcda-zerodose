@@ -11,7 +11,7 @@ import ai
 import data_io as io
 from theme import (section, kpi_row, clean, domain_banner, highlight_classes,
                    TIER_CELL, SEVERITY_CELL)
-from models.d5_zerodose import run_state_model, run_lga_burden
+from models.d5_zerodose import run_state_model, run_lga_burden, loo_wave_validation as run_loo
 
 
 def _download(df: pd.DataFrame, label: str, fname: str):
@@ -208,7 +208,10 @@ def render(data: dict):
         if q:
             view = view[view["LGA"].str.contains(q, case=False, na=False)]
         st.caption(clean("LGA tier colours: Tier 1 Critical (red), Tier 2 High (orange), Tier 3 "
-                         "Moderate (amber), Tier 4 Lower (blue). Act on Tier 1 LGAs first."))
+                         "Moderate (amber), Tier 4 Lower (blue). Act on Tier 1 LGAs first. The 'ZD "
+                         "count low/high (95%)' columns carry the state posterior credible interval "
+                         "down to each LGA (allocation of the state uncertainty, not an independent "
+                         "LGA model)."))
         show = highlight_classes(view, "LGA tier", TIER_CELL) if "LGA tier" in view.columns else view
         st.dataframe(show, use_container_width=True, height=480)
         _download(clean_df, "Download full ranked LGA table (CSV)", "D5_lga_zero_dose_ranked_CLEAN.csv")
@@ -227,3 +230,22 @@ def render(data: dict):
         st.dataframe(out["diag"], use_container_width=True)
         st.caption(clean(f"Max R-hat {out['max_rhat']} | min bulk ESS {out['min_ess']} | "
                          f"{out['n_draws']} posterior draws ({'full' if full else 'live'} sampler)."))
+
+        st.divider()
+        section("Out-of-sample validation (leave-one-wave-out)",
+                "Refit the model with each NDHS survey wave held out, predict that wave, and compare "
+                "to observed: MAE/RMSE in percentage points and 95% credible-interval coverage.")
+        st.caption(clean("This refits the Bayesian model once per survey wave, so it takes a few "
+                         "minutes. It tests whether the time trend generalizes to an unseen survey round."))
+        if st.button("Run leave-one-wave-out validation", key="d5_loo_btn"):
+            with st.spinner("Refitting the model for each held-out wave..."):
+                st.session_state["d5_loo"] = run_loo(data["ndhs_long"], data["under5"], data["dhis2"],
+                                                     key=f"{kn}-{ku}-{kd}-loo")
+        loo = st.session_state.get("d5_loo")
+        if loo is not None and not loo.empty:
+            st.dataframe(loo, use_container_width=True, hide_index=True)
+            ai.ai_block("d5_loo", "Zero-Dose & Hotspots - leave-one-wave-out validation",
+                        "Out-of-sample accuracy of the Bayesian model: MAE/RMSE (percentage points) and "
+                        "95% CI coverage when each NDHS wave is held out. Comment on whether accuracy and "
+                        "interval calibration are acceptable and which wave is hardest to predict.",
+                        loo.to_dict(orient="records"))

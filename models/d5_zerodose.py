@@ -159,6 +159,76 @@ def run_state_model(_ndhs_long, _under5, _dhis2, key: str,
             "min_ess": int(min_ess), "n_draws": a_flat.shape[0]}
 
 
+def _sample_state_posterior(a: dict, draws: int, tune: int):
+    """Fit the hierarchical Beta model on the arrays in `a`; return posterior flats (alpha_s, beta_s,
+    gamma). Shared by the main fit and the leave-one-wave-out validation."""
+    import pymc as pm
+    n_states, n_zones = a["n_states"], a["n_zones"]
+    with pm.Model():
+        mu_alpha = pm.Normal("mu_alpha", mu=0, sigma=1)
+        sig_a_z = pm.HalfNormal("sig_a_z", sigma=0.5)
+        alpha_z = pm.Deterministic("alpha_z", mu_alpha + sig_a_z * pm.Normal("a_z_raw", 0, 1, shape=n_zones))
+        b_year_g = pm.Normal("b_year_g", mu=0, sigma=1)
+        sig_b_z = pm.HalfNormal("sig_b_z", sigma=0.3)
+        beta_z = pm.Deterministic("beta_z", b_year_g + sig_b_z * pm.Normal("b_z_raw", 0, 1, shape=n_zones))
+        sig_a_s = pm.HalfNormal("sig_a_s", sigma=0.5)
+        alpha_s = pm.Deterministic("alpha_s", alpha_z[a["state_zone_idx"]] + sig_a_s * pm.Normal("z_a", 0, 1, shape=n_states))
+        sig_b_s = pm.HalfNormal("sig_b_s", sigma=0.3)
+        beta_s = pm.Deterministic("beta_s", beta_z[a["state_zone_idx"]] + sig_b_s * pm.Normal("z_b", 0, 1, shape=n_states))
+        gamma = pm.Normal("gamma", mu=0, sigma=0.5)
+        kappa_b = pm.Gamma("kappa_b", alpha=2, beta=0.5)
+        eta = alpha_s[a["st_idx_v"]] + beta_s[a["st_idx_v"]] * a["yr_std_v"] + gamma * a["dhis2_cov_std"][a["st_idx_v"]]
+        mu = pm.math.invlogit(eta)
+        kappa_obs = kappa_b * a["kappa_scale"]
+        pm.Beta("y_like", alpha=mu * kappa_obs, beta=(1 - mu) * kappa_obs, observed=a["y_obs"])
+        kw = dict(draws=draws, tune=tune, chains=C.MCMC_CHAINS, target_accept=C.TARGET_ACCEPT,
+                  random_seed=42, progressbar=False, return_inferencedata=True)
+        try:
+            import nutpie  # noqa: F401
+            trace = pm.sample(nuts_sampler="nutpie", **kw)
+        except Exception:
+            trace = pm.sample(cores=1, **kw)
+    return (trace.posterior["alpha_s"].values.reshape(-1, n_states),
+            trace.posterior["beta_s"].values.reshape(-1, n_states),
+            trace.posterior["gamma"].values.reshape(-1))
+
+
+@st.cache_data(show_spinner="Leave-one-wave-out validation (refitting the Bayesian model)...")
+def loo_wave_validation(_ndhs_long, _under5, _dhis2, key: str,
+                        draws: int = 400, tune: int = 400) -> pd.DataFrame:
+    """Refit the model with each NDHS wave held out, predict that wave's state zero-dose rate, and
+    compare to observed. Reports MAE/RMSE (percentage points) and 95% credible-interval coverage."""
+    ndhs_long = _ndhs_long.copy()
+    ndhs_long["state"] = ndhs_long["state"].astype(str).str.strip()
+    waves = sorted(int(y) for y in ndhs_long["year"].dropna().unique())
+    rows = []
+    for hold in waves:
+        train = ndhs_long[ndhs_long["year"] != hold]
+        if train["year"].nunique() < 2:
+            continue
+        a = _prepare(train, _under5, _dhis2)
+        train_year_std = train["year"].std()
+        hold_std = (hold - C.YEAR_CENTER) / train_year_std
+        a_flat, b_flat, g_flat = _sample_state_posterior(a, draws, tune)
+        obs_map = (ndhs_long[ndhs_long["year"] == hold].groupby("state")["zero_dose_pct"].first().to_dict())
+        errs, covs = [], []
+        for si, state in enumerate(a["states"]):
+            if state not in obs_map:
+                continue
+            pred = 1 / (1 + np.exp(-(a_flat[:, si] + b_flat[:, si] * hold_std
+                                     + g_flat * a["dhis2_cov_std"][si]))) * 100
+            obs = float(obs_map[state])
+            errs.append(np.mean(pred) - obs)
+            covs.append(np.percentile(pred, 2.5) <= obs <= np.percentile(pred, 97.5))
+        if errs:
+            e = np.array(errs)
+            rows.append({"Held-out wave": hold, "States": len(errs),
+                         "MAE (pp)": round(float(np.mean(np.abs(e))), 1),
+                         "RMSE (pp)": round(float(np.sqrt(np.mean(e ** 2))), 1),
+                         "95% CI coverage (%)": round(float(np.mean(covs) * 100))})
+    return pd.DataFrame(rows)
+
+
 def _build_state_results(a: dict, fc_mu: np.ndarray) -> pd.DataFrame:
     long_df, states, state_zone = a["long_df"], a["states"], a["state_zone"]
     rows = []
@@ -223,6 +293,12 @@ def run_lga_burden(_dhis2, _res, _lga_population, key: str) -> dict:
 
     state_pred = dict(zip(res["state"], res["zd_pred_2026_mean"] / 100))
     state_cohort = dict(zip(res["state"], res["cohort_12_23m"]))
+    # State posterior credible interval as a proportional ratio, to allocate down to the LGA level.
+    state_ci = {}
+    for s, m, lo, hi in zip(res["state"], res["zd_pred_2026_mean"],
+                            res["zd_pred_2026_lo95"], res["zd_pred_2026_hi95"]):
+        r = (max(lo / m, 0.0), hi / m) if m else (1.0, 1.0)
+        state_ci[N.nstate(str(s))] = r
 
     out_rows = []
     for state, sg in lga_best.groupby("state"):
@@ -261,11 +337,11 @@ def run_lga_burden(_dhis2, _res, _lga_population, key: str) -> dict:
     lga["lga_tier"] = pd.cut(lga["lga_risk_index"], bins=[-np.inf, 25, 50, 75, np.inf],
                              labels=["Tier 4", "Tier 3", "Tier 2", "Tier 1"])
 
-    clean, pareto, stats = _population_weight(lga, lga_population)
+    clean, pareto, stats = _population_weight(lga, lga_population, state_ci)
     return {"clean": clean, "pareto": pareto, **stats}
 
 
-def _population_weight(lga: pd.DataFrame, pop_raw: pd.DataFrame) -> tuple:
+def _population_weight(lga: pd.DataFrame, pop_raw: pd.DataFrame, state_ci: dict | None = None) -> tuple:
     """Distribute each state cohort across LGAs by population (D5 cell 45)."""
     pop = pop_raw.copy()
     pop = pop[pop["Status"].astype(str).str.strip() == "Local Government Area"].copy()
@@ -301,6 +377,12 @@ def _population_weight(lga: pd.DataFrame, pop_raw: pd.DataFrame) -> tuple:
     cl["zd_count_w"] = cl["zd_count_w"].fillna(0).astype(int)
     cl["LGA population (2022)"] = cl["LGA population (2022)"].round(0).astype(int)
 
+    # Allocate the state posterior credible interval down to the LGA (proportional to the mean).
+    sc = state_ci or {}
+    ratios = cl["state"].map(lambda s: sc.get(N.nstate(str(s)), (1.0, 1.0)))
+    cl["zd_count_lo95"] = (cl["zd_count_w"] * ratios.map(lambda t: t[0])).round(0).fillna(0).astype(int)
+    cl["zd_count_hi95"] = (cl["zd_count_w"] * ratios.map(lambda t: t[1])).round(0).fillna(0).astype(int)
+
     sevmap = {"Tier 1": "Critical", "Tier 2": "High", "Tier 3": "Moderate", "Tier 4": "Lower"}
     cl["Severity (within state)"] = cl["lga_tier"].astype(str).str.strip().map(sevmap)
 
@@ -312,13 +394,14 @@ def _population_weight(lga: pd.DataFrame, pop_raw: pd.DataFrame) -> tuple:
         "zone": "Zone", "state": "State", "lga": "LGA",
         "penta_1_count": "Penta1 count", "penta_3_count": "Penta3 count",
         "p1_share": "Penta1 share", "zd_proxy_pct": "ZD proxy (%)",
-        "zd_count_w": "ZD count (est)", "dropout_p1p3": "Dropout P1-P3 (%)",
+        "zd_count_w": "ZD count (est)", "zd_count_lo95": "ZD count low (95%)",
+        "zd_count_hi95": "ZD count high (95%)", "dropout_p1p3": "Dropout P1-P3 (%)",
         "lga_risk_index": "LGA risk index", "lga_tier": "LGA tier",
     })
     order = ["National rank", "State rank", "Zone", "State", "LGA", "Penta1 count",
              "Penta3 count", "Penta1 share", "ZD proxy (%)", "LGA population (2022)",
-             "ZD count (est)", "Dropout P1-P3 (%)", "LGA risk index", "LGA tier",
-             "Severity (within state)"]
+             "ZD count (est)", "ZD count low (95%)", "ZD count high (95%)",
+             "Dropout P1-P3 (%)", "LGA risk index", "LGA tier", "Severity (within state)"]
     clean = clean[[c for c in order if c in clean.columns]]
     for c in ["Penta1 share", "ZD proxy (%)", "Dropout P1-P3 (%)", "LGA risk index"]:
         if c in clean:
