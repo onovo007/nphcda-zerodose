@@ -10,8 +10,8 @@ import viz
 import ai
 from theme import section, kpi_row, clean, domain_banner
 from data_io import prep_dhis2, national_monthly, state_monthly, df_hash
-from models.d2_dropout import (dropout_forecasts, lasso_drivers, state_dropout_forecasts,
-                               state_year_observed, state_year_with_forecast)
+from models.d2_dropout import (dropout_forecasts, lasso_drivers, lasso_drivers_inference,
+                               state_dropout_forecasts, state_year_observed, state_year_with_forecast)
 
 
 def _download(df, label, fname):
@@ -114,6 +114,32 @@ def render(data: dict):
                         "socioeconomic indicators to each dropout pair; larger means stronger association. "
                         "Name the leading drivers per pair and what they imply for intervention design.",
                         drivers_summary)
+
+            st.divider()
+            section("Driver stability and inference (LASSO bootstrap + robust regression)",
+                    "Selection stability over 200 bootstrap resamples, plus a regression on the "
+                    "LASSO-selected drivers with HC3 robust standard errors, p-values and a "
+                    "Benjamini-Hochberg FDR adjustment.")
+            st.caption(clean(
+                "These are cross-sectional, ecological associations across 37 states (one row per "
+                "state), not causal effects, and the sample is small relative to the number of "
+                "candidate drivers - read selection frequency and FDR-adjusted p-values together, and "
+                "treat single-state inference with caution (ecological fallacy)."))
+            if st.button("Run LASSO stability + robust regression", key="d2_infer_btn"):
+                st.session_state["d2_infer"] = lasso_drivers_inference(agg, data["model_dataset"],
+                                                                       key=f"{kd}-infer")
+            inf = st.session_state.get("d2_infer")
+            if inf:
+                for pair, tbl in inf.items():
+                    st.markdown(f"**{clean(pair)}**")
+                    st.dataframe(tbl, use_container_width=True, hide_index=True)
+                ai.ai_block("d2_drivers_infer", "Dropout & Completion - driver stability and robust inference",
+                            "For each dropout pair: bootstrap selection frequency (how often LASSO keeps "
+                            "each driver), the standardized coefficient with HC3 robust SE, the p-value and "
+                            "the FDR-adjusted p. Explain which drivers are both stably selected (high "
+                            "frequency) and statistically supported (low FDR p), and caution that with 37 "
+                            "states these are ecological associations, not causal effects.",
+                            {p: t.to_dict(orient="records") for p, t in inf.items()})
 
     with tabs[2]:
         section("Dropout by state and year",

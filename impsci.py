@@ -182,6 +182,39 @@ def band_bar_fig(df: pd.DataFrame):
     return style_fig(fig), summary
 
 
+def beta_drivers(df: pd.DataFrame, n_min: int = 6):
+    """Beta regression of the 2024 zero-dose rate on the LASSO-selected equity drivers.
+
+    LASSO selects on the logit scale (matching the Beta logit link); the selected set is then fit
+    with a Beta regression reporting coefficients, SEs, p-values and an FDR adjustment. Returns
+    (table, method_label, n_states)."""
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LassoCV
+    import stats_infer as si
+
+    feats = [c for c in DRIVERS if c in df.columns]
+    sub = df[[OUTCOME] + feats].dropna()
+    if len(sub) < 12 or not feats:
+        return None, "", 0
+    p = np.clip(sub[OUTCOME].values / 100.0, 1e-3, 1 - 1e-3)
+    Xz = pd.DataFrame(StandardScaler().fit_transform(sub[feats]), columns=feats)
+    logit = np.log(p / (1 - p))
+    lasso = LassoCV(cv=5, random_state=42, max_iter=5000).fit(Xz.values, logit)
+    coefs = dict(zip(feats, lasso.coef_))
+    selected = [f for f in feats if abs(coefs[f]) > 0]
+    if not selected:
+        selected = sorted(feats, key=lambda f: abs(coefs[f]), reverse=True)[:n_min]
+    tbl, method = si.beta_regression(p, Xz[selected])
+    tbl = tbl[tbl["term"] != "(intercept)"].copy()
+    tbl["p_FDR"] = si.bh_fdr(tbl["p_value"].values)
+    tbl["term"] = tbl["term"].map(pretty)
+    for c in [c for c in tbl.columns if c != "term"]:
+        tbl[c] = tbl[c].round(3)
+    tbl = tbl.rename(columns={"term": "Driver", "coef": "Coef (logit)", "SE": "SE", "z": "z / t",
+                              "p_value": "p-value", "p_FDR": "p (FDR)"})
+    return tbl.sort_values("p (FDR)").reset_index(drop=True), method, len(sub)
+
+
 def all_numeric(df: pd.DataFrame) -> list[str]:
     return [c for c in df.columns if c not in ("state_name", "zone_name")
             and pd.api.types.is_numeric_dtype(df[c])]

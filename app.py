@@ -567,6 +567,28 @@ def page_impsci():
                     "each zone. Name the zones dominated by the High band and what that implies for "
                     "where to concentrate effort.", ksum)
 
+        st.divider()
+        section("Multivariable drivers of zero-dose (Beta regression on the LASSO-selected set)",
+                "LASSO selects the drivers (on the logit scale); the selected set is then fit with a "
+                "Beta regression reporting coefficients, standard errors, p-values and an FDR adjustment.")
+        st.caption(clean("Cross-sectional, ecological association across 37 states - not causal. A "
+                         "positive logit coefficient means the driver is associated with higher "
+                         "zero-dose; read the FDR-adjusted p-values given the small sample."))
+        if st.button("Run Beta regression on zero-dose drivers", key="is_beta_btn"):
+            tbl, method, n = impsci.beta_drivers(df)
+            st.session_state["is_beta"] = {"tbl": tbl, "method": method, "n": n}
+        bres = st.session_state.get("is_beta")
+        if bres and bres["tbl"] is not None:
+            st.caption(clean(f"Model: {bres['method']} - {bres['n']} states."))
+            st.dataframe(bres["tbl"], use_container_width=True, hide_index=True)
+            ai.ai_block("is_beta_block", "Zero-dose drivers - Beta regression on LASSO-selected set",
+                        "A Beta regression of the state zero-dose rate on the LASSO-selected equity "
+                        "drivers, with coefficients (logit scale), robust SEs/p-values and FDR-adjusted "
+                        "p. State which drivers are statistically supported after FDR correction, the "
+                        "direction of each, and one programming implication; caution that these are "
+                        "ecological state-level associations, not causal effects.",
+                        bres["tbl"].to_dict(orient="records"))
+
     with tabs[3]:
         section("Bland-Altman agreement",
                 "Agreement between two coverage measures across states: bias (mean difference) and "

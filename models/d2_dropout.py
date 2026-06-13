@@ -66,6 +66,70 @@ def lasso_drivers(agg: pd.DataFrame, model_dataset: pd.DataFrame) -> dict:
     return results
 
 
+def _driver_design(agg: pd.DataFrame, model_dataset: pd.DataFrame):
+    """Merge state 2024 dropout means with standardized equity covariates. Returns (merged, feats)."""
+    feats = [f for f in C.LASSO_FEATURES if f in model_dataset.columns]
+    targets = [t for t in C.DROPOUT_TARGETS if t in agg.columns]
+    sd = agg[agg["year"] == 2024].groupby("state")[targets].mean().reset_index()
+    sd["state"] = sd["state"].astype(str).str.strip().str.title()
+    mod = model_dataset.copy()
+    mod["state_key"] = mod["state_name"].astype(str).str.strip().str.title()
+    merged = sd.merge(mod[["state_key"] + feats], left_on="state", right_on="state_key", how="inner")
+    return merged, feats, targets
+
+
+@st.cache_data(show_spinner="Bootstrapping LASSO drivers and fitting robust regressions...")
+def lasso_drivers_inference(_agg, _model_dataset, key: str, n_boot: int = 200) -> dict:
+    """For each dropout pair: LASSO selection-stability (bootstrap selection frequency) plus an
+    inferential regression on the LASSO-selected drivers with HC3 robust SEs, p-values and a
+    Benjamini-Hochberg FDR adjustment. Dropout can be negative, so the inferential model is OLS
+    with robust SEs (the statistically correct family for an unbounded rate)."""
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LassoCV
+    import stats_infer as si
+
+    merged, feats, targets = _driver_design(_agg, _model_dataset)
+    if merged.empty or not feats:
+        return {}
+    Xraw = merged[feats].fillna(merged[feats].median())
+    scaler = StandardScaler().fit(Xraw)
+    X_sc = scaler.transform(Xraw)
+    Xz = pd.DataFrame(X_sc, columns=feats)
+    rng = np.random.default_rng(42)
+    n = len(merged)
+    out = {}
+    for target in targets:
+        y = merged[target].fillna(merged[target].median()).values.astype(float)
+        base = LassoCV(cv=5, random_state=42, max_iter=5000).fit(X_sc, y)
+        selected = [f for f, c in zip(feats, base.coef_) if abs(c) > 0]
+        # Bootstrap selection frequency.
+        freq = {f: 0 for f in feats}
+        for _ in range(n_boot):
+            idx = rng.integers(0, n, n)
+            try:
+                lb = LassoCV(cv=5, random_state=42, max_iter=5000).fit(X_sc[idx], y[idx])
+            except Exception:
+                continue
+            for f, c in zip(feats, lb.coef_):
+                if abs(c) > 0:
+                    freq[f] += 1
+        sel = selected or sorted(feats, key=lambda f: freq[f], reverse=True)[:5]
+        reg = si.ols_robust(y, Xz[sel])
+        reg = reg[reg["term"] != "(intercept)"].copy()
+        reg["p_FDR"] = si.bh_fdr(reg["p_value"].values)
+        lasso_abs = {f: abs(c) for f, c in zip(feats, base.coef_)}
+        reg.insert(1, "selection_freq_pct", reg["term"].map(lambda f: round(100 * freq[f] / max(n_boot, 1), 0)))
+        reg.insert(1, "lasso_abs_coef", reg["term"].map(lambda f: round(lasso_abs.get(f, 0), 3)))
+        reg = reg.rename(columns={"term": "Driver", "lasso_abs_coef": "|LASSO coef|",
+                                  "selection_freq_pct": "Selection freq (%)", "coef": "Std beta",
+                                  "robust_SE": "Robust SE", "p_value": "p-value", "p_FDR": "p (FDR)"})
+        for c in ["Std beta", "Robust SE", "t", "p-value", "p (FDR)"]:
+            reg[c] = reg[c].round(3)
+        reg["Driver"] = reg["Driver"].map(lambda s: s.replace("pct_", "").replace("_", " ").title())
+        out[C.DROPOUT_TARGETS[target]] = reg.sort_values("p (FDR)").reset_index(drop=True)
+    return out
+
+
 @st.cache_data(show_spinner="Forecasting state dropout (Prophet, 2026-2027)...")
 def state_dropout_forecasts(_dhis2, key: str) -> pd.DataFrame:
     """Per-state Prophet forecast of each dropout pair; monthly 2026-2027 (long) for microplanning."""
