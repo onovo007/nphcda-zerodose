@@ -40,7 +40,7 @@ def highlight_below(df: pd.DataFrame, col: str, thresh: float = 80.0):
         return ["color:#C0392B; font-weight:700" if (pd.notna(v) and v < thresh) else "" for v in s]
 
     try:
-        return df.style.apply(_row, subset=[col])
+        return df.style.apply(_row, subset=[col]).format(precision=2)
     except Exception:
         return df
 
@@ -56,7 +56,7 @@ def highlight_severity(df: pd.DataFrame, col: str = "Severity"):
         return [cmap.get(str(v), "") for v in s]
 
     try:
-        return df.style.apply(_row, subset=[col])
+        return df.style.apply(_row, subset=[col]).format(precision=2)
     except Exception:
         return df
 
@@ -70,7 +70,7 @@ def highlight_classes(df: pd.DataFrame, col: str, cmap: dict):
         return [cmap.get(str(v), "") for v in s]
 
     try:
-        return df.style.apply(_row, subset=[col])
+        return df.style.apply(_row, subset=[col]).format(precision=2)
     except Exception:
         return df
 

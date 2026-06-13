@@ -214,6 +214,19 @@ SCHEMAS = {
         "recommended": [],
         "note": "LGA population used to distribute the state cohort across LGAs (Domain 5).",
     },
+    "ndhs_antigens": {
+        "label": "NDHS antigen coverage (2024, by state)",
+        "required": ["State"],
+        "recommended": ["BCG vaccination received", "Pentavalent 1 vaccination received",
+                        "Pentavalent 3 vaccination received", "Measles vaccination received"],
+        "note": "State NDHS 2024 survey coverage per antigen. Sets the admin-vs-survey reference lines.",
+    },
+    "live_births": {
+        "label": "DHIS2 live births (monthly, by LGA)",
+        "required": ["state", "lga", "period", "live_births_count"],
+        "recommended": ["zone"],
+        "note": "Monthly DHIS2-reported live births. Optional eligible-infant denominator for coverage.",
+    },
 }
 
 # Validation ground-truth (for the optional self-check banner)

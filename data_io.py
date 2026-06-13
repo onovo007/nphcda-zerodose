@@ -159,31 +159,40 @@ def _state_key(s) -> str:
     return "".join(ch for ch in str(s).upper() if ch.isalpha())
 
 
-def survey_national_coverage(ndhs_antigens: pd.DataFrame, under5: pd.DataFrame | None = None) -> dict:
-    """National survey coverage per tracer antigen from ndhs_antigens2024 (population-weighted by
-    under-five when available, else a simple mean across states)."""
+def _survey_weights(nd: pd.DataFrame, under5: pd.DataFrame | None):
+    if under5 is None:
+        return None
+    try:
+        u = prep_under5(under5)
+        wmap = {_state_key(r["state_raw"]): r["under5_n"] for _, r in u.iterrows()}
+        w = nd["State"].map(lambda s: wmap.get(_state_key(s)))
+        return pd.to_numeric(w, errors="coerce") if w.notna().sum() >= 30 else None
+    except Exception:
+        return None
+
+
+def national_survey_value(ndhs_antigens: pd.DataFrame, column: str,
+                          under5: pd.DataFrame | None = None) -> float | None:
+    """National value for any ndhs_antigens column (population-weighted by under-five, else mean)."""
     nd = ndhs_antigens.copy()
     nd.columns = [c.strip() for c in nd.columns]
-    weights = None
-    if under5 is not None:
-        try:
-            u = prep_under5(under5)
-            wmap = {_state_key(r["state_raw"]): r["under5_n"] for _, r in u.iterrows()}
-            w = nd["State"].map(lambda s: wmap.get(_state_key(s)))
-            if w.notna().sum() >= 30:
-                weights = pd.to_numeric(w, errors="coerce")
-        except Exception:
-            weights = None
+    if column not in nd.columns:
+        return None
+    vals = pd.to_numeric(nd[column], errors="coerce")
+    weights = _survey_weights(nd, under5)
+    if weights is not None:
+        m = vals.notna() & weights.notna()
+        return round(float((vals[m] * weights[m]).sum() / weights[m].sum()), 1)
+    return round(float(vals.mean()), 1)
+
+
+def survey_national_coverage(ndhs_antigens: pd.DataFrame, under5: pd.DataFrame | None = None) -> dict:
+    """National survey coverage per tracer antigen from ndhs_antigens2024 (population-weighted)."""
     cov = {}
     for antigen, col in C.SURVEY_ANTIGEN_COLS.items():
-        if col not in nd.columns:
-            continue
-        vals = pd.to_numeric(nd[col], errors="coerce")
-        if weights is not None:
-            m = vals.notna() & weights.notna()
-            cov[antigen] = round(float((vals[m] * weights[m]).sum() / weights[m].sum()), 1)
-        else:
-            cov[antigen] = round(float(vals.mean()), 1)
+        v = national_survey_value(ndhs_antigens, col, under5)
+        if v is not None:
+            cov[antigen] = v
     return cov
 
 

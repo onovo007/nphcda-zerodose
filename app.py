@@ -152,7 +152,8 @@ def page_home():
 # --------------------------------------------------------------------------------------
 # Data and Quality
 # --------------------------------------------------------------------------------------
-UPLOAD_ORDER = ["dhis2", "ndhs_long", "model_dataset", "under5", "lga_population"]
+UPLOAD_ORDER = ["dhis2", "ndhs_long", "model_dataset", "under5", "lga_population",
+                "ndhs_antigens", "live_births"]
 
 
 def page_data():
@@ -465,12 +466,50 @@ def page_impsci():
     cols = impsci.numeric_cols(df)
     o = impsci.OUTCOME
     kpi_row([
-        {"label": "States", "value": str(len(df)), "color": C.NAVY},
-        {"label": "Variables analysed", "value": str(len(cols)), "color": C.STEEL},
-        {"label": "Mean zero-dose 2024", "value": f"{df[o].mean():.0f}%", "color": C.ACCENT},
-        {"label": "Range across states", "value": f"{df[o].min():.0f}-{df[o].max():.0f}%",
-         "color": C.GOLD},
+        {"label": "States", "value": str(len(df)), "sub": "in the dataset", "color": C.NAVY},
+        {"label": "Variables analysed", "value": str(len(cols)), "sub": "outcome + numeric drivers",
+         "color": C.STEEL},
+        {"label": "Avg state zero-dose 2024", "value": f"{df[o].mean():.1f}%",
+         "sub": "mean across the 37 states", "color": C.ACCENT},
+        {"label": "Zero-dose range (states)", "value": f"{df[o].min():.0f}% - {df[o].max():.0f}%",
+         "sub": "lowest to highest state", "color": C.GOLD},
     ])
+
+    # Reference metrics teams can quote directly (NDHS 2024 survey + population denominators).
+    survey = (io.survey_national_coverage(data["ndhs_antigens"], data.get("under5"))
+              if data.get("ndhs_antigens") is not None else {})
+    if survey:
+        section("Reference metrics - NDHS 2024 survey coverage (national)",
+                "Population-weighted national survey coverage per antigen, for direct reference.")
+        kpi_row([{"label": f"{a} coverage", "value": f"{survey[a]:.1f}%",
+                  "sub": "NDHS 2024, national", "color": C.ANTIGEN_PAL.get(a, C.STEEL)}
+                 for a in ["BCG", "Penta1", "Penta3", "Measles1"] if a in survey])
+
+    pop_cards = []
+    if data.get("under5") is not None:
+        cohort = float(io.prep_under5(data["under5"])["cohort_12_23m"].sum())
+        pop_cards.append({"label": "Birth cohort (demographic)", "value": f"{cohort/1e6:.2f}M",
+                          "sub": "under-five 2024 / 5 (eligible infants)", "color": C.NAVY})
+    if data.get("live_births") is not None:
+        lb = io.national_live_births(data["live_births"], 2024)
+        if lb:
+            pop_cards.append({"label": "DHIS2 live births 2024", "value": f"{lb/1e6:.2f}M",
+                              "sub": "facility-reported (under-counts true births)", "color": C.STEEL})
+    if data.get("ndhs_antigens") is not None:
+        fv = io.national_survey_value(data["ndhs_antigens"], "Fully vaccinated (8 basic antigens)",
+                                      data.get("under5"))
+        nv = io.national_survey_value(data["ndhs_antigens"], "Received no vaccinations",
+                                      data.get("under5"))
+        if fv is not None:
+            pop_cards.append({"label": "Fully vaccinated", "value": f"{fv:.1f}%",
+                              "sub": "NDHS 2024, 8 basic antigens", "color": C.NPHCDA_GREEN})
+        if nv is not None:
+            pop_cards.append({"label": "No vaccinations (survey)", "value": f"{nv:.1f}%",
+                              "sub": "NDHS 2024 zero-dose proxy", "color": C.ACCENT})
+    if pop_cards:
+        section("Reference metrics - population and coverage",
+                "Eligible-infant denominators and headline survey coverage.")
+        kpi_row(pop_cards)
     tabs = st.tabs(["Descriptive stats", "Univariate", "Bivariate", "Validation (Bland-Altman)",
                     "Hypothesis tests"])
 
@@ -674,6 +713,8 @@ def page_sop():
         {"File": "Under-five population", "Holds": "Under-5 cohort by state", "Used by": "Zero-Dose burden"},
         {"File": "LGA population", "Holds": "Population by LGA (NPC 2022)", "Used by": "LGA burden, hotspots"},
         {"File": "Zero-dose model dataset", "Holds": "State equity / socioeconomic covariates", "Used by": "Implementation Science, drivers"},
+        {"File": "NDHS antigen coverage 2024", "Holds": "State survey coverage per antigen", "Used by": "Coverage (admin-vs-survey lines), reference metrics"},
+        {"File": "DHIS2 live births (monthly)", "Holds": "Facility-reported live births by LGA", "Used by": "Coverage (optional eligible denominator)"},
     ]), use_container_width=True, hide_index=True)
 
     section("Step-by-step")
@@ -688,12 +729,15 @@ def page_sop():
                   "using your own files."))
     st.markdown("#### 3. Check data quality and anomalies")
     st.markdown(clean("Open **Data and Quality**. Review completeness, reporting rates and the missing-"
-                      "value heatmap, then the **Anomaly detection** tab for spikes or drops (colour-coded "
-                      "by severity). Fix obvious data issues before modelling."))
+                      "value heatmap (with a **By-LGA drill-down** and a month-range filter), then the "
+                      "**Anomaly detection** tab for spikes or drops (colour-coded by severity). Fix "
+                      "obvious data issues before modelling."))
     st.markdown("#### 4. Run the models")
     st.markdown(clean(
-        "- **Coverage Forecasting** - see which antigens fall below the 80% target; use the 3/6/12-month "
-        "horizon buttons; review the LGA at-risk screen.\n"
+        "- **Coverage Forecasting** - which antigens fall below the 80% target; choose the forecast "
+        "end-year (to 2032) and the 3/6/12-month scorecard horizon; switch to **WHO administrative "
+        "coverage** to pick the eligible-infant denominator (under-five proxy or DHIS2 live births) "
+        "and show the **NDHS survey reference lines**; review the LGA at-risk screen.\n"
         "- **Dropout & Completion** - dropout forecasts, LASSO drivers and the state-by-year heatmap.\n"
         "- **Zero-Dose & Hotspots** - the Bayesian state model, LGA burden, Pareto priorities and the "
         "Getis-Ord Gi* hotspot maps (run automatically)."))
@@ -718,6 +762,7 @@ def page_sop():
         {"Signal": "Priority tier (LGA)", "Meaning": "Tier 1 Critical (red) to Tier 4 (blue), by burden"},
         {"Signal": "Pareto severity", "Meaning": "Critical/High/Moderate/Lower within state; band A/B/C of burden"},
         {"Signal": "Gi* hotspot", "Meaning": "Hot Spot (red) = significant high-burden cluster; p<0.01 most confident"},
+        {"Signal": "Survey line (Coverage)", "Meaning": "Dotted purple = NDHS survey coverage; a large gap vs admin flags denominator/reporting issues"},
         {"Signal": "Credible / prediction interval", "Meaning": "The plausible range; wider = more uncertainty"},
     ]), use_container_width=True, hide_index=True)
 

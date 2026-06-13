@@ -543,6 +543,8 @@ def sop_docx() -> bytes:
         ["Under-five population", "Under-5 cohort by state", "Zero-Dose burden"],
         ["LGA population", "Population by LGA (NPC 2022)", "LGA burden, hotspots"],
         ["Zero-dose model dataset", "State equity / socioeconomic covariates", "Implementation Science, drivers"],
+        ["NDHS antigen coverage 2024", "State survey coverage per antigen", "Coverage admin-vs-survey lines"],
+        ["DHIS2 live births (monthly)", "Facility-reported live births by LGA", "Coverage optional denominator"],
     ])
 
     h("Step-by-step")
@@ -550,7 +552,7 @@ def sop_docx() -> bytes:
         "Sign in: enter your name and email (and access code if required). Your sign-in is recorded for usage tracking.",
         "Load the data: on Home, click Use bundled project sample data, or Upload your own data on the Data and Quality page.",
         "Check data quality and anomalies: review completeness, reporting rates, the missing-value heatmap and the Anomaly detection tab.",
-        "Run the models: Coverage Forecasting (80% target, 3/6/12-month horizon, LGA at-risk screen); Dropout & Completion (forecasts, LASSO drivers, heatmap); Zero-Dose & Hotspots (Bayesian model, LGA burden, Pareto, Gi* maps).",
+        "Run the models: Coverage Forecasting (80% target; forecast end-year to 2032; 3/6/12-month scorecard horizon; WHO administrative-coverage mode with a selectable eligible-infant denominator and NDHS survey reference lines; LGA at-risk screen); Dropout & Completion (forecasts, LASSO drivers, heatmap); Zero-Dose & Hotspots (Bayesian model, LGA burden, Pareto, Gi* maps).",
         "Explore and test (Implementation Science): correlation with multicollinearity flags, distributions, scatter, zone violins, and the Hypothesis tests tab (t-test, ANOVA, chi-square).",
         "Ask the Analyst: add your OpenAI key in the sidebar, then ask grounded cross-domain questions.",
         "Generate reports: on Reports & Briefs, produce the factsheet, the Word policy brief and the PowerPoint deck.",
@@ -566,6 +568,7 @@ def sop_docx() -> bytes:
         ["Priority tier (LGA)", "Tier 1 Critical (red) to Tier 4 (blue), by burden"],
         ["Pareto severity", "Critical/High/Moderate/Lower within state; band A/B/C of burden"],
         ["Gi* hotspot", "Hot Spot (red) = significant high-burden cluster; p<0.01 most confident"],
+        ["Survey line (Coverage)", "Dotted purple = NDHS survey coverage; a large gap vs admin flags denominator/reporting issues"],
         ["Credible / prediction interval", "The plausible range; wider = more uncertainty"],
     ])
 
