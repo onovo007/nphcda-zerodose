@@ -11,7 +11,7 @@ from theme import section, kpi_row, clean, highlight_below, domain_banner
 from data_io import (prep_dhis2, national_monthly, df_hash, prep_under5,
                      national_live_births, survey_national_coverage)
 from models.d1_forecast import (national_forecasts, lga_at_risk_screen,
-                                state_antigen_forecasts, lga_antigen_projections)
+                                state_antigen_forecasts, lga_antigen_projections, backtest_national)
 
 
 def _download(df, label, fname):
@@ -188,6 +188,22 @@ def render(data: dict):
         st.caption(clean(f"Values below 80 ({unit_label}) are flagged in red."))
         st.dataframe(highlight_below(summary, value_col), use_container_width=True)
         _download(summary, "Download national forecast summary (CSV)", "D1_national_antigen_forecast.csv")
+
+        with st.expander("Forecast validation (hold-out back-test)"):
+            st.caption(clean("We refit on all but the last 6 months and compare the forecast to the "
+                             "held-out actuals. MAPE is the mean absolute percentage error (lower is "
+                             "better); 95% PI coverage is the share of actuals that fell inside the "
+                             "interval (ideal is near 95%)."))
+            bt = backtest_national(nat, key=kd, holdout=6)
+            if bt.empty:
+                st.info("Not enough history to back-test on this dataset.")
+            else:
+                st.dataframe(bt, use_container_width=True, hide_index=True)
+                ai.ai_block("d1_backtest", "Coverage Forecasting - hold-out back-test",
+                            "Out-of-sample accuracy of the national forecasts: MAPE and 95% prediction-"
+                            "interval coverage per antigen on a 6-month hold-out. Comment on whether "
+                            "accuracy and interval calibration are acceptable and any antigen to treat "
+                            "with caution.", bt.to_dict(orient="records"))
         st.divider()
         ai.chat_panel("d1", "Coverage Forecasting - national antigen forecast",
                       f"Per-antigen national Prophet forecast in {unit_label}: the minimum value, the "

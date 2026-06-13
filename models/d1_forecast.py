@@ -109,6 +109,34 @@ def national_forecasts(_nat, key: str, end_year: int = 2027,
             "unit_label": unit_label, "value_col": value_col}
 
 
+@st.cache_data(show_spinner="Back-testing the national forecasts (hold-out)...")
+def backtest_national(_nat, key: str, holdout: int = 6) -> pd.DataFrame:
+    """Out-of-sample back-test: refit Prophet on all but the last `holdout` months and compare the
+    forecast to the held-out actuals. Reports MAPE and empirical 95% prediction-interval coverage."""
+    nat = _nat
+    rows = []
+    for antigen, col in C.ANTIGEN_TS.items():
+        if col not in nat.columns:
+            continue
+        ts = nat[["ds", col]].rename(columns={col: "y"}).dropna().sort_values("ds")
+        if len(ts) < holdout + 18:
+            continue
+        train, test = ts.iloc[:-holdout], ts.iloc[-holdout:]
+        try:
+            fc = run_prophet(train, periods=holdout)
+        except Exception:
+            continue
+        m = test.merge(fc[["ds", "yhat", "yhat_lower", "yhat_upper"]], on="ds", how="left").dropna(subset=["yhat"])
+        if m.empty:
+            continue
+        ape = (np.abs(m["y"] - m["yhat"]) / m["y"].replace(0, np.nan)).dropna()
+        mape = float(ape.mean() * 100) if len(ape) else float("nan")
+        cov = float(((m["y"] >= m["yhat_lower"]) & (m["y"] <= m["yhat_upper"])).mean() * 100)
+        rows.append({"Antigen": antigen, "Hold-out months": int(len(m)),
+                     "MAPE (%)": round(mape, 1), "95% PI coverage (%)": round(cov, 0)})
+    return pd.DataFrame(rows)
+
+
 @st.cache_data(show_spinner="Forecasting antigen coverage by state (Prophet, 2026-2027)...")
 def state_antigen_forecasts(_dhis2, key: str) -> pd.DataFrame:
     """Prophet forecast per state and antigen; returns monthly 2026-2027 projections (long)."""
