@@ -79,6 +79,11 @@ def build_findings(data: dict) -> dict:
             f["d2"]["top_drivers"] = {
                 C.DROPOUT_TARGETS[t]: [k.replace("pct_", "").replace("_", " ") for k in c.head(4).index]
                 for t, c in drv.items()}
+    if data.get("ndhs_antigens") is not None:
+        try:
+            f["survey"] = dio.survey_national_coverage(data["ndhs_antigens"], data.get("under5"))
+        except Exception:
+            pass
     return f
 
 
@@ -181,46 +186,103 @@ def _bignum(v: float) -> str:
     return f"{v:,.0f}"
 
 
+def _icon(name: str, color: str) -> str:
+    shapes = {
+        "children": ("<circle cx='8' cy='8' r='3'/><path d='M2 21v-2a5 5 0 0 1 5-5h2a5 5 0 0 1 5 5v2'/>"
+                     "<circle cx='17.5' cy='10' r='2.2'/><path d='M22 21v-1.5a3.5 3.5 0 0 0-3.5-3.5'/>"),
+        "target": "<circle cx='12' cy='12' r='9'/><circle cx='12' cy='12' r='5'/><circle cx='12' cy='12' r='1.6'/>",
+        "pin": "<path d='M12 22s7-6.4 7-12a7 7 0 1 0-14 0c0 5.6 7 12 7 12z'/><circle cx='12' cy='10' r='2.5'/>",
+        "alert": "<path d='M12 3 2 20h20L12 3z'/><line x1='12' y1='10' x2='12' y2='14.5'/><circle cx='12' cy='17.4' r='0.6'/>",
+        "syringe": "<path d='M4 20l3-3'/><path d='M14 6l4 4-7 7-4-4z'/><path d='M16 4l4 4'/><path d='M9 11l4 4'/>",
+    }.get(name, "")
+    return (f"<svg width='38' height='38' viewBox='0 0 24 24' fill='none' stroke='{color}' "
+            f"stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'>{shapes}</svg>")
+
+
+def _pill(badge: str, text: str, color: str) -> str:
+    return (f"<div class='pill' style='border-color:{color}'>"
+            f"<span class='pn' style='color:{color}'>{clean(badge)}</span>"
+            f"<span class='pt'>{clean(text)}</span></div>")
+
+
 def factsheet_html(f: dict, narrative_md: str) -> str:
     d5 = f.get("d5", {})
     d1 = f.get("d1", {})
     d2 = f.get("d2", {})
+    survey = f.get("survey", {})
+    GREEN, RED, NAVY = C.NPHCDA_GREEN, C.ACCENT, C.NAVY
     logo = img_data_uri(C.LOGO_PATH)
     logo_html = (f"<img src='{logo}' style='height:58px'/>" if logo
                  else "<b style='font-size:22px;color:#0F5226'>NPHCDA</b>")
 
-    # GAVI-style big-number stat blocks.
-    stats = []
-    if d5:
-        stats.append((_bignum(d5.get("lga_total", 0)), C.ACCENT, "zero-dose children projected in 2026",
-                      f"across {d5.get('lga_count', 0)} reporting LGAs"))
-        stats.append((f"{d5.get('top20_pct', 0):.0f}%", C.NAVY, "of the burden sits in the top 20% of LGAs",
-                      f"80% of the burden is in the top {d5.get('n80', 0)} LGAs"))
-        stats.append((str(len(d5.get("tier1_states", []))), C.NPHCDA_GREEN, "Tier-1 critical states",
-                      clean(", ".join(d5.get("tier1_states", [])) or "North-West")))
-    stat_html = "".join(
-        f"<div class='stat'><div class='big' style='color:{col}'>{clean(v)}</div>"
-        f"<div class='lab'>{clean(lab)}</div><div class='cap'>{clean(cap)}</div></div>"
-        for v, col, lab, cap in stats)
+    # Hero band: three headline numbers with icons (GAVI style).
+    hero = [
+        ("children", _bignum(d5.get("lga_total", 0)), RED,
+         "zero-dose children projected in 2026",
+         f"across {d5.get('lga_count', 0)} reporting LGAs"),
+        ("target", f"{d5.get('top20_pct', 0):.0f}%", NAVY,
+         "of the burden in the top 20% of LGAs",
+         f"80% of the burden sits in just {d5.get('n80', 0)} LGAs"),
+        ("pin", str(len(d5.get("tier1_states", []))), GREEN,
+         "Tier-1 critical states",
+         clean(", ".join(d5.get("tier1_states", [])) or "concentrated in the North-West")),
+    ]
+    hero_html = "".join(
+        f"<div class='hcard'><div class='hicon'>{_icon(ic, col)}</div><div>"
+        f"<div class='hbig' style='color:{col}'>{clean(v)}</div>"
+        f"<div class='hlab'>{clean(lab)}</div><div class='hcap'>{clean(cap)}</div></div></div>"
+        for ic, v, col, lab, cap in hero)
 
-    # Pill callouts (GAVI-style rounded outline).
-    pills = []
-    if d5.get("top_lgas"):
-        t = d5["top_lgas"][0]
-        pills.append((f"{t['zd_count']:,}", f"highest-burden LGA: {t['lga']} ({t['state']}), {t['zd_rate_pct']:.0f}% rate"))
-    if d5.get("top_states"):
-        ts = d5["top_states"][0]
-        pills.append((f"{ts['zd_2026_pct']:.0f}%", f"highest-risk state: {ts['state']} (predicted 2026)"))
-    ar = d1.get("at_risk_antigens")
-    pills.append((str(len(ar)) if ar else "0",
-                  ("antigens at risk below 80% in 6-12m: " + ", ".join(ar)) if ar
-                  else "antigens below the 80% target (all tracer antigens on track)"))
+    # Three colour-coded goal cards, each a big number + paragraph + pill call-outs.
+    sm = {r["Antigen"]: r for r in d1.get("summary", [])}
+    low_ant = min(sm.values(), key=lambda r: r["Min forecast (% of 2024 baseline)"]) if sm else None
+    ar = d1.get("at_risk_antigens", [])
+    top_lga = (d5.get("top_lgas") or [{}])[0]
+    top_state = (d5.get("top_states") or [{}])[0]
+
+    goals = []
+    # Goal 1 - Reach / burden
+    g1 = [_pill(f"{d5.get('n80', 0)}", "LGAs carry 80% of the national burden", GREEN)]
+    if top_lga:
+        g1.append(_pill(f"{top_lga.get('zd_count', 0):,}",
+                        f"highest-burden LGA: {top_lga.get('lga','')} ({top_lga.get('state','')})", GREEN))
+    goals.append((GREEN, "The reach goal", _bignum(d5.get("lga_total", 0)),
+                  f"zero-dose children projected in 2026 across {d5.get('lga_count', 0)} LGAs. The "
+                  "burden is highly concentrated, so targeting a small set of LGAs reaches most "
+                  "unvaccinated children.", g1))
+    # Goal 2 - Equity / where it concentrates
+    g2 = [_pill(f"{len(d5.get('tier1_states', []))}",
+                "Tier-1 critical states: " + (", ".join(d5.get("tier1_states", [])) or "North-West"), RED)]
+    if top_state:
+        g2.append(_pill(f"{int(top_state.get('zd_2026_count') or 0):,}",
+                        f"zero-dose children in {top_state.get('state','')} (2026)", RED))
+    goals.append((RED, "The equity goal", f"{top_state.get('zd_2026_pct', 0):.0f}%",
+                  f"predicted 2026 zero-dose rate in the highest-risk state "
+                  f"({top_state.get('state','the North-West')}). The North-West carries the heaviest, "
+                  "most persistent burden and needs first-line investment.", g2))
+    # Goal 3 - Coverage & completion
+    g3 = []
+    if survey.get("Penta1") is not None:
+        g3.append(_pill(f"{survey['Penta1']:.0f}%", "NDHS Penta1 survey coverage (2024)", NAVY))
+    if low_ant is not None:
+        g3.append(_pill(f"{low_ant['Min forecast (% of 2024 baseline)']:.0f}%",
+                        f"lowest national antigen forecast ({low_ant['Antigen']})", NAVY))
     if d2.get("top_drivers"):
         first = next(iter(d2["top_drivers"].items()))
-        pills.append(("Drivers", f"{first[0]} dropout: {', '.join(first[1][:3])}"))
-    pill_html = "".join(
-        f"<div class='pill'><span class='pn'>{clean(n)}</span><span class='pt'>{clean(txt)}</span></div>"
-        for n, txt in pills)
+        g3.append(_pill("Drivers", f"{first[0]}: {', '.join(first[1][:3])}", NAVY))
+    g3_big = str(len(ar)) if ar else "On track"
+    g3_para = (("tracer antigens projected below the 80% target within 6 to 12 months: "
+                + ", ".join(ar) + ".") if ar
+               else "all four tracer antigens are projected to hold at or above the 80% target "
+               "nationally - protect this with reminder-recall and defaulter tracing.")
+    goals.append((NAVY, "The coverage and completion goal", g3_big, g3_para, g3))
+
+    goals_html = "".join(
+        f"<div class='goal' style='border-top-color:{col}'>"
+        f"<div class='glabel' style='color:{col}'>{clean(label)}</div>"
+        f"<div class='gbig' style='color:{col}'>{clean(big)}</div>"
+        f"<div class='gpara'>{clean(para)}</div>{''.join(pl)}</div>"
+        for col, label, big, para, pl in goals)
 
     rows = "".join(
         f"<tr><td>{i+1}</td><td>{clean(s['lga'])}</td><td>{clean(s['state'])}</td>"
@@ -233,35 +295,44 @@ def factsheet_html(f: dict, narrative_md: str) -> str:
 
     return f"""<!doctype html><html><head><meta charset='utf-8'>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700;800&display=swap');
 body{{font-family:'IBM Plex Sans',Segoe UI,sans-serif;color:#1A1A1A;margin:0;background:#fff}}
-.wrap{{max-width:920px;margin:0 auto;padding:34px 42px}}
-.hd{{display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid {C.NPHCDA_GREEN};padding-bottom:14px}}
-.tag{{color:{C.NPHCDA_GREEN};font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase}}
-.lead{{font-family:'IBM Plex Sans',sans-serif;font-size:25px;line-height:1.3;color:{C.NAVY};margin:18px 0 6px}}
-.sub{{color:{C.MUTE};font-size:13px}}
-.stats{{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:26px 0 8px;border-top:1px solid #e7eef4;padding-top:18px}}
-.big{{font-family:'IBM Plex Sans',sans-serif;font-size:46px;font-weight:700;line-height:1}}
-.lab{{color:#1A1A1A;font-size:13px;margin-top:6px;max-width:15rem}}
-.cap{{color:{C.MUTE};font-size:11.5px;margin-top:4px}}
-.sect{{color:{C.NAVY};font-family:'IBM Plex Sans',sans-serif;font-size:18px;border-left:4px solid {C.GOLD};padding-left:10px;margin:26px 0 10px}}
-.pills{{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}}
-.pill{{display:flex;align-items:center;gap:10px;border:1.5px solid {C.STEEL};border-radius:999px;padding:7px 14px;max-width:46%}}
-.pn{{color:{C.STEEL};font-weight:700;font-size:15px;white-space:nowrap}}
-.pt{{color:#33414d;font-size:11.5px;line-height:1.25}}
-h2,h3{{color:{C.NAVY};font-family:'IBM Plex Sans',sans-serif}} h2{{font-size:17px;margin-top:18px}} h3{{font-size:14px}}
-ul{{margin:6px 0}} li{{margin:4px 0;font-size:13px}}
-.tbl{{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px}}
-.tbl th{{background:{C.NAVY};color:#fff;padding:7px 9px;text-align:left}}
+.wrap{{max-width:940px;margin:0 auto;padding:32px 40px}}
+.hd{{display:flex;align-items:center;justify-content:space-between;border-bottom:4px solid {GREEN};padding-bottom:14px}}
+.tag{{color:{GREEN};font-size:12px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase}}
+.sub{{color:{C.MUTE};font-size:12.5px}}
+.lead{{font-size:26px;font-weight:700;line-height:1.25;color:{NAVY};margin:18px 0 4px}}
+.hero{{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin:22px 0 6px;
+       border-top:1px solid #e7eef4;border-bottom:1px solid #e7eef4;padding:18px 0}}
+.hcard{{display:flex;gap:12px;align-items:flex-start}}
+.hicon{{flex:none;margin-top:2px}}
+.hbig{{font-size:38px;font-weight:800;line-height:1}}
+.hlab{{font-size:12.5px;color:#1A1A1A;margin-top:3px;font-weight:600}}
+.hcap{{font-size:11px;color:{C.MUTE};margin-top:2px}}
+.goals{{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:18px 0 6px}}
+.goal{{border:1px solid #eaf0f3;border-top:5px solid {GREEN};border-radius:12px;padding:15px 15px 12px;
+       background:linear-gradient(180deg,#fff,#fbfdfc);box-shadow:0 4px 14px rgba(20,40,55,.05)}}
+.glabel{{font-size:11.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px}}
+.gbig{{font-size:40px;font-weight:800;line-height:1;margin:4px 0 6px}}
+.gpara{{font-size:11.5px;color:#33414d;line-height:1.35;margin-bottom:6px}}
+.pill{{display:flex;align-items:center;gap:9px;border:1.5px solid {C.STEEL};border-radius:999px;
+       padding:5px 11px;margin-top:7px}}
+.pn{{font-weight:800;font-size:13.5px;white-space:nowrap}}
+.pt{{color:#33414d;font-size:10.5px;line-height:1.2}}
+.sect{{color:{NAVY};font-size:17px;font-weight:700;border-left:4px solid {C.GOLD};padding-left:10px;margin:24px 0 10px}}
+h2,h3{{color:{NAVY}}} h2{{font-size:16px;margin-top:16px}} h3{{font-size:13px}}
+ul{{margin:6px 0}} li{{margin:4px 0;font-size:12.5px}}
+.tbl{{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}}
+.tbl th{{background:{NAVY};color:#fff;padding:7px 9px;text-align:left}}
 .tbl td{{padding:6px 9px;border-bottom:1px solid #e7eef4}}
-.ft{{margin-top:26px;border-top:1px solid #e0e7ee;padding-top:10px;color:{C.MUTE};font-size:11px}}
+.ft{{margin-top:24px;border-top:1px solid #e0e7ee;padding-top:10px;color:{C.MUTE};font-size:10.5px}}
 </style></head><body><div class='wrap'>
-<div class='hd'>{logo_html}<div style='text-align:right'><div class='tag'>Factsheet</div>
+<div class='hd'>{logo_html}<div style='text-align:right'><div class='tag'>Zero-Dose Factsheet</div>
 <div class='sub'>{clean(f.get('generated',''))}</div></div></div>
 <div class='lead'>Nigeria zero-dose modelling: where the unvaccinated children are, and where to act first.</div>
 <div class='sub'>{clean(f.get('consortium',''))}. For {clean(f.get('audience',''))}.</div>
-<div class='stats'>{stat_html}</div>
-<div class='sect'>Key statistics</div><div class='pills'>{pill_html}</div>
+<div class='hero'>{hero_html}</div>
+<div class='goals'>{goals_html}</div>
 <div class='sect'>Findings and recommended actions</div>
 {md_to_html(narrative_md)}
 <div class='sect'>Highest-burden LGAs</div>{table_html}
