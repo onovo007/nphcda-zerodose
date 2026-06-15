@@ -208,16 +208,18 @@ def zone_summary_fig(res: pd.DataFrame) -> go.Figure:
               "zd_pred_2027_mean": 2027, "zd_pred_2028_mean": 2028}
     for col, yr in yr_map.items():
         fig.add_trace(go.Bar(name=str(yr), x=zorder, y=rate[col], marker_color=C.YEAR_COLORS[yr],
-                             text=[f"{v:.0f}" for v in rate[col]], textposition="outside",
-                             textangle=-90, textfont=dict(size=8), cliponaxis=False), row=1, col=1)
+                             text=[f"{v:.2f}" for v in rate[col]], textposition="outside",
+                             textangle=-90, textfont=dict(size=11), cliponaxis=False), row=1, col=1)
     fig.add_trace(go.Bar(x=zorder, y=burden, marker_color=C.NAVY, showlegend=False,
                          text=[f"{v:.0f}k" for v in burden], textposition="outside",
-                         cliponaxis=False), row=1, col=2)
-    fig.update_yaxes(title_text="Zero-dose rate (%)", range=[0, float(rate.max().max()) * 1.18], row=1, col=1)
+                         textfont=dict(size=12), cliponaxis=False), row=1, col=2)
+    fig.update_yaxes(title_text="Zero-dose rate (%)", range=[0, float(rate.max().max()) * 1.22], row=1, col=1)
     fig.update_yaxes(title_text="Children (thousands)", row=1, col=2)
-    fig.update_layout(title="Geopolitical zone summary", barmode="group",
-                      legend=dict(orientation="h", y=-0.12))
-    return style_fig(fig, height=480)
+    fig.update_xaxes(tickfont=dict(size=13))
+    fig.update_layout(title="Geopolitical zone summary", barmode="group", font=dict(size=14),
+                      legend=dict(orientation="h", y=-0.12, font=dict(size=13)))
+    fig.update_annotations(font_size=16)  # subplot titles
+    return style_fig(fig, height=520)
 
 
 # --------------------------------------------------------------------------------------

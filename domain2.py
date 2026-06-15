@@ -40,18 +40,22 @@ def render(data: dict):
                                              else "stable")} for s in fc.values()}
 
     latest = {col: nat[col].dropna().iloc[-1] for col in C.DROPOUT_TARGETS if col in nat}
-    st.markdown("**Where dropout is now (latest observed)**")
-    st.caption(clean("Most recent reported dropout per antigen pair - a fixed snapshot of the current "
-                     "situation. This row does not change with the horizon selector below."))
-    cards = [{"label": "Dropout pairs", "value": str(len(fc)), "sub": "Prophet forecast", "color": C.NAVY}]
+    obs_month = pd.Timestamp(nat["ds"].max()).strftime("%b %Y")
+    st.markdown("#### Where dropout is now (latest observed)")
+    st.caption(clean(f"Most recent reported dropout per antigen pair - the actual value in the latest "
+                     f"data month ({obs_month}), not a forecast. This row does not change with the "
+                     "horizon selector below."))
+    cards = [{"label": "Dropout pairs", "value": str(len(fc)), "sub": "antigen transitions", "color": C.NAVY}]
     for col, label in C.DROPOUT_TARGETS.items():
         if col in latest:
-            cards.append({"label": label, "value": f"{latest[col]:.1f}%", "sub": "latest observed",
+            cards.append({"label": label, "value": f"{latest[col]:.2f}%",
+                          "sub": clean(f"latest observed ({obs_month})"),
                           "color": C.DROPOUT_COLORS[col]})
     kpi_row(cards)
 
+    st.markdown("<div style='height:22px'></div>", unsafe_allow_html=True)
     # Time-horizon selector: forecast dropout for the next 3 / 6 / 12 months (micro-planning).
-    st.markdown("**Where dropout is heading (Prophet forecast)**")
+    st.markdown("#### Where dropout is heading (Prophet forecast)")
     hlabel = st.radio("Forecast dropout for the next:", ["3 months", "6 months", "12 months"],
                       index=2, horizontal=True, key="d2_horizon")
     H = {"3 months": 3, "6 months": 6, "12 months": 12}[hlabel]
@@ -64,10 +68,14 @@ def render(data: dict):
         mask = ma <= H
         val = float(fy[mask][-1]) if mask.any() else float(fy[-1])
         delta = val - float(s["obs_y"][-1])
-        hcards.append({"label": s["label"], "value": f"{val:.1f}%",
-                       "sub": clean(f"forecast at +{H}m ({'+' if delta >= 0 else ''}{delta:.1f} vs now)"),
+        arrow = "worsening" if delta > 0.05 else ("improving" if delta < -0.05 else "stable")
+        hcards.append({"label": s["label"], "value": f"{val:.2f}%",
+                       "sub": clean(f"forecast at +{H}m ({'+' if delta >= 0 else ''}{delta:.2f} pp vs "
+                                    f"latest - {arrow})"),
                        "color": C.DROPOUT_COLORS[col]})
-    st.caption(clean(f"Projected dropout rate {hlabel} ahead, per antigen pair, for micro-planning."))
+    st.caption(clean(f"Projected dropout rate {hlabel} ahead, per antigen pair, for micro-planning. "
+                     "'pp vs latest' is the change in percentage points from the latest observed value "
+                     "above (positive = dropout rising, i.e. worsening)."))
     kpi_row(hcards)
 
     tabs = st.tabs(["Dropout forecasts", "Drivers (LASSO)", "State-year heatmap",

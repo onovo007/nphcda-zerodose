@@ -75,10 +75,11 @@ def ai_block(block_id: str, title: str, what: str, data) -> None:
 
 
 def chat_panel(chat_id: str, title: str, what: str, data, suggestions: list[str] | None = None,
-               system: str | None = None) -> None:
+               system: str | None = None, assistant_avatar: str | None = None,
+               heading: str | None = None) -> None:
     """A grounded, memory-keeping chat scoped to one output (or tab)."""
     cfg = _cfg()
-    st.markdown(f"##### Ask about: {clean(title)}")
+    st.markdown(heading or f"##### Ask about: {clean(title)}")
     if not cfg.get("key"):
         st.caption(clean("Add your OpenAI API key in the sidebar to ask questions about this output."))
         return
@@ -90,7 +91,8 @@ def chat_panel(chat_id: str, title: str, what: str, data, suggestions: list[str]
         st.caption(clean("Try: " + "  |  ".join(suggestions)))
 
     for m in st.session_state[mkey]:
-        with st.chat_message(m["role"]):
+        av = assistant_avatar if m["role"] == "assistant" else None
+        with st.chat_message(m["role"], avatar=av):
             st.markdown(clean(m["content"]))
 
     with st.form(key=f"form_{chat_id}", clear_on_submit=True):

@@ -908,22 +908,26 @@ def page_agent():
     if not data:
         st.warning("Load data first on Home or the Data and Quality page.")
         return
+    # ZARA - the named, branded assistant (NPHCDA Zero-dose Analytics & Risk Assistant).
+    avatar_svg = (
+        "<svg width='52' height='52' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.6' "
+        "stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='8' width='16' height='11' rx='3'/>"
+        "<circle cx='9' cy='13' r='1.4' fill='white' stroke='none'/><circle cx='15' cy='13' r='1.4' "
+        "fill='white' stroke='none'/><line x1='12' y1='4' x2='12' y2='8'/><circle cx='12' cy='3' r='1.2'/>"
+        "<line x1='8' y1='16.5' x2='16' y2='16.5'/></svg>")
+    st.markdown(
+        f"<div style='display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,"
+        f"{C.NAVY},{C.NPHCDA_GREEN});border-radius:14px;padding:14px 18px;margin-bottom:10px'>"
+        f"<div style='background:rgba(255,255,255,.14);border-radius:50%;padding:6px;display:flex'>{avatar_svg}</div>"
+        f"<div><div style='color:#fff;font-size:1.25rem;font-weight:700'>ZARA</div>"
+        f"<div style='color:rgba(255,255,255,.9);font-size:.82rem'>Zero-dose Analytics &amp; Risk "
+        f"Assistant - your NPHCDA biostatistics, epidemiology and immunization-programme advisor</div>"
+        f"</div></div>", unsafe_allow_html=True)
     cfg = st.session_state.get("llm") or {}
     if not cfg.get("key"):
-        st.info(clean("Add your OpenAI API key in the sidebar to chat with the cross-domain analyst."))
-    with st.spinner("Assembling results from all workstreams (first run may fit the zero-dose model)..."):
+        st.info(clean("Add your OpenAI API key in the sidebar to chat with ZARA."))
+    with st.spinner("ZARA is assembling results from all workstreams (first run may fit the zero-dose model)..."):
         ctx = reports.build_findings(data)
-    d5 = ctx.get("d5", {})
-    if d5:
-        kpi_row([
-            {"label": "Zero-dose, 2026", "value": f"{d5.get('lga_total', 0):,}", "color": C.ACCENT},
-            {"label": "Reporting LGAs", "value": str(d5.get("lga_count", 0)), "color": C.NAVY},
-            {"label": "Top-20% concentration", "value": f"{d5.get('top20_pct', 0):.0f}%", "color": C.STEEL},
-            {"label": "Tier-1 states", "value": str(len(d5.get("tier1_states", []))), "color": C.GOLD},
-        ])
-    st.caption(clean("A senior biostatistics, epidemiology and immunization-programme advisor that "
-                     "reasons over the combined coverage, dropout, zero-dose and spatial results "
-                     "(national, state and LGA), grounding the numbers and adding domain expertise."))
     ai.chat_panel("analyst", "All workstream results (coverage, dropout, zero-dose, hotspots)",
                   "Combined live outputs: national antigen coverage forecasts and at-risk antigens; "
                   "dropout forecasts and drivers; state zero-dose forecasts, tiers and burden; "
@@ -931,7 +935,8 @@ def page_agent():
                   suggestions=["Which states and LGAs should we prioritize first, and why?",
                                "What is the single biggest risk across all workstreams?",
                                "Draft three recommendations for the next quarter."],
-                  system=llm.ANALYST_SYSTEM)
+                  system=llm.ANALYST_SYSTEM, assistant_avatar="🤖",
+                  heading="##### Ask ZARA")
 
 
 # --------------------------------------------------------------------------------------
