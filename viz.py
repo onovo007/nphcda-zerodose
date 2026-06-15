@@ -207,11 +207,13 @@ def zone_summary_fig(res: pd.DataFrame) -> go.Figure:
     yr_map = {"zd_obs_2024": 2024, "zd_pred_2026_mean": 2026,
               "zd_pred_2027_mean": 2027, "zd_pred_2028_mean": 2028}
     for col, yr in yr_map.items():
-        fig.add_trace(go.Bar(name=str(yr), x=zorder, y=rate[col],
-                             marker_color=C.YEAR_COLORS[yr]), row=1, col=1)
+        fig.add_trace(go.Bar(name=str(yr), x=zorder, y=rate[col], marker_color=C.YEAR_COLORS[yr],
+                             text=[f"{v:.0f}" for v in rate[col]], textposition="outside",
+                             textangle=-90, textfont=dict(size=8), cliponaxis=False), row=1, col=1)
     fig.add_trace(go.Bar(x=zorder, y=burden, marker_color=C.NAVY, showlegend=False,
-                         text=[f"{v:.0f}k" for v in burden], textposition="outside"), row=1, col=2)
-    fig.update_yaxes(title_text="Zero-dose rate (%)", row=1, col=1)
+                         text=[f"{v:.0f}k" for v in burden], textposition="outside",
+                         cliponaxis=False), row=1, col=2)
+    fig.update_yaxes(title_text="Zero-dose rate (%)", range=[0, float(rate.max().max()) * 1.18], row=1, col=1)
     fig.update_yaxes(title_text="Children (thousands)", row=1, col=2)
     fig.update_layout(title="Geopolitical zone summary", barmode="group",
                       legend=dict(orientation="h", y=-0.12))

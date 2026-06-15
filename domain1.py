@@ -18,23 +18,26 @@ def _download(df, label, fname):
     st.download_button(label, df.to_csv(index=False).encode("utf-8"), fname, "text/csv")
 
 
-def _horizon_minima(series: dict, horizon_months: int) -> dict:
-    """For each antigen, the minimum forecast (% of baseline) within the chosen horizon."""
+def _horizon_values(series: dict, horizon_months: int):
+    """Each antigen's projected value at the END of the chosen horizon (the same calendar month for
+    every antigen, so the scorecards are directly comparable). Returns (endpoint_label, {antigen:
+    (pct, at_risk)})."""
     import numpy as np
     out = {}
+    endpoint_label = ""
     for antigen, s in series.items():
         fx = pd.DatetimeIndex(pd.to_datetime(s["fore_x"]))
         fy = np.asarray(s["fore_y"], dtype=float)
         cut = pd.Timestamp(s["cutoff"])
-        ma = (fx.year - cut.year) * 12 + (fx.month - cut.month)
-        mask = np.asarray(ma) <= horizon_months
-        if not mask.any():
-            mask = np.ones(len(fy), dtype=bool)
-        sub = fy[mask]
-        j = int(sub.argmin())
-        month = fx[mask][j].strftime("%b %Y")
-        out[antigen] = (float(sub.min()), month, bool(sub.min() < 80))
-    return out
+        ma = np.asarray((fx.year - cut.year) * 12 + (fx.month - cut.month))
+        if horizon_months >= 999:
+            j = len(fy) - 1
+        else:
+            elig = np.where(ma <= horizon_months)[0]
+            j = int(elig[-1]) if len(elig) else len(fy) - 1
+        endpoint_label = fx[j].strftime("%b %Y")
+        out[antigen] = (float(fy[j]), bool(fy[j] < 80))
+    return endpoint_label, out
 
 
 def render(data: dict):
@@ -127,28 +130,32 @@ def render(data: dict):
                       ["3 months", "6 months", "12 months", "Full forecast"],
                       index=2, horizontal=True, key="d1_horizon")
     H = {"3 months": 3, "6 months": 6, "12 months": 12, "Full forecast": 999}[hlabel]
-    hm = _horizon_minima(series, H)  # antigen -> (min_pct, month_label, at_risk)
+    endpoint, hv = _horizon_values(series, H)  # endpoint month + antigen -> (pct, at_risk)
 
-    at_risk = [a for a, v in hm.items() if v[2]]
-    low_antigen = min(hm, key=lambda a: hm[a][0]) if hm else None
+    at_risk = [a for a, (v, r) in hv.items() if r]
+    low_antigen = min(hv, key=lambda a: hv[a][0]) if hv else None
 
     if at_risk:
-        st.error(clean(f"Headline ({hlabel}): {len(at_risk)} of {len(series)} tracer antigens are "
-                       f"projected to fall below the 80 percent target: {', '.join(at_risk)}."))
+        st.error(clean(f"Headline (by {endpoint}): {len(at_risk)} of {len(series)} tracer antigens are "
+                       f"projected to be below the 80 percent target: {', '.join(at_risk)}."))
     elif low_antigen:
         st.success(clean(
-            f"Headline ({hlabel}): all {len(series)} tracer antigens are projected to stay at or above "
-            f"the 80 percent target nationally. Lowest is {low_antigen} at {hm[low_antigen][0]:.0f} "
-            f"{unit_label} ({hm[low_antigen][1]})."))
+            f"Headline (by {endpoint}): all {len(series)} tracer antigens are projected to be at or "
+            f"above the 80 percent target nationally. Lowest is {low_antigen} at "
+            f"{hv[low_antigen][0]:.0f} {unit_label}."))
 
-    cards = [{"label": "Horizon", "value": hlabel, "sub": clean(f"{unit_label}; target 80%"),
+    cards = [{"label": "Horizon", "value": hlabel, "sub": clean(f"projected value by {endpoint}"),
               "color": C.STEEL}]
     for antigen in series:
-        mn, mon, risk = hm[antigen]
-        cards.append({"label": antigen, "value": f"{mn:.0f}%",
-                      "sub": clean(("at risk - " if risk else "on target - ") + str(mon)),
+        v, risk = hv[antigen]
+        cards.append({"label": antigen, "value": f"{v:.0f}%",
+                      "sub": clean(("at risk - by " if risk else "on target - by ") + endpoint),
                       "color": C.ACCENT if risk else C.NPHCDA_GREEN})
     kpi_row(cards)
+    st.caption(clean(
+        f"Scorecards show each antigen's projected {unit_label} at the end of the selected horizon "
+        f"({endpoint}) - the same month for every antigen, so they are directly comparable. The "
+        "National at-risk summary below flags any dip below 80% within the 6 to 12-month window."))
 
     fmonths = pd.to_datetime(next(iter(series.values()))["fore_x"])
     period = f"{fmonths.min():%b %Y} to {fmonths.max():%b %Y}"

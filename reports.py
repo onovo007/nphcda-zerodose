@@ -9,6 +9,7 @@ otherwise a templated narrative built from the numbers.
 """
 from __future__ import annotations
 
+import base64
 import io
 import re
 from datetime import datetime
@@ -59,6 +60,10 @@ def build_findings(data: dict) -> dict:
                  "zd_count": int(r["Zero-dose children (est)"]),
                  "zd_rate_pct": float(r["Zero-dose rate (%)"])}
                 for _, r in lga["pareto"].head(10).iterrows()],
+            "zone_burden": [
+                {"zone": str(z), "count": int(c)} for z, c in
+                res.groupby("zone")["zd_count_2026"].sum().sort_values(ascending=False).items()
+                if pd.notna(c)],
         }
 
     # Domain 1
@@ -199,6 +204,37 @@ def _icon(name: str, color: str) -> str:
             f"stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'>{shapes}</svg>")
 
 
+def _burden_bar_png(zone_burden: list) -> str:
+    """Horizontal bar of zero-dose burden by zone as a base64 PNG (the factsheet's headline visual)."""
+    if not zone_burden:
+        return ""
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as plt
+    except Exception:
+        return ""
+    zb = sorted(zone_burden, key=lambda z: z["count"])  # ascending so largest is at top in barh
+    zones = [z["zone"] for z in zb]
+    vals = [z["count"] / 1e3 for z in zb]
+    top = max(vals) if vals else 1
+    colors = ["#C0392B" if v == top else "#1F3B57" for v in vals]
+    fig, ax = plt.subplots(figsize=(7.8, 2.9), dpi=150)
+    ax.barh(zones, vals, color=colors)
+    for i, v in enumerate(vals):
+        ax.text(v + top * 0.012, i, f"{v:,.0f}k", va="center", fontsize=8.5, color="#1A1A1A")
+    ax.set_xlabel("Estimated zero-dose children, 2026 (thousands)", fontsize=8.5, color="#33414d")
+    ax.set_xlim(0, top * 1.16)
+    for sp in ("top", "right"):
+        ax.spines[sp].set_visible(False)
+    ax.tick_params(labelsize=9)
+    fig.tight_layout()
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", bbox_inches="tight")
+    plt.close(fig)
+    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
+
+
 def _pill(badge: str, text: str, color: str) -> str:
     return (f"<div class='pill' style='border-color:{color}'>"
             f"<span class='pn' style='color:{color}'>{clean(badge)}</span>"
@@ -284,6 +320,12 @@ def factsheet_html(f: dict, narrative_md: str) -> str:
         f"<div class='gpara'>{clean(para)}</div>{''.join(pl)}</div>"
         for col, label, big, para, pl in goals)
 
+    chart_uri = _burden_bar_png(d5.get("zone_burden", []))
+    chart_html = (f"<div class='sect'>Where the burden concentrates</div>"
+                  f"<div class='chartcap'>Estimated zero-dose children by geopolitical zone in 2026. "
+                  f"The North-West (red) carries the heaviest burden.</div>"
+                  f"<img class='chart' src='{chart_uri}'/>" if chart_uri else "")
+
     rows = "".join(
         f"<tr><td>{i+1}</td><td>{clean(s['lga'])}</td><td>{clean(s['state'])}</td>"
         f"<td style='text-align:right'>{s['zd_count']:,}</td>"
@@ -320,6 +362,8 @@ body{{font-family:'IBM Plex Sans',Segoe UI,sans-serif;color:#1A1A1A;margin:0;bac
 .pn{{font-weight:800;font-size:13.5px;white-space:nowrap}}
 .pt{{color:#33414d;font-size:10.5px;line-height:1.2}}
 .sect{{color:{NAVY};font-size:17px;font-weight:700;border-left:4px solid {C.GOLD};padding-left:10px;margin:24px 0 10px}}
+.chartcap{{color:{C.MUTE};font-size:11.5px;margin:-4px 0 8px}}
+.chart{{width:100%;max-width:760px;border:1px solid #eef2f5;border-radius:10px;padding:6px}}
 h2,h3{{color:{NAVY}}} h2{{font-size:16px;margin-top:16px}} h3{{font-size:13px}}
 ul{{margin:6px 0}} li{{margin:4px 0;font-size:12.5px}}
 .tbl{{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}}
@@ -333,6 +377,7 @@ ul{{margin:6px 0}} li{{margin:4px 0;font-size:12.5px}}
 <div class='sub'>{clean(f.get('consortium',''))}. For {clean(f.get('audience',''))}.</div>
 <div class='hero'>{hero_html}</div>
 <div class='goals'>{goals_html}</div>
+{chart_html}
 <div class='sect'>Findings and recommended actions</div>
 {md_to_html(narrative_md)}
 <div class='sect'>Highest-burden LGAs</div>{table_html}

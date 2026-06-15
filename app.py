@@ -489,16 +489,9 @@ def page_impsci():
          "sub": "lowest to highest state", "color": C.GOLD},
     ])
 
-    # Reference metrics teams can quote directly (NDHS 2024 survey + population denominators).
+    # Reference metrics teams can quote directly, split into two clearly-titled tabs.
     survey = (io.survey_national_coverage(data["ndhs_antigens"], data.get("under5"))
               if data.get("ndhs_antigens") is not None else {})
-    if survey:
-        section("Reference metrics - NDHS 2024 survey coverage (national)",
-                "Population-weighted national survey coverage per antigen, for direct reference.")
-        kpi_row([{"label": f"{a} coverage", "value": f"{survey[a]:.1f}%",
-                  "sub": "NDHS 2024, national", "color": C.ANTIGEN_PAL.get(a, C.STEEL)}
-                 for a in ["BCG", "Penta1", "Penta3", "Measles1"] if a in survey])
-
     pop_cards = []
     if data.get("under5") is not None:
         cohort = float(io.prep_under5(data["under5"])["cohort_12_23m"].sum())
@@ -520,12 +513,28 @@ def page_impsci():
         if nv is not None:
             pop_cards.append({"label": "No vaccinations (survey)", "value": f"{nv:.1f}%",
                               "sub": "NDHS 2024 zero-dose proxy", "color": C.ACCENT})
-    if pop_cards:
-        section("Reference metrics - population and coverage",
-                "Eligible-infant denominators and headline survey coverage.")
-        kpi_row(pop_cards)
+
+    ref_tabs = st.tabs(["NDHS 2024 survey coverage (national)", "Population and denominators"])
+    with ref_tabs[0]:
+        if survey:
+            st.caption(clean("Population-weighted national survey coverage per antigen (NDHS 2024) - "
+                             "reference values programme teams can quote directly."))
+            kpi_row([{"label": f"{a} coverage", "value": f"{survey[a]:.1f}%",
+                      "sub": "NDHS 2024, national", "color": C.ANTIGEN_PAL.get(a, C.STEEL)}
+                     for a in ["BCG", "Penta1", "Penta3", "Measles1"] if a in survey])
+        else:
+            st.info(clean("Load the NDHS antigens 2024 file to show national survey coverage."))
+    with ref_tabs[1]:
+        if pop_cards:
+            st.caption(clean("Eligible-infant denominators (birth cohort vs DHIS2 live births) and "
+                             "headline survey coverage."))
+            kpi_row(pop_cards)
+        else:
+            st.info(clean("Load the under-five and/or NDHS antigens files to show population metrics."))
+
+    st.divider()
     tabs = st.tabs(["Descriptive stats", "Univariate", "Bivariate", "Validation (Bland-Altman)",
-                    "Hypothesis tests"])
+                    "Hypothesis tests", "Multiple regression"])
 
     with tabs[0]:
         section("Descriptive statistics", "Summary of the zero-dose outcome and its candidate drivers.")
@@ -696,6 +705,48 @@ def page_impsci():
                         "answering the stated question. Explain in plain language what the result "
                         "means for programming, whether the difference/association is significant, and "
                         "one action it supports. Note the small sample (37 states) as a caveat.", res)
+
+    with tabs[5]:
+        section("Multiple linear regression (build your own)",
+                "Fit a multivariable model of an outcome on the predictors you choose. Reports "
+                "coefficients, HC3 robust standard errors, p-values, 95% CIs and model fit "
+                "(R-squared, adjusted R-squared, overall F-test).")
+        allnum = impsci.all_numeric(df)
+        c1, c2 = st.columns([1, 2])
+        out_var = c1.selectbox("Outcome variable", allnum,
+                               index=allnum.index(impsci.OUTCOME) if impsci.OUTCOME in allnum else 0,
+                               format_func=impsci.pretty, key="is_mreg_y")
+        default_x = [p for p in impsci.DRIVERS if p in allnum and p != out_var][:3]
+        preds = c2.multiselect("Predictor variables", [c for c in allnum if c != out_var],
+                               default=default_x, format_func=impsci.pretty, key="is_mreg_x")
+        if st.button("Fit regression", type="primary", key="is_mreg_btn"):
+            if not preds:
+                st.warning("Select at least one predictor.")
+            else:
+                r = impsci.multiple_regression(df, out_var, preds)
+                st.session_state["is_mreg"] = r if r else "fail"
+        res = st.session_state.get("is_mreg")
+        if res == "fail":
+            st.warning(clean("Not enough complete rows for the chosen predictors - pick fewer "
+                             "predictors (need at least predictors + 2 states)."))
+        elif isinstance(res, dict):
+            s = res["stats"]
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Observations", s["n"])
+            m2.metric("Predictors", s["predictors"])
+            m3.metric("R-squared", s["R2"])
+            m4.metric("Adj. R-squared", s["adj_R2"])
+            st.caption(clean(f"Overall model F-test p = {s['F_p']}. HC3 robust standard errors. "
+                             "Cross-sectional, ecological associations (state-level) - not causal."))
+            st.dataframe(res["table"], use_container_width=True, hide_index=True)
+            ai.ai_block("is_mreg_ai", f"Multiple regression - {impsci.pretty(out_var)}",
+                        "A multivariable linear regression of the outcome on the selected predictors "
+                        "(robust SEs). Explain which predictors are significantly associated (p<0.05), "
+                        "the direction and magnitude of each, how much variation the model explains "
+                        "(R-squared), and the programme implication. Caution: ecological state-level "
+                        "associations (small n), not causal effects.",
+                        {"outcome": impsci.pretty(out_var), "model_fit": s,
+                         "coefficients": res["table"].to_dict(orient="records")})
 
     st.divider()
     ai.chat_panel("impsci", "Implementation Science - state zero-dose EDA",

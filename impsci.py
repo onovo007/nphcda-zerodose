@@ -217,6 +217,42 @@ def beta_drivers(df: pd.DataFrame, top_k: int = 4):
     return out, method, len(sub)
 
 
+def multiple_regression(df: pd.DataFrame, outcome: str, predictors: list[str]):
+    """Build-your-own multiple linear regression: HC3 robust SEs, p-values, 95% CIs and model fit
+    (R-squared, adjusted R-squared, overall F-test). Returns {table, stats} or None if too few rows."""
+    import stats_infer as si
+    from scipy import stats as ss
+    preds = [p for p in predictors if p in df.columns and p != outcome]
+    if not preds:
+        return None
+    sub = df[[outcome] + preds].apply(pd.to_numeric, errors="coerce").dropna()
+    n, k = len(sub), len(preds)
+    if n < k + 2:
+        return None
+    y = sub[outcome].values.astype(float)
+    X = sub[preds]
+    tbl = si.add_ci(si.ols_robust(y, X), "coef", "robust_SE")
+    Xmat = np.column_stack([np.ones(n), X.values.astype(float)])
+    beta = np.linalg.pinv(Xmat.T @ Xmat) @ Xmat.T @ y
+    yhat = Xmat @ beta
+    ss_res = float(((y - yhat) ** 2).sum())
+    ss_tot = float(((y - y.mean()) ** 2).sum())
+    r2 = 1 - ss_res / ss_tot if ss_tot > 0 else 0.0
+    adj = 1 - (1 - r2) * (n - 1) / (n - k - 1) if (n - k - 1) > 0 else r2
+    f_p = None
+    if (1 - r2) > 0 and (n - k - 1) > 0:
+        fstat = (r2 / k) / ((1 - r2) / (n - k - 1))
+        f_p = round(float(ss.f.sf(fstat, k, n - k - 1)), 4)
+    tbl["Term"] = tbl["term"].map(lambda t: "(intercept)" if t == "(intercept)" else pretty(t))
+    tbl["Coefficient"] = tbl["coef"].round(3)
+    tbl["Robust SE"] = tbl["robust_SE"].round(3)
+    tbl["p-value"] = tbl["p_value"].round(4)
+    tbl["95% CI"] = tbl.apply(lambda r: f"{r['CI_low']:.2f} to {r['CI_high']:.2f}", axis=1)
+    table = tbl[["Term", "Coefficient", "Robust SE", "p-value", "95% CI"]].reset_index(drop=True)
+    stats = {"n": n, "predictors": k, "R2": round(r2, 3), "adj_R2": round(adj, 3), "F_p": f_p}
+    return {"table": table, "stats": stats}
+
+
 def all_numeric(df: pd.DataFrame) -> list[str]:
     return [c for c in df.columns if c not in ("state_name", "zone_name")
             and pd.api.types.is_numeric_dtype(df[c])]
