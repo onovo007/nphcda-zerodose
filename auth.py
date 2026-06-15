@@ -169,7 +169,7 @@ def require_login() -> bool:
                 else:
                     st.error("Invalid username or password.")
         else:
-            st.markdown("##### Identify yourself to continue")
+            st.markdown("##### Sign in to continue")
             st.caption(clean("Your name, email and organisation are recorded by the NPHCDA Digital "
                              "Innovation Hub solely to track platform usage. They are not used for any "
                              "other purpose and uploaded data is processed only in your session, not "
