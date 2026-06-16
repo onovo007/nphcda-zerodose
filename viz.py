@@ -279,7 +279,7 @@ def choropleth(gdf, color_col: str, *, categorical: bool, title: str,
             colorscale=cscale or "Greys", zmin=-0.5, zmax=n - 0.5,
             customdata=gdf[color_col].astype(str), text=text,
             hovertemplate="%{text}<br>%{customdata}<extra></extra>",
-            marker_line_color="white", marker_line_width=0.35,
+            marker_line_color="white", marker_line_width=0.3,
             colorbar=dict(title=clean(legend_title), tickmode="array",
                           tickvals=list(range(len(present))),
                           ticktext=[clean(k) for k in present], len=0.85),
@@ -291,22 +291,9 @@ def choropleth(gdf, color_col: str, *, categorical: bool, title: str,
             geojson=gj, locations=gdf["_uid"], featureidkey="properties._uid", z=z,
             colorscale=colorscale or "RdYlGn_r", zmin=rc[0], zmax=rc[1],
             text=text, hovertemplate="%{text}<br>%{z:.1f}<extra></extra>",
-            marker_line_color="white", marker_line_width=0.35,
+            marker_line_color="white", marker_line_width=0.3,
             colorbar=dict(title=clean(legend_title), len=0.85),
         ))
-    # Bold state-boundary overlay (dissolve LGAs into states) for clearer admin geography.
-    if "state" in gdf.columns and hasattr(gdf, "dissolve"):
-        try:
-            states = gdf.dissolve(by="state").reset_index()
-            states["_sid"] = states.index.astype(str)
-            sgj = json.loads(states.to_json())
-            fig.add_trace(go.Choropleth(
-                geojson=sgj, locations=states["_sid"], featureidkey="properties._sid",
-                z=[0] * len(states), colorscale=[[0, "rgba(0,0,0,0)"], [1, "rgba(0,0,0,0)"]],
-                showscale=False, marker_line_color="#0F2233", marker_line_width=1.5,
-                hoverinfo="skip"))
-        except Exception:
-            pass
     fig.update_geos(fitbounds="locations", visible=False, bgcolor="#E8F4F8",
                     showcountries=False, showframe=False)
     fig.update_layout(title=title, margin=dict(l=0, r=0, t=60, b=0))
