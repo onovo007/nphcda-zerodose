@@ -41,6 +41,18 @@ def render(data: dict):
         m = ma <= H
         return float(fy[m][-1]) if m.any() else float(fy[-1])
 
+    def _direction(latest, val, short=False):
+        # Negative dropout = later dose recorded at/above the earlier = NO net dropout (not a loss).
+        d = val - latest
+        if val <= 0 and latest <= 0:
+            return "no net dropout" if short else ("no net dropout (negative - later dose recorded "
+                                                   "at or above the earlier)")
+        if d > 0.5:
+            return "worsening" if short else "worsening (dropout rising)"
+        if d < -0.5:
+            return "improving" if short else "improving (dropout falling)"
+        return "stable"
+
     # Summary aligned to the on-screen scorecards (12-month forecast), so the AI cites the same numbers.
     fc_summary = {}
     for s in fc.values():
@@ -49,8 +61,7 @@ def render(data: dict):
             "latest_observed_pct": round(latest, 2),
             "forecast_pct_at_12m": round(f12, 2),
             "change_pp_vs_latest": round(delta, 2),
-            "direction": ("worsening (dropout rising)" if delta > 0.5
-                          else "improving (dropout falling)" if delta < -0.5 else "stable")}
+            "direction": _direction(latest, f12)}
 
     latest = {col: nat[col].dropna().iloc[-1] for col in C.DROPOUT_TARGETS if col in nat}
     obs_month = pd.Timestamp(nat["ds"].max()).strftime("%b %Y")
@@ -81,7 +92,7 @@ def render(data: dict):
         mask = ma <= H
         val = float(fy[mask][-1]) if mask.any() else float(fy[-1])
         delta = val - float(s["obs_y"][-1])
-        arrow = "worsening" if delta > 0.05 else ("improving" if delta < -0.05 else "stable")
+        arrow = _direction(float(s["obs_y"][-1]), val, short=True)
         hcards.append({"label": s["label"], "value": f"{val:.2f}%",
                        "sub": clean(f"forecast at +{H}m ({'+' if delta >= 0 else ''}{delta:.2f} pp vs "
                                     f"latest - {arrow})"),
@@ -111,9 +122,13 @@ def render(data: dict):
                     "value and the forecast 12 months ahead (these match the scorecards on screen), the "
                     "change in percentage points (change_pp_vs_latest; positive = dropout rising = "
                     "worsening) and the direction. Use ONLY these numbers - cite the forecast_pct_at_12m "
-                    "value, not any other horizon. State each pair's direction and magnitude, name the "
-                    "pair of greatest concern, and give one priority action. Positive dropout values "
-                    "mean the earlier dose was received but not the later one.",
+                    "value, not any other horizon. IMPORTANT: a NEGATIVE dropout means the later dose "
+                    "was recorded at or above the earlier - i.e. NO net dropout (a reporting/coverage "
+                    "signal, not a loss); do NOT describe a pair as 'worsening' if both its values are "
+                    "negative - use its stated 'direction' verbatim. Only a positive, rising dropout is "
+                    "a genuine concern. State each pair's direction and magnitude, name the pair of "
+                    "greatest concern (or say none shows real dropout if all are negative), and give one "
+                    "priority action.",
                     fc_summary)
 
     with tabs[1]:
