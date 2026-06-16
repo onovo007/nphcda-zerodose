@@ -59,7 +59,7 @@ def render(data: dict):
                                 [2027, 2028, 2029, 2030, 2031, 2032], index=0, key="d1_end_year")
     metric_choice = c_right.radio(
         "Coverage metric",
-        ["Relative to 2024 baseline", "WHO administrative coverage"],
+        ["Early-Warning Alert (Relative to 2024 baseline)", "WHO administrative coverage"],
         index=0, horizontal=True, key="d1_metric",
         help=("Relative index = doses vs the antigen's mean 2024 level (denominator-free). "
               "WHO administrative coverage = doses / eligible cohort (under-five / 5 as a labelled "

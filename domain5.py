@@ -50,6 +50,7 @@ def render(data: dict):
 
     nat_2026 = res["zd_count_2026"].sum()
     top_state = res.iloc[0]
+    n20 = int(round(0.20 * lga["n_lgas"]))
     kpi_row([
         {"label": "National zero-dose, 2026", "value": f"{nat_2026/1e6:.2f}M",
          "sub": "state-model sum", "color": C.ACCENT},
@@ -58,9 +59,10 @@ def render(data: dict):
         {"label": "Highest-risk state", "value": clean(top_state["state"]),
          "sub": f"{top_state['zd_pred_2026_mean']:.0f}% predicted 2026", "color": C.GOLD},
         {"label": "Pareto concentration", "value": f"top 20% = {lga['top20_pct']:.0f}%",
-         "sub": f"80% of burden in {lga['n80']} LGAs", "color": C.STEEL,
-         "help": "Share of all zero-dose children living in the top 20% of LGAs by burden. Higher "
-                 "means more concentrated, so targeting fewer LGAs reaches more children."},
+         "sub": f"= {n20} LGAs; 80% of burden in {lga['n80']} LGAs", "color": C.STEEL,
+         "help": "The top 20% of LGAs by burden (= the listed number of LGAs) hold this share of all "
+                 "zero-dose children. Higher means more concentrated, so targeting fewer LGAs reaches "
+                 "more children."},
         {"label": "Convergence", "value": f"R-hat {out['max_rhat']}",
          "sub": f"min ESS {out['min_ess']} | {out['n_draws']} draws", "color": C.STEEL,
          "help": "MCMC convergence check. R-hat near 1.00 with high effective sample size (ESS) means "
@@ -138,7 +140,19 @@ def render(data: dict):
         col_sev = "Severity (within state)" if "Severity (within state)" in pareto.columns else None
         show = highlight_classes(pareto.head(60), col_sev, SEVERITY_CELL) if col_sev else pareto.head(60)
         st.dataframe(show, use_container_width=True, height=420)
-        _download(pareto, "Download Pareto priority table (CSV)", "D5_lga_pareto_priority.csv")
+        rank_col = "Burden rank" if "Burden rank" in pareto.columns else pareto.columns[0]
+        top20 = pareto[pareto[rank_col] <= n20]
+        top80 = pareto[pareto[rank_col] <= lga["n80"]]
+        st.markdown("**Download the priority list:**")
+        dc1, dc2, dc3 = st.columns(3)
+        with dc1:
+            _download(pareto, f"All {lga['n_lgas']} ranked LGAs (CSV)", "D5_lga_pareto_all.csv")
+        with dc2:
+            _download(top20, f"Top 20% - {n20} LGAs = {lga['top20_pct']:.0f}% of burden (CSV)",
+                      "D5_lga_pareto_top20pct.csv")
+        with dc3:
+            _download(top80, f"Top {lga['n80']} LGAs = 80% of burden (CSV)",
+                      "D5_lga_pareto_80pct.csv")
         ai.ai_block("d5_pareto", "Zero-Dose & Hotspots - LGA Pareto concentration of zero-dose burden",
                     f"Top LGAs ranked by estimated zero-dose children. Nationally about "
                     f"{lga['national_total']:,} children across {lga['n_lgas']} LGAs; the top 20 "

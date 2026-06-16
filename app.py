@@ -44,7 +44,7 @@ def sidebar() -> str:
         st.caption(clean("CIDRE and Quantium Insights LLC, in technical support of NPHCDA. "
                          "Funders and reviewers: GAVI and UNICEF."))
         nav_options = ["Home", "Data and Quality", "Coverage Forecasting", "Dropout & Completion",
-                       "Zero-Dose & Hotspots", "Implementation Science", "Ask the Analyst",
+                       "Zero-Dose & Hotspots", "Exploratory Data Analysis", "Ask the Analyst",
                        "Reports & Briefs", "Program Q&A (RAG)", "User Guide (SOP)",
                        "Methods & Validation"]
         # Allow other pages to request navigation (e.g. the Home "Upload your own data" button).
@@ -110,7 +110,7 @@ def page_home():
             "- **Zero-Dose & Hotspots.** A Bayesian hierarchical Beta regression of state zero-dose "
             "rates with credible intervals, population-weighted LGA burden, Pareto prioritization and "
             "Getis-Ord Gi* hotspot maps.\n"
-            "- **Implementation Science.** Exploratory analysis of the state zero-dose dataset - a "
+            "- **Exploratory Data Analysis.** Exploratory analysis of the state zero-dose dataset - a "
             "correlation matrix with multicollinearity flags, distributions, scatter with Pearson r "
             "and p, violin by zone with a Kruskal-Wallis test, burden-band bars, a Bland-Altman "
             "agreement plot, and a build-your-own hypothesis test (t-test, paired t-test, ANOVA, "
@@ -468,7 +468,7 @@ def page_reports():
 # Implementation Science - EDA
 # --------------------------------------------------------------------------------------
 def page_impsci():
-    domain_banner("_banner_impsci.jpg", "Implementation Science - Exploratory Data Analysis",
+    domain_banner("_banner_impsci.jpg", "Exploratory Data Analysis",
                   "Descriptive statistics and univariate / bivariate analysis of the state zero-dose "
                   "dataset to surface the drivers that should shape implementation.")
     data = io.get_active_data()
@@ -957,7 +957,7 @@ def main():
         domain2.render(data)
     elif page.startswith("Zero-Dose"):
         domain5.render(data)
-    elif page.startswith("Implementation"):
+    elif page.startswith("Exploratory"):
         page_impsci()
     elif page.startswith("Ask the Analyst"):
         page_agent()
