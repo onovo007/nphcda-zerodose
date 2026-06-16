@@ -33,11 +33,24 @@ def render(data: dict):
     agg = state_monthly(d)
     fc = dropout_forecasts(nat, key=kd)
 
-    fc_summary = {s["label"]: {"latest_observed_pct": round(s["obs_y"][-1], 1),
-                               "forecast_end_pct": round(s["fore_y"][-1], 1),
-                               "direction": ("worsening" if s["fore_y"][-1] > s["obs_y"][-1] + 0.5
-                                             else "improving" if s["fore_y"][-1] < s["obs_y"][-1] - 0.5
-                                             else "stable")} for s in fc.values()}
+    def _fc_at(s, H=12):
+        fx = pd.DatetimeIndex(pd.to_datetime(s["fore_x"]))
+        fy = np.asarray(s["fore_y"], dtype=float)
+        cut = pd.Timestamp(s["cutoff"])
+        ma = np.asarray((fx.year - cut.year) * 12 + (fx.month - cut.month))
+        m = ma <= H
+        return float(fy[m][-1]) if m.any() else float(fy[-1])
+
+    # Summary aligned to the on-screen scorecards (12-month forecast), so the AI cites the same numbers.
+    fc_summary = {}
+    for s in fc.values():
+        latest = float(s["obs_y"][-1]); f12 = _fc_at(s, 12); delta = f12 - latest
+        fc_summary[s["label"]] = {
+            "latest_observed_pct": round(latest, 2),
+            "forecast_pct_at_12m": round(f12, 2),
+            "change_pp_vs_latest": round(delta, 2),
+            "direction": ("worsening (dropout rising)" if delta > 0.5
+                          else "improving (dropout falling)" if delta < -0.5 else "stable")}
 
     latest = {col: nat[col].dropna().iloc[-1] for col in C.DROPOUT_TARGETS if col in nat}
     obs_month = pd.Timestamp(nat["ds"].max()).strftime("%b %Y")
@@ -94,10 +107,13 @@ def render(data: dict):
                                           f"{s['label']} dropout", "Dropout rate (%)"),
                     use_container_width=True)
         ai.ai_block("d2_forecast", "Dropout & Completion - dropout rate forecasts",
-                    "Prophet forecasts of the three antigen-pair dropout rates (latest observed vs "
-                    "forecast end value, with direction). State the trend direction and magnitude for "
-                    "each pair, name the pair of greatest concern, and give one priority action. "
-                    "Positive values mean the earlier dose was received but not the later one.",
+                    "For each of the three antigen-pair dropout rates you are given the latest observed "
+                    "value and the forecast 12 months ahead (these match the scorecards on screen), the "
+                    "change in percentage points (change_pp_vs_latest; positive = dropout rising = "
+                    "worsening) and the direction. Use ONLY these numbers - cite the forecast_pct_at_12m "
+                    "value, not any other horizon. State each pair's direction and magnitude, name the "
+                    "pair of greatest concern, and give one priority action. Positive dropout values "
+                    "mean the earlier dose was received but not the later one.",
                     fc_summary)
 
     with tabs[1]:
