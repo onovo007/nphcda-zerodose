@@ -823,7 +823,7 @@ def page_sop():
     st.markdown("#### 4. Run the models")
     st.markdown(clean(
         "- **Coverage Forecasting** - which antigens fall below the 80% target; choose the forecast "
-        "end-year (to 2032) and the 3/6/12-month scorecard horizon; switch to **WHO administrative "
+        "end-year (to 2032) and the 3/6/12-month scorecard horizon; switch to **Estimated coverage "
         "coverage** to pick the eligible-infant denominator (under-five proxy or DHIS2 live births) "
         "and show the **NDHS survey reference lines**; review the LGA at-risk screen.\n"
         "- **Dropout & Completion** - dropout forecasts, LASSO drivers and the state-by-year heatmap.\n"

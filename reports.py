@@ -684,7 +684,7 @@ def sop_docx() -> bytes:
         "Sign in: enter your name and email (and access code if required). Your sign-in is recorded for usage tracking.",
         "Load the data: on Home, click Use bundled project sample data, or Upload your own data on the Data and Quality page.",
         "Check data quality and anomalies: review completeness, reporting rates, the missing-value heatmap and the Anomaly detection tab.",
-        "Run the models: Coverage Forecasting (80% target; forecast end-year to 2032; 3/6/12-month scorecard horizon; WHO administrative-coverage mode with a selectable eligible-infant denominator and NDHS survey reference lines; LGA at-risk screen); Dropout & Completion (forecasts, LASSO drivers, heatmap); Zero-Dose & Hotspots (Bayesian model, LGA burden, Pareto, Gi* maps).",
+        "Run the models: Coverage Forecasting (80% target; forecast end-year to 2032; 3/6/12-month scorecard horizon; Estimated-coverage mode (doses / estimated eligible cohort) with a selectable denominator and NDHS survey reference lines; LGA at-risk screen); Dropout & Completion (forecasts, LASSO drivers, heatmap); Zero-Dose & Hotspots (Bayesian model, LGA burden, Pareto, Gi* maps).",
         "Explore and test (Implementation Science): correlation with multicollinearity flags, distributions, scatter, zone violins, and the Hypothesis tests tab (t-test, ANOVA, chi-square).",
         "Ask the Analyst: add your OpenAI key in the sidebar, then ask grounded cross-domain questions.",
         "Generate reports: on Reports & Briefs, produce the factsheet, the Word policy brief and the PowerPoint deck.",
@@ -749,7 +749,7 @@ def methods_sections() -> list:
           "piecewise-linear trend with automatic changepoints, yearly plus an added semi-annual "
           "seasonality; 95% and 80% prediction intervals.",
           "Two reporting modes: a denominator-free index (percent of the 2024 baseline; the 80% line is "
-          "a decline tripwire) and WHO-style administrative coverage (doses divided by an eligible "
+          "a decline tripwire) and estimated coverage of the eligible cohort (doses divided by an eligible "
           "infant denominator: under-five/5 demographic proxy by default, or DHIS2 live births).",
           "Admin-vs-survey triangulation: NDHS 2024 survey coverage is overlaid per antigen so a large "
           "admin-vs-survey gap flags a denominator or reporting-completeness issue.",

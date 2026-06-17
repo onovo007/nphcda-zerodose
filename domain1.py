@@ -59,12 +59,12 @@ def render(data: dict):
                                 [2027, 2028, 2029, 2030, 2031, 2032], index=0, key="d1_end_year")
     metric_choice = c_right.radio(
         "Coverage metric",
-        ["Early-Warning Alert (Relative to 2024 baseline)", "WHO administrative coverage"],
+        ["Early-Warning Alert (Relative to 2024 baseline)", "Estimated coverage (eligible cohort)"],
         index=0, horizontal=True, key="d1_metric",
-        help=("Relative index = doses vs the antigen's mean 2024 level (denominator-free). "
-              "WHO administrative coverage = doses / eligible cohort (under-five / 5 as a labelled "
-              "proxy until LGA live births are supplied)."))
-    metric = "coverage" if metric_choice.startswith("WHO") else "baseline"
+        help=("Early-Warning Alert = doses vs the antigen's mean 2024 level (denominator-free; a "
+              "decline tripwire). Estimated coverage = doses divided by the estimated 12-23 month "
+              "eligible cohort (under-five / 5), i.e. coverage of the eligible infants."))
+    metric = "baseline" if metric_choice.startswith("Early") else "coverage"
     cohort_annual = None
     denom_label = ""
     if metric == "coverage":
@@ -78,15 +78,15 @@ def render(data: dict):
         if lb_2024:
             opts.append("DHIS2 live births (2024)")
         if not opts:
-            st.info(clean("Load the under-five population (or live births) file to use WHO "
-                          "administrative coverage. Showing the 2024-baseline index instead."))
+            st.info(clean("Load the under-five population (or live births) file to use Estimated "
+                          "coverage. Showing the Early-Warning Alert index instead."))
             metric = "baseline"
         else:
             denom_choice = st.radio(
                 "Eligible-infant denominator", opts, index=0, horizontal=True, key="d1_denom",
                 help="The demographic proxy (~7.0M) approximates Nigeria's true annual birth cohort. "
                      "DHIS2 live births are facility-reported and under-count true births, so they can "
-                     "push administrative coverage above 100%.")
+                     "push estimated coverage above 100%.")
             if denom_choice.startswith("DHIS2"):
                 cohort_annual, denom_label = lb_2024, "DHIS2 live births 2024"
                 st.warning(clean(
@@ -114,16 +114,16 @@ def render(data: dict):
             survey_src = C.SURVEY_COVERAGE_SOURCE
     st.caption(clean(
         f"Metric: {unit_label}"
-        + (f" - WHO-style administrative coverage = monthly doses / (annual {denom_label} / 12)."
+        + (f" - estimated coverage of the eligible cohort = monthly doses / (annual {denom_label} / 12)."
            if metric == "coverage"
            else " - each antigen vs its own mean 2024 monthly level; the 80% line marks an 80%-of-2024 "
                 "decline tripwire, not literal coverage.")
         + f" Forecast starts after the last observed data ({last_obs:%b %Y}) to Dec {end_year}; "
           "longer horizons widen the prediction intervals."))
     if metric == "baseline":
-        st.info(clean("Tip: switch the Coverage metric above to 'WHO administrative coverage' to choose "
-                      "the eligible-infant denominator (under-five proxy or DHIS2 live births) and to "
-                      "show the NDHS survey reference lines on all four antigen charts."))
+        st.info(clean("Tip: switch the Coverage metric above to 'Estimated coverage (eligible cohort)' to "
+                      "choose the eligible-infant denominator (under-five proxy or DHIS2 live births) and "
+                      "to show the NDHS survey reference lines on all four antigen charts."))
 
     # Time-horizon selector: the scorecards and headline react to the chosen window.
     hlabel = st.radio("Forecast horizon for the scorecards",

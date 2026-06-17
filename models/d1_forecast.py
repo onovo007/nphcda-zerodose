@@ -51,7 +51,7 @@ def national_forecasts(_nat, key: str, end_year: int = 2027,
     cutoff = nat["ds"].max()
     periods = _horizon_to(cutoff, year=end_year)
     coverage = (metric == "coverage" and cohort_annual and cohort_annual > 0)
-    unit_label = "% coverage (admin)" if coverage else "% of 2024 baseline"
+    unit_label = "% coverage (eligible cohort)" if coverage else "% of 2024 baseline"
     value_col = f"Min forecast ({unit_label})"
     series = {}
     summary = []
