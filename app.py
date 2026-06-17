@@ -910,16 +910,17 @@ def page_agent():
         return
     # ZARA - the named, branded assistant (NPHCDA Zero-dose Analytics & Risk Assistant).
     zara_uri = img_data_uri(C.ZARA_PATH)
-    avatar = (f"<img src='{zara_uri}' style='height:84px;width:84px'/>" if zara_uri
-              else "<b style='color:#1F3B57;font-size:1.4rem'>ZARA</b>")
+    avatar = (f"<img src='{zara_uri}' style='height:110px;width:110px'/>" if zara_uri
+              else "<b style='color:#1F3B57;font-size:1.6rem'>ZARA</b>")
     st.markdown(
-        f"<div style='display:flex;align-items:center;gap:18px;background:linear-gradient(120deg,"
-        f"{C.NAVY},{C.NPHCDA_GREEN});border-radius:14px;padding:16px 20px;margin-bottom:10px'>"
-        f"<div style='background:#fff;border-radius:50%;padding:10px;display:flex;line-height:0'>{avatar}</div>"
-        f"<div><div style='color:#fff;font-size:1.25rem;font-weight:700'>ZARA</div>"
-        f"<div style='color:rgba(255,255,255,.9);font-size:.82rem'>Zero-dose Analytics &amp; Risk "
-        f"Assistant - your NPHCDA biostatistics, epidemiology and immunization-programme advisor</div>"
-        f"</div></div>", unsafe_allow_html=True)
+        f"<div style='text-align:center;background:linear-gradient(120deg,{C.NAVY},{C.NPHCDA_GREEN});"
+        f"border-radius:16px;padding:20px 18px;margin-bottom:10px'>"
+        f"<div style='background:#fff;border-radius:50%;width:138px;height:138px;display:inline-flex;"
+        f"align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(10,30,45,.25)'>{avatar}</div>"
+        f"<div style='color:#fff;font-size:1.8rem;font-weight:800;margin-top:10px'>ZARA</div>"
+        f"<div style='color:rgba(255,255,255,.92);font-size:.92rem;max-width:660px;margin:4px auto 0'>"
+        f"Zero-dose Analytics &amp; Risk Assistant - your NPHCDA biostatistics, epidemiology and "
+        f"immunization-programme advisor</div></div>", unsafe_allow_html=True)
     cfg = st.session_state.get("llm") or {}
     if not cfg.get("key"):
         st.info(clean("Add your OpenAI API key in the sidebar to chat with ZARA."))
@@ -932,7 +933,7 @@ def page_agent():
                   suggestions=["Which states and LGAs should we prioritize first, and why?",
                                "What is the single biggest risk across all workstreams?",
                                "Draft three recommendations for the next quarter."],
-                  system=llm.ANALYST_SYSTEM, assistant_avatar="🤖",
+                  system=llm.ANALYST_SYSTEM, assistant_avatar=(zara_uri or "🤖"),
                   heading="##### Ask ZARA")
 
 
