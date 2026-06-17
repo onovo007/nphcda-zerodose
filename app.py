@@ -16,7 +16,7 @@ import streamlit as st
 
 import config as C
 from theme import (inject_theme, hero, section, kpi_row, clean, sidebar_brand,
-                   domain_banner, highlight_severity)
+                   domain_banner, highlight_severity, img_data_uri)
 
 st.set_page_config(page_title="NPHCDA Zero-Dose Modelling Platform",
                    page_icon="💉", layout="wide", initial_sidebar_state="expanded")
@@ -909,16 +909,13 @@ def page_agent():
         st.warning("Load data first on Home or the Data and Quality page.")
         return
     # ZARA - the named, branded assistant (NPHCDA Zero-dose Analytics & Risk Assistant).
-    avatar_svg = (
-        "<svg width='52' height='52' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='1.6' "
-        "stroke-linecap='round' stroke-linejoin='round'><rect x='4' y='8' width='16' height='11' rx='3'/>"
-        "<circle cx='9' cy='13' r='1.4' fill='white' stroke='none'/><circle cx='15' cy='13' r='1.4' "
-        "fill='white' stroke='none'/><line x1='12' y1='4' x2='12' y2='8'/><circle cx='12' cy='3' r='1.2'/>"
-        "<line x1='8' y1='16.5' x2='16' y2='16.5'/></svg>")
+    zara_uri = img_data_uri(C.ZARA_PATH)
+    avatar = (f"<img src='{zara_uri}' style='height:48px;width:48px'/>" if zara_uri
+              else "<b style='color:#1F3B57'>ZARA</b>")
     st.markdown(
         f"<div style='display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,"
         f"{C.NAVY},{C.NPHCDA_GREEN});border-radius:14px;padding:14px 18px;margin-bottom:10px'>"
-        f"<div style='background:rgba(255,255,255,.14);border-radius:50%;padding:6px;display:flex'>{avatar_svg}</div>"
+        f"<div style='background:#fff;border-radius:50%;padding:6px;display:flex;line-height:0'>{avatar}</div>"
         f"<div><div style='color:#fff;font-size:1.25rem;font-weight:700'>ZARA</div>"
         f"<div style='color:rgba(255,255,255,.9);font-size:.82rem'>Zero-dose Analytics &amp; Risk "
         f"Assistant - your NPHCDA biostatistics, epidemiology and immunization-programme advisor</div>"

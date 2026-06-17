@@ -134,6 +134,7 @@ LOGO_PATH = ASSETS_DIR / "nphcda_logo.png"
 HERO_PATH = ASSETS_DIR / "hero.jpg"
 FLAG_PATH = ASSETS_DIR / "flag.png"
 LOGIN_BANNER_PATH = ASSETS_DIR / "_banner_login.jpg"
+ZARA_PATH = ASSETS_DIR / "zara.png"
 
 ANTIGEN_PAL = {
     "BCG": "#1565C0",
