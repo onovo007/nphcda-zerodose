@@ -132,8 +132,12 @@ def backtest_national(_nat, key: str, holdout: int = 6) -> pd.DataFrame:
         ape = (np.abs(m["y"] - m["yhat"]) / m["y"].replace(0, np.nan)).dropna()
         mape = float(ape.mean() * 100) if len(ape) else float("nan")
         cov = float(((m["y"] >= m["yhat_lower"]) & (m["y"] <= m["yhat_upper"])).mean() * 100)
+        # Lewis (1982) MAPE benchmark.
+        rating = ("Highly accurate" if mape < 10 else "Good" if mape < 20
+                  else "Reasonable" if mape < 50 else "Inaccurate")
         rows.append({"Antigen": antigen, "Hold-out months": int(len(m)),
-                     "MAPE (%)": round(mape, 1), "95% PI coverage (%)": round(cov, 0)})
+                     "MAPE (%)": round(mape, 1), "Accuracy (Lewis)": rating,
+                     "95% PI coverage (%)": round(cov, 0)})
     return pd.DataFrame(rows)
 
 

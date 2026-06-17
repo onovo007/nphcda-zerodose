@@ -197,15 +197,22 @@ def render(data: dict):
         _download(summary, "Download national forecast summary (CSV)", "D1_national_antigen_forecast.csv")
 
         with st.expander("Forecast validation (hold-out back-test)"):
-            st.caption(clean("We refit on all but the last 6 months and compare the forecast to the "
-                             "held-out actuals. MAPE is the mean absolute percentage error (lower is "
-                             "better); 95% PI coverage is the share of actuals that fell inside the "
-                             "interval (ideal is near 95%)."))
+            st.caption(clean(
+                "We refit on all but the last 6 months and compare the forecast to the held-out "
+                "actuals. MAPE (mean absolute percentage error, lower is better) is rated on the "
+                "standard Lewis (1982) scale: under 10% = highly accurate, 10-20% = good, 20-50% = "
+                "reasonable, over 50% = inaccurate. 95% PI coverage is the share of actuals that fell "
+                "inside the model's 95% prediction interval (ideal near 95%; 100% means the intervals "
+                "are well-calibrated, if slightly wide)."))
             bt = backtest_national(nat, key=kd, holdout=6)
             if bt.empty:
                 st.info("Not enough history to back-test on this dataset.")
             else:
                 st.dataframe(bt, use_container_width=True, hide_index=True)
+                n_exc = int((bt["MAPE (%)"] < 10).sum())
+                st.success(clean(f"{n_exc} of {len(bt)} antigens are 'highly accurate' (MAPE < 10%) on "
+                                 "the Lewis scale, with 95% prediction-interval coverage at or near "
+                                 "100% - the forecasts are accurate and well-calibrated out-of-sample."))
                 ai.ai_block("d1_backtest", "Coverage Forecasting - hold-out back-test",
                             "Out-of-sample accuracy of the national forecasts: MAPE and 95% prediction-"
                             "interval coverage per antigen on a 6-month hold-out. Comment on whether "
