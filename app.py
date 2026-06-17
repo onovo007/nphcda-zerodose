@@ -910,12 +910,12 @@ def page_agent():
         return
     # ZARA - the named, branded assistant (NPHCDA Zero-dose Analytics & Risk Assistant).
     zara_uri = img_data_uri(C.ZARA_PATH)
-    avatar = (f"<img src='{zara_uri}' style='height:48px;width:48px'/>" if zara_uri
-              else "<b style='color:#1F3B57'>ZARA</b>")
+    avatar = (f"<img src='{zara_uri}' style='height:84px;width:84px'/>" if zara_uri
+              else "<b style='color:#1F3B57;font-size:1.4rem'>ZARA</b>")
     st.markdown(
-        f"<div style='display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,"
-        f"{C.NAVY},{C.NPHCDA_GREEN});border-radius:14px;padding:14px 18px;margin-bottom:10px'>"
-        f"<div style='background:#fff;border-radius:50%;padding:6px;display:flex;line-height:0'>{avatar}</div>"
+        f"<div style='display:flex;align-items:center;gap:18px;background:linear-gradient(120deg,"
+        f"{C.NAVY},{C.NPHCDA_GREEN});border-radius:14px;padding:16px 20px;margin-bottom:10px'>"
+        f"<div style='background:#fff;border-radius:50%;padding:10px;display:flex;line-height:0'>{avatar}</div>"
         f"<div><div style='color:#fff;font-size:1.25rem;font-weight:700'>ZARA</div>"
         f"<div style='color:rgba(255,255,255,.9);font-size:.82rem'>Zero-dose Analytics &amp; Risk "
         f"Assistant - your NPHCDA biostatistics, epidemiology and immunization-programme advisor</div>"
