@@ -54,8 +54,8 @@ def render(data: dict):
     kpi_row([
         {"label": "National zero-dose, 2026", "value": f"{nat_2026/1e6:.2f}M",
          "sub": "state-model sum", "color": C.ACCENT},
-        {"label": "LGA-sum burden", "value": f"{lga['national_total']:,}",
-         "sub": f"across {lga['n_lgas']} LGAs", "color": C.NAVY},
+        {"label": "LGA-sum burden", "value": f"{lga['national_total']/1e6:.2f}M",
+         "sub": clean(f"{lga['national_total']:,} across {lga['n_lgas']} LGAs"), "color": C.NAVY},
         {"label": "Highest-risk state", "value": clean(top_state["state"]),
          "sub": f"{top_state['zd_pred_2026_mean']:.0f}% predicted 2026", "color": C.GOLD},
         {"label": "Pareto concentration", "value": f"top 20% = {lga['top20_pct']:.0f}%",

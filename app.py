@@ -64,7 +64,11 @@ def sidebar() -> str:
                             placeholder="sk-...", help="Stored only for this session, never saved.")
         model = st.selectbox("Model", llm.MODELS, index=llm.MODELS.index(llm.DEFAULT_MODEL),
                              key="openai_model")
-        st.session_state["llm"] = {"key": key.strip() if key else "", "model": model}
+        lang = st.selectbox("Response language (ZARA and interpretations)", llm.LANGUAGES, index=0,
+                            key="ai_lang",
+                            help="ZARA answers and the auto-interpretations are written in this "
+                                 "language. Numbers, antigen codes and place names stay unchanged.")
+        st.session_state["llm"] = {"key": key.strip() if key else "", "model": model, "lang": lang}
         st.toggle("Auto-interpret figures on load", value=True, key="ai_auto",
                   help="Generate an interpretation under each figure and table automatically. "
                        "Turn off to interpret only on demand and save API calls.")
@@ -382,7 +386,7 @@ def page_rag():
         st.session_state["rag_chat"].append({"role": "user", "content": q.strip()})
         with st.spinner("Searching the document..."):
             res = rag.answer(cfg["key"], cfg.get("model", llm.DEFAULT_MODEL), q.strip(),
-                             doc["matrix"], doc["chunks"])
+                             doc["matrix"], doc["chunks"], language=cfg.get("lang"))
         if res.get("error"):
             ans = clean(res["error"])
             st.session_state["rag_last_snips"] = None
@@ -459,9 +463,12 @@ def page_reports():
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
         pptx_bytes = reports.policy_pptx(rep["findings"], rep["narrative"])
         d2.download_button(
-            "Download policy deck (PowerPoint .pptx)", pptx_bytes,
-            "NPHCDA_zero_dose_policy_deck.pptx",
+            "Download policy brief (PowerPoint .pptx)", pptx_bytes,
+            "NPHCDA_zero_dose_policy_brief.pptx",
             "application/vnd.openxmlformats-officedocument.presentationml.presentation")
+        st.caption(clean("Both downloads contain the policy brief above (the same findings and "
+                         "recommendations) - one as an editable Word document, one as PowerPoint "
+                         "slides. This is generated from the live results, not the meeting deck."))
 
 
 # --------------------------------------------------------------------------------------
@@ -514,23 +521,25 @@ def page_impsci():
             pop_cards.append({"label": "No vaccinations (survey)", "value": f"{nv:.1f}%",
                               "sub": "NDHS 2024 zero-dose proxy", "color": C.ACCENT})
 
-    ref_tabs = st.tabs(["NDHS 2024 survey coverage (national)", "Population and denominators"])
-    with ref_tabs[0]:
-        if survey:
-            st.caption(clean("Population-weighted national survey coverage per antigen (NDHS 2024) - "
-                             "reference values programme teams can quote directly."))
-            kpi_row([{"label": f"{a} coverage", "value": f"{survey[a]:.1f}%",
-                      "sub": "NDHS 2024, national", "color": C.ANTIGEN_PAL.get(a, C.STEEL)}
-                     for a in ["BCG", "Penta1", "Penta3", "Measles1"] if a in survey])
-        else:
-            st.info(clean("Load the NDHS antigens 2024 file to show national survey coverage."))
-    with ref_tabs[1]:
-        if pop_cards:
-            st.caption(clean("Eligible-infant denominators (birth cohort vs DHIS2 live births) and "
-                             "headline survey coverage."))
-            kpi_row(pop_cards)
-        else:
-            st.info(clean("Load the under-five and/or NDHS antigens files to show population metrics."))
+    with st.expander("Reference metrics - NDHS 2024 survey coverage and population denominators "
+                     "(click to open)", expanded=False):
+        ref_tabs = st.tabs(["NDHS 2024 survey coverage (national)", "Population and denominators"])
+        with ref_tabs[0]:
+            if survey:
+                st.caption(clean("Population-weighted national survey coverage per antigen (NDHS 2024) - "
+                                 "reference values programme teams can quote directly."))
+                kpi_row([{"label": f"{a} coverage", "value": f"{survey[a]:.1f}%",
+                          "sub": "NDHS 2024, national", "color": C.ANTIGEN_PAL.get(a, C.STEEL)}
+                         for a in ["BCG", "Penta1", "Penta3", "Measles1"] if a in survey])
+            else:
+                st.info(clean("Load the NDHS antigens 2024 file to show national survey coverage."))
+        with ref_tabs[1]:
+            if pop_cards:
+                st.caption(clean("Eligible-infant denominators (birth cohort vs DHIS2 live births) and "
+                                 "headline survey coverage."))
+                kpi_row(pop_cards)
+            else:
+                st.info(clean("Load the under-five and/or NDHS antigens files to show population metrics."))
 
     st.divider()
     tabs = st.tabs(["Descriptive stats", "Univariate", "Bivariate", "Validation (Bland-Altman)",

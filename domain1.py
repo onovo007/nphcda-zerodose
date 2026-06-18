@@ -40,6 +40,22 @@ def _horizon_values(series: dict, horizon_months: int):
     return endpoint_label, out
 
 
+def _values_at_month(series: dict, target: pd.Timestamp):
+    """Each antigen's projected value at the chosen calendar month (the forecast month nearest the
+    target). Lets the user score a specific period, e.g. Dec 2026. Same return shape as
+    _horizon_values."""
+    import numpy as np
+    out = {}
+    endpoint_label = ""
+    for antigen, s in series.items():
+        fx = pd.DatetimeIndex(pd.to_datetime(s["fore_x"]))
+        fy = np.asarray(s["fore_y"], dtype=float)
+        j = int(np.argmin(np.abs((fx - target).days)))
+        endpoint_label = fx[j].strftime("%b %Y")
+        out[antigen] = (float(fy[j]), bool(fy[j] < 80))
+    return endpoint_label, out
+
+
 def render(data: dict):
     domain_banner("_banner_d1.jpg", "Coverage Forecasting",
                   "Which routine antigens are projected to fall below the 80 percent coverage target "
@@ -127,10 +143,22 @@ def render(data: dict):
 
     # Time-horizon selector: the scorecards and headline react to the chosen window.
     hlabel = st.radio("Forecast horizon for the scorecards",
-                      ["3 months", "6 months", "12 months", "Full forecast"],
-                      index=2, horizontal=True, key="d1_horizon")
-    H = {"3 months": 3, "6 months": 6, "12 months": 12, "Full forecast": 999}[hlabel]
-    endpoint, hv = _horizon_values(series, H)  # endpoint month + antigen -> (pct, at_risk)
+                      ["3 months", "6 months", "12 months", "Full forecast", "Pick a month"],
+                      index=2, horizontal=True, key="d1_horizon",
+                      help="Pick a month lets you score a specific period, e.g. Dec 2026, instead "
+                           "of a rolling window.")
+    if hlabel == "Pick a month":
+        fx0 = pd.DatetimeIndex(pd.to_datetime(next(iter(series.values()))["fore_x"]))
+        month_opts = [t.strftime("%b %Y") for t in fx0]
+        # Default to the December of the first full forecast year if present, else the last month.
+        dec_idx = [i for i, t in enumerate(fx0) if t.month == 12]
+        default_idx = dec_idx[0] if dec_idx else len(month_opts) - 1
+        chosen = st.selectbox("Score the antigens at this forecast month",
+                              month_opts, index=default_idx, key="d1_pick_month")
+        endpoint, hv = _values_at_month(series, pd.to_datetime(chosen))
+    else:
+        H = {"3 months": 3, "6 months": 6, "12 months": 12, "Full forecast": 999}[hlabel]
+        endpoint, hv = _horizon_values(series, H)  # endpoint month + antigen -> (pct, at_risk)
 
     at_risk = [a for a, (v, r) in hv.items() if r]
     low_antigen = min(hv, key=lambda a: hv[a][0]) if hv else None
@@ -183,13 +211,21 @@ def render(data: dict):
                                           ref_label=(f"NDHS {antigen} survey {rl:.0f}%" if rl else "")),
                     use_container_width=True)
 
+        ai_ctx = {
+            "metric": unit_label,
+            "scorecards_at_selected_horizon": {
+                "horizon": hlabel, "endpoint_month": endpoint,
+                "antigens": {a: {"value_pct": round(v, 1), "at_risk": bool(r)}
+                             for a, (v, r) in hv.items()}},
+            "min_forecast_summary": summary.to_dict(orient="records")}
         ai.ai_block("d1_charts", f"Coverage Forecasting - national antigen forecasts ({unit_label})",
-                    f"Four national Prophet forecasts (BCG, Penta1, Penta3, Measles1) in {unit_label} "
-                    "against the 80 percent target. For each antigen give the minimum projected value and "
-                    "the month it occurs, and whether it crosses 80 percent within 6 to 12 months. State "
-                    "the overall verdict clearly (which antigens are at risk, or that all stay above "
+                    f"Two things to use together: (1) the SCORECARDS - each antigen's projected value at "
+                    f"the end of the selected horizon ({endpoint}), with an at-risk flag; and (2) the "
+                    "min-forecast summary - each antigen's lowest projected value, the month it occurs, "
+                    "and whether it crosses 80 percent within 6 to 12 months. Cite the scorecard values "
+                    "for each antigen, state the overall verdict (which antigens are at risk or all on "
                     "target), name the lowest antigen, and give one priority action.",
-                    summary)
+                    ai_ctx)
 
         section("National at-risk summary")
         st.caption(clean(f"Values below 80 ({unit_label}) are flagged in red."))

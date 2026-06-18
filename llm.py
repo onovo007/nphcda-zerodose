@@ -45,6 +45,20 @@ def blocked(text: str) -> bool:
     return bool(_BLOCK.search(text or ""))
 
 
+# Response languages ZARA can answer in. English is the default; the others are produced by asking
+# the model to translate its explanation while leaving numbers, antigen codes and place names intact.
+LANGUAGES = ["English", "French", "Spanish", "Hausa", "Nigerian Pidgin", "Yoruba", "Igbo", "Swahili"]
+
+
+def _lang_directive(language: str | None) -> str:
+    if not language or language == "English":
+        return ""
+    return (f"\n\nRESPOND ENTIRELY IN {language.upper()}. Write the explanation in {language}, but keep "
+            "all numbers, percentages, dates, antigen codes (BCG, Penta1, Penta3, Measles1, Measles2), "
+            "statistical terms (R-hat, MAPE, Gi*, 95% CI) and proper place names (states, LGAs) exactly "
+            "as given - do not translate or alter them. Keep the same house style (hyphen only).")
+
+
 SYSTEM = f"""You are the analytics assistant for the NPHCDA zero-dose predictive modelling
 platform, helping NPHCDA, GAVI and UNICEF staff act on the immunization model outputs (coverage
 forecasting, dropout and completion, and zero-dose modelling and hotspot detection).
@@ -146,9 +160,9 @@ def _context_block(title: str, what: str, data) -> str:
             f"CONTEXT VALUES (the only source of truth):\n{json.dumps(payload, default=str)[:7000]}")
 
 
-def interpret(api_key: str, model: str, title: str, what: str, data) -> str:
+def interpret(api_key: str, model: str, title: str, what: str, data, language: str | None = None) -> str:
     """Auto-interpret one figure or table (no user input, so no safety pre-filter needed)."""
-    messages = [{"role": "system", "content": SYSTEM},
+    messages = [{"role": "system", "content": SYSTEM + _lang_directive(language)},
                 {"role": "user", "content": _context_block(title, what, data)
                  + "\n\nInterpret this output for the NPHCDA programme team. Make the single most "
                  "important takeaway unmistakable in the first line, cite the specific numbers, and "
@@ -157,13 +171,13 @@ def interpret(api_key: str, model: str, title: str, what: str, data) -> str:
 
 
 def chat(api_key: str, model: str, history: list, title: str, what: str, data,
-         system: str | None = None) -> str:
+         system: str | None = None, language: str | None = None) -> str:
     """Multi-turn chat. Grounded in the output's context; pass system=ANALYST_SYSTEM for the
     expert cross-domain analyst (which may add domain knowledge while grounding the numbers)."""
     last_user = next((m["content"] for m in reversed(history) if m["role"] == "user"), "")
     if blocked(last_user):
         return REFUSAL
-    sys = system or SYSTEM
+    sys = (system or SYSTEM) + _lang_directive(language)
     ctx_line = ("RESULTS CONTEXT (ground all quantitative claims in this; you may add domain "
                 "expertise):\n" if system else "CONVERSATION CONTEXT (the only source of truth):\n")
     messages = [{"role": "system", "content": sys},
@@ -203,11 +217,12 @@ Rules:
 - House style: hyphen only; concise and factual."""
 
 
-def rag_answer(api_key: str, model: str, question: str, retrieved: list[dict]) -> str:
+def rag_answer(api_key: str, model: str, question: str, retrieved: list[dict],
+               language: str | None = None) -> str:
     if blocked(question):
         return REFUSAL
     ctx = "\n\n".join(f"[p. {c['page']}] {c['text']}" for c in retrieved)
-    messages = [{"role": "system", "content": RAG_SYSTEM},
+    messages = [{"role": "system", "content": RAG_SYSTEM + _lang_directive(language)},
                 {"role": "user", "content": f"DOCUMENT EXCERPTS:\n{ctx[:12000]}\n\nQUESTION: {question}"}]
     return _complete(api_key, model, messages)
 

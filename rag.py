@@ -96,12 +96,13 @@ def retrieve(api_key: str, query: str, matrix, chunks: list[dict], k: int = 5):
     return top, confidence, None
 
 
-def answer(api_key: str, model: str, question: str, matrix, chunks: list[dict], k: int = 5):
+def answer(api_key: str, model: str, question: str, matrix, chunks: list[dict], k: int = 5,
+           language: str | None = None):
     """Full RAG step. Returns dict {text, citations, confidence, snippets, error}."""
     top, confidence, err = retrieve(api_key, question, matrix, chunks, k)
     if err:
         return {"error": err}
-    txt = llm.rag_answer(api_key, model, question, top)
+    txt = llm.rag_answer(api_key, model, question, top, language=language)
     pages = sorted({c["page"] for c in top})
     return {"text": txt, "citations": pages, "confidence": confidence,
             "snippets": top, "error": None}

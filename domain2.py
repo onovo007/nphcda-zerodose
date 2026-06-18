@@ -218,10 +218,30 @@ def render(data: dict):
             _download(sdf, "Download state dropout forecasts (CSV)",
                       "D2_state_dropout_forecast_2026_2027.csv")
 
+    # Per-state dropout (observed) so the chat can answer "which states have the highest dropout".
+    state_dropout = {}
+    try:
+        last_obs_year = int(agg["year"].max())
+        for col, label in C.DROPOUT_TARGETS.items():
+            if col in agg.columns:
+                piv = state_year_observed(agg, col)
+                if last_obs_year in piv.columns:
+                    state_dropout[label] = {
+                        "year": last_obs_year,
+                        "top_states_by_dropout": piv[last_obs_year].sort_values(ascending=False)
+                        .head(10).round(1).to_dict()}
+    except Exception:
+        pass
+
     st.divider()
-    ai.chat_panel("d2", "Dropout & Completion - dropout dynamics and drivers",
-                  "Latest observed and forecast endpoint for each dropout pair (Penta1-Penta3, "
-                  "Penta1-Measles1, Measles1-Measles2), and the top LASSO drivers per pair.",
-                  {"forecasts": fc_summary, "drivers": drivers_summary},
-                  suggestions=["Which dropout pair is worsening?",
+    ai.chat_panel("d2", "Dropout & Completion - dropout dynamics, drivers and state pattern",
+                  "Three things: (1) latest observed and forecast endpoint for each dropout pair; "
+                  "(2) the top LASSO drivers per pair; and (3) per-state dropout for the latest observed "
+                  "year (top states per pair). State-by-state FORECAST values for 2026/2027 are produced "
+                  "on demand in the State-year heatmap tab and are NOT in this context - if asked for a "
+                  "forecast year not provided, say it must be generated there and answer from the latest "
+                  "observed year instead; never invent state values.",
+                  {"forecasts": fc_summary, "drivers": drivers_summary,
+                   "state_dropout_latest_observed": state_dropout},
+                  suggestions=["Which states have the highest Measles1 to Measles2 dropout?",
                                "What drives Penta1 to Penta3 dropout?"])
