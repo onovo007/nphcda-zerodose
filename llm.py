@@ -21,10 +21,16 @@ import requests
 
 OPENAI_URL = "https://api.openai.com/v1/chat/completions"
 EMBED_URL = "https://api.openai.com/v1/embeddings"
+TTS_URL = "https://api.openai.com/v1/audio/speech"
 MODELS = ["gpt-4o-mini", "gpt-4o", "gpt-5", "gpt-4.1-mini"]
 DEFAULT_MODEL = "gpt-4o-mini"
 FALLBACK_MODEL = "gpt-4o"
 EMBED_MODEL = "text-embedding-3-small"
+TTS_MODEL = "gpt-4o-mini-tts"
+TTS_FALLBACK_MODEL = "tts-1"
+TTS_VOICE = "alloy"
+# Languages with reliable neural TTS today (read-aloud is offered only for these).
+TTS_LANGUAGES = ["English", "French", "Spanish", "Swahili"]
 
 REFUSAL = ("I am sorry, I cannot help with that. This assistant only interprets the immunization "
            "analytics shown in this platform, and it will not assist with harmful, unethical, or "
@@ -184,6 +190,40 @@ def chat(api_key: str, model: str, history: list, title: str, what: str, data,
                 {"role": "system", "content": ctx_line + _context_block(title, what, data)}]
     messages += [{"role": m["role"], "content": m["content"]} for m in history][-12:]
     return _complete(api_key, model, messages)
+
+
+# --------------------------------------------------------------------------------------
+# Text to speech (read ZARA replies aloud; OpenAI auto-detects the language of the text)
+# --------------------------------------------------------------------------------------
+def _strip_markdown(text: str) -> str:
+    """Plain text for speech: drop markdown markers so the voice does not read '*' or '#'."""
+    t = re.sub(r"[*_`#>]", "", text or "")
+    t = re.sub(r"^\s*[-•]\s*", "", t, flags=re.MULTILINE)
+    return t.strip()
+
+
+def tts(api_key: str, text: str, voice: str = TTS_VOICE):
+    """Return MP3 bytes for the given text, or an error string. Falls back to tts-1 if the
+    primary model is unavailable on the key."""
+    headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
+    body = {"voice": voice, "input": _strip_markdown(text)[:4000], "response_format": "mp3"}
+    for mdl in (TTS_MODEL, TTS_FALLBACK_MODEL):
+        try:
+            r = requests.post(TTS_URL, headers=headers, json={**body, "model": mdl}, timeout=60)
+        except Exception as exc:
+            return f"Could not reach the OpenAI audio API ({exc})."
+        if r.status_code == 200 and r.content:
+            return r.content
+        if r.status_code == 401:
+            return "The OpenAI API key was rejected."
+        if r.status_code == 429:
+            return "OpenAI rate limit or quota reached. Try again shortly."
+        # Otherwise try the fallback model on the next loop; keep the last error message.
+        try:
+            last = r.json().get("error", {}).get("message", "")
+        except Exception:
+            last = ""
+    return f"Audio generation failed. {last}".strip()
 
 
 # --------------------------------------------------------------------------------------

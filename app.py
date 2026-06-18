@@ -69,6 +69,12 @@ def sidebar() -> str:
                             help="ZARA answers and the auto-interpretations are written in this "
                                  "language. Numbers, antigen codes and place names stay unchanged.")
         st.session_state["llm"] = {"key": key.strip() if key else "", "model": model, "lang": lang}
+        st.toggle("Read ZARA replies aloud (voice)", value=False, key="ai_voice",
+                  help="Adds a Listen button under each ZARA reply. Available for "
+                       + ", ".join(llm.TTS_LANGUAGES) + ".")
+        if st.session_state.get("ai_voice") and lang not in llm.TTS_LANGUAGES:
+            st.caption(clean(f"Voice is not yet available for {lang}; replies stay text-only. "
+                             "Switch to " + ", ".join(llm.TTS_LANGUAGES) + " to hear them."))
         st.toggle("Auto-interpret figures on load", value=True, key="ai_auto",
                   help="Generate an interpretation under each figure and table automatically. "
                        "Turn off to interpret only on demand and save API calls.")
@@ -466,9 +472,6 @@ def page_reports():
             "Download policy brief (PowerPoint .pptx)", pptx_bytes,
             "NPHCDA_zero_dose_policy_brief.pptx",
             "application/vnd.openxmlformats-officedocument.presentationml.presentation")
-        st.caption(clean("Both downloads contain the policy brief above (the same findings and "
-                         "recommendations) - one as an editable Word document, one as PowerPoint "
-                         "slides. This is generated from the live results, not the meeting deck."))
 
 
 # --------------------------------------------------------------------------------------

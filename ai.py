@@ -34,6 +34,11 @@ def _lang() -> str:
     return _cfg().get("lang") or "English"
 
 
+def _voice_on() -> bool:
+    """Read-aloud is offered only when the toggle is on and the language has reliable TTS."""
+    return bool(st.session_state.get("ai_voice")) and _lang() in llm.TTS_LANGUAGES
+
+
 def _hash(data) -> str:
     try:
         payload = data.to_dict(orient="records") if hasattr(data, "to_dict") else data
@@ -99,10 +104,24 @@ def chat_panel(chat_id: str, title: str, what: str, data, suggestions: list[str]
     if suggestions:
         st.caption(clean("Try: " + "  |  ".join(suggestions)))
 
-    for m in st.session_state[mkey]:
+    voice = _voice_on()
+    for i, m in enumerate(st.session_state[mkey]):
         av = assistant_avatar if m["role"] == "assistant" else None
         with st.chat_message(m["role"], avatar=av):
             st.markdown(clean(m["content"]))
+            if m["role"] == "assistant" and voice:
+                akey = f"tts_{chat_id}_{i}"
+                audio = st.session_state.get(akey)
+                if audio:
+                    st.audio(audio, format="audio/mp3")
+                elif st.button("Listen", key=f"ttsbtn_{chat_id}_{i}", help="Read this reply aloud"):
+                    with st.spinner("Generating audio..."):
+                        out = llm.tts(cfg["key"], m["content"])
+                    if isinstance(out, (bytes, bytearray)):
+                        st.session_state[akey] = bytes(out)
+                        st.rerun()
+                    else:
+                        st.caption(clean(str(out)))
 
     with st.form(key=f"form_{chat_id}", clear_on_submit=True):
         q = st.text_input("Your question", key=f"in_{chat_id}",
