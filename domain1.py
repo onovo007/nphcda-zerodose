@@ -40,6 +40,32 @@ def _horizon_values(series: dict, horizon_months: int):
     return endpoint_label, out
 
 
+def _year_summary(series: dict, year: int, value_col: str):
+    """At-risk summary scoped to one calendar year: each antigen's lowest projected value within
+    that year, the month it occurs, whether it dips below 80 that year, and the first month below.
+    Same value column name as the full summary so the red-flag styling still applies."""
+    import numpy as np
+    rows = []
+    for antigen, s in series.items():
+        fx = pd.DatetimeIndex(pd.to_datetime(s["fore_x"]))
+        fy = np.asarray(s["fore_y"], dtype=float)
+        mask = np.asarray(fx.year == year)
+        if not mask.any():
+            continue
+        vals, months = fy[mask], fx[mask]
+        jmin = int(np.argmin(vals))
+        below = vals < 80
+        rows.append({
+            "Antigen": antigen,
+            value_col: round(float(vals[jmin]), 2),
+            "Month of minimum": months[jmin].strftime("%b %Y"),
+            f"Below 80% during {year}": "Yes" if below.any() else "No",
+            "First month below 80%": (months[int(np.argmax(below))].strftime("%b %Y")
+                                      if below.any() else "-"),
+        })
+    return pd.DataFrame(rows)
+
+
 def _values_at_month(series: dict, target: pd.Timestamp):
     """Each antigen's projected value at the chosen calendar month (the forecast month nearest the
     target). Lets the user score a specific period, e.g. Dec 2026. Same return shape as
@@ -228,9 +254,18 @@ def render(data: dict):
                     ai_ctx)
 
         section("National at-risk summary")
-        st.caption(clean(f"Values below 80 ({unit_label}) are flagged in red."))
-        st.dataframe(highlight_below(summary, value_col), use_container_width=True)
-        _download(summary, "Download national forecast summary (CSV)", "D1_national_antigen_forecast.csv")
+        fx_all = pd.DatetimeIndex(pd.to_datetime(next(iter(series.values()))["fore_x"]))
+        years_avail = sorted({int(y) for y in fx_all.year})
+        yr_choice = st.selectbox(
+            "Period to check", ["Whole forecast"] + [str(y) for y in years_avail], index=0,
+            key="d1_atrisk_year",
+            help="Pick a calendar year to see each antigen's lowest projected value and at-risk "
+                 "status within that year (for example 2026), or keep the whole horizon.")
+        show = summary if yr_choice == "Whole forecast" else _year_summary(series, int(yr_choice), value_col)
+        st.caption(clean(f"Values below 80 ({unit_label}) are flagged in red."
+                         + ("" if yr_choice == "Whole forecast" else f" Scoped to {yr_choice}.")))
+        st.dataframe(highlight_below(show, value_col), use_container_width=True)
+        _download(show, "Download national forecast summary (CSV)", "D1_national_antigen_forecast.csv")
 
         with st.expander("Forecast validation (hold-out back-test)"):
             st.caption(clean(
