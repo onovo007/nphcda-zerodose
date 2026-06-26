@@ -211,6 +211,50 @@ def render(data: dict):
                           suggestions=["Which LGAs are the strongest hotspots?",
                                        "How many hot spots at p<0.01?"])
 
+        st.divider()
+        section("Forecast zero-dose hotspots, 2026 to 2028 (state-level)",
+                "Figure 11. Getis-Ord Gi* on the Bayesian posterior predicted state zero-dose means "
+                "(Queen contiguity, GRID3 admin-1 boundaries). Shows whether the hot cluster persists "
+                "across the forecast horizon.")
+        st.caption(clean(
+            "Each map is one forecast year. A 'Hot Spot' is a state whose high predicted zero-dose "
+            "rate, together with its neighbours, is statistically unlikely to be chance (p<0.01 deep "
+            "red is most confident, then p<0.05, p<0.10); 'Cold Spot' (blues) marks low-burden "
+            "clusters; grey is not significant. A cluster that stays put year on year is a structural, "
+            "multi-year problem, not a one-year spike."))
+        res_keyed = res.copy()
+        res_keyed["state_key"] = res_keyed["state"].map(N.nstate)
+        year_maps, hot_by_year = {}, {}
+        for yr in C.FORECAST_YEARS:
+            vcol = f"zd_pred_{yr}_mean"
+            if vcol not in res_keyed.columns:
+                continue
+            sv = res_keyed[["state_key", vcol]].rename(columns={vcol: "value"})
+            sg = spatial.state_gi_star(sv, key=f"{mkey}-stategi-{yr}", value_col="value")
+            g = spatial.load_gdf("state").merge(sg[["state_key", "gi_class", "value"]],
+                                                on="state_key", how="left")
+            g["gi_class"] = g["gi_class"].fillna("Not Significant")
+            year_maps[yr] = g
+            hot_by_year[yr] = sorted(sg.loc[sg["gi_class"].str.contains("Hot", na=False), "state"]
+                                     .astype(str).tolist())
+        if year_maps:
+            ycols = st.columns(len(year_maps))
+            for i, (yr, g) in enumerate(year_maps.items()):
+                with ycols[i]:
+                    st.plotly_chart(
+                        viz.choropleth(g, "gi_class", categorical=True, color_map=C.HOTSPOT_COLORS,
+                                       title=f"Zero-dose hotspots {yr}", legend_title="Gi* class"),
+                        use_container_width=True)
+            persistent = sorted(set.intersection(*[set(v) for v in hot_by_year.values()])) \
+                if hot_by_year else []
+            yctx = {"hot_states_by_year": hot_by_year, "persistent_hot_states": persistent}
+            ai.ai_block("d5_hot_years",
+                        "Zero-Dose & Hotspots - forecast state hotspots 2026 to 2028",
+                        "Statistically significant zero-dose hot-spot states for each forecast year and "
+                        "the states that stay hot across all years. State whether the cluster is "
+                        "persistent (structural) or shifting, name the persistent hot states, and give "
+                        "one targeting implication.", yctx)
+
     with tabs[3]:
         section("Ranked LGA table (population-weighted)",
                 f"{lga['n_lgas']} reporting LGAs. Population matched for {lga['matched_pop']} LGAs.")

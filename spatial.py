@@ -65,3 +65,37 @@ def lga_gi_star(_lga_df, key: str, value_col: str = "zd_proxy_pct") -> pd.DataFr
         merged["gi_class"] = "Not Significant"
         st.info(f"Gi* computation unavailable, showing rates only ({exc}).")
     return merged[["state_key", "lga_key", "state", "lga", value_col, "gi_z", "gi_p", "gi_class"]]
+
+
+@st.cache_data(show_spinner=False)
+def state_gi_star(_state_df, key: str, value_col: str = "value") -> pd.DataFrame:
+    """Getis-Ord Gi* on the state surface (GRID3 admin-1, Queen contiguity), used for the
+    forecast zero-dose hotspot maps (Figure 11). _state_df must carry 'state_key' and value_col.
+    Returns a DataFrame keyed by state_key with the value, Gi* z, p and hotspot class.
+    """
+    from libpysal.weights import Queen, KNN
+    from esda.getisord import G_Local
+
+    gdf = load_gdf("state").copy()
+    work = _state_df[["state_key", value_col]].drop_duplicates("state_key")
+    merged = gdf.merge(work, on="state_key", how="left")
+    merged[value_col] = pd.to_numeric(merged[value_col], errors="coerce")
+    merged[value_col] = merged[value_col].fillna(merged[value_col].median())
+
+    try:
+        try:
+            w = Queen.from_dataframe(merged, use_index=False)
+        except Exception:
+            w = KNN.from_dataframe(merged, k=C.LGA_KNN)
+        w.transform = "r"
+        gi = G_Local(merged[value_col].values, w, star=True, seed=42)
+        merged["gi_z"] = gi.Zs
+        merged["gi_p"] = gi.p_sim
+        merged["gi_class"] = [N.hotspot_class(zz, pp) for zz, pp in zip(gi.Zs, gi.p_sim)]
+    except Exception as exc:  # pragma: no cover - defensive
+        merged["gi_z"] = np.nan
+        merged["gi_p"] = np.nan
+        merged["gi_class"] = "Not Significant"
+        st.info(f"State Gi* computation unavailable, showing rates only ({exc}).")
+    return pd.DataFrame(merged.drop(columns="geometry"))[
+        ["state_key", "state", value_col, "gi_z", "gi_p", "gi_class"]]
