@@ -257,7 +257,7 @@ def pareto_fig(pareto: pd.DataFrame, top20_pct: float, n80: int, total: int) -> 
 # --------------------------------------------------------------------------------------
 def choropleth(gdf, color_col: str, *, categorical: bool, title: str,
                color_map: dict | None = None, colorscale=None,
-               range_color=None, legend_title: str = "") -> go.Figure:
+               range_color=None, legend_title: str = "", height: int = 620) -> go.Figure:
     """Built with graph_objects (one trace, one geojson) to stay pandas-3.0 safe."""
     gdf = gdf.reset_index(drop=True).copy()
     gdf["_uid"] = gdf.index.astype(str)
@@ -297,4 +297,4 @@ def choropleth(gdf, color_col: str, *, categorical: bool, title: str,
     fig.update_geos(fitbounds="locations", visible=False, bgcolor="#E8F4F8",
                     showcountries=False, showframe=False)
     fig.update_layout(title=title, margin=dict(l=0, r=0, t=60, b=0))
-    return style_fig(fig, height=620)
+    return style_fig(fig, height=height)

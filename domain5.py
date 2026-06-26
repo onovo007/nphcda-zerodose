@@ -238,13 +238,27 @@ def render(data: dict):
             hot_by_year[yr] = sorted(sg.loc[sg["gi_class"].str.contains("Hot", na=False), "state"]
                                      .astype(str).tolist())
         if year_maps:
-            ycols = st.columns(len(year_maps))
-            for i, (yr, g) in enumerate(year_maps.items()):
-                with ycols[i]:
-                    st.plotly_chart(
-                        viz.choropleth(g, "gi_class", categorical=True, color_map=C.HOTSPOT_COLORS,
-                                       title=f"Zero-dose hotspots {yr}", legend_title="Gi* class"),
-                        use_container_width=True)
+            yrs = list(year_maps.keys())
+            view = st.radio("Map view", ["Large (one year at a time)", "Compare all three years"],
+                            horizontal=True, key="d5_hot_year_view",
+                            help="Large shows one full-width map you can read clearly; Compare shows "
+                                 "all three years side by side to see how the cluster moves.")
+            if view.startswith("Compare"):
+                ycols = st.columns(len(year_maps))
+                for i, (yr, g) in enumerate(year_maps.items()):
+                    with ycols[i]:
+                        st.plotly_chart(
+                            viz.choropleth(g, "gi_class", categorical=True, color_map=C.HOTSPOT_COLORS,
+                                           title=f"{yr}", legend_title="Gi* class", height=460),
+                            use_container_width=True)
+            else:
+                yr_sel = st.radio("Forecast year", yrs, horizontal=True, key="d5_hot_year_sel")
+                st.plotly_chart(
+                    viz.choropleth(year_maps[yr_sel], "gi_class", categorical=True,
+                                   color_map=C.HOTSPOT_COLORS,
+                                   title=f"Zero-dose hotspots {yr_sel}", legend_title="Gi* class",
+                                   height=720),
+                    use_container_width=True)
             persistent = sorted(set.intersection(*[set(v) for v in hot_by_year.values()])) \
                 if hot_by_year else []
             yctx = {"hot_states_by_year": hot_by_year, "persistent_hot_states": persistent}
