@@ -398,8 +398,10 @@ def _population_weight(lga: pd.DataFrame, pop_raw: pd.DataFrame, state_ci: dict 
         "zd_count_hi95": "ZD count high (95%)", "dropout_p1p3": "Dropout P1-P3 (%)",
         "lga_risk_index": "LGA risk index", "lga_tier": "LGA tier",
     })
+    # LGA population (2022) is kept for the burden calculation above but NOT displayed: it is the
+    # general LGA population, not the child cohort, so showing it confuses users.
     order = ["National rank", "State rank", "Zone", "State", "LGA", "Penta1 count",
-             "Penta3 count", "Penta1 share", "ZD proxy (%)", "LGA population (2022)",
+             "Penta3 count", "Penta1 share", "ZD proxy (%)",
              "ZD count (est)", "ZD count low (95%)", "ZD count high (95%)",
              "Dropout P1-P3 (%)", "LGA risk index", "LGA tier", "Severity (within state)"]
     clean = clean[[c for c in order if c in clean.columns]]
@@ -411,7 +413,7 @@ def _population_weight(lga: pd.DataFrame, pop_raw: pd.DataFrame, state_ci: dict 
     par = clean.sort_values("ZD count (est)", ascending=False).reset_index(drop=True)
     pareto = pd.DataFrame({
         "Burden rank": np.arange(1, len(par) + 1), "State": par["State"], "LGA": par["LGA"],
-        "Zone": par["Zone"], "LGA population (2022)": par["LGA population (2022)"],
+        "Zone": par["Zone"],
         "Zero-dose children (est)": par["ZD count (est)"],
         "Zero-dose rate (%)": pd.to_numeric(par["ZD proxy (%)"]).round(2),
         "LGA tier": par["LGA tier"], "Severity (within state)": par["Severity (within state)"],
