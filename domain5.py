@@ -239,17 +239,21 @@ def render(data: dict):
                                      .astype(str).tolist())
         if year_maps:
             yrs = list(year_maps.keys())
-            view = st.radio("Map view", ["Large (one year at a time)", "Compare all three years"],
-                            horizontal=True, key="d5_hot_year_view",
-                            help="Large shows one full-width map you can read clearly; Compare shows "
-                                 "all three years side by side to see how the cluster moves.")
+            vc1, vc2 = st.columns([2, 1])
+            view = vc1.radio("Map view", ["Large (one year at a time)", "Compare all three years"],
+                             horizontal=True, key="d5_hot_year_view",
+                             help="Large shows one full-width map you can read clearly; Compare shows "
+                                  "all three years side by side to see how the cluster moves.")
+            show_labels = vc2.checkbox("Show state labels", value=False, key="d5_hot_labels",
+                                       help="Overlay each state's name on the map.")
             if view.startswith("Compare"):
                 ycols = st.columns(len(year_maps))
                 for i, (yr, g) in enumerate(year_maps.items()):
                     with ycols[i]:
                         st.plotly_chart(
                             viz.choropleth(g, "gi_class", categorical=True, color_map=C.HOTSPOT_COLORS,
-                                           title=f"{yr}", legend_title="Gi* class", height=460),
+                                           title=f"{yr}", legend_title="Gi* class", height=460,
+                                           labels=show_labels, label_size=7),
                             use_container_width=True)
             else:
                 yr_sel = st.radio("Forecast year", yrs, horizontal=True, key="d5_hot_year_sel")
@@ -257,7 +261,7 @@ def render(data: dict):
                     viz.choropleth(year_maps[yr_sel], "gi_class", categorical=True,
                                    color_map=C.HOTSPOT_COLORS,
                                    title=f"Zero-dose hotspots {yr_sel}", legend_title="Gi* class",
-                                   height=720),
+                                   height=720, labels=show_labels, label_size=10),
                     use_container_width=True)
             persistent = sorted(set.intersection(*[set(v) for v in hot_by_year.values()])) \
                 if hot_by_year else []

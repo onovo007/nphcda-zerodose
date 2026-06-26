@@ -257,8 +257,11 @@ def pareto_fig(pareto: pd.DataFrame, top20_pct: float, n80: int, total: int) -> 
 # --------------------------------------------------------------------------------------
 def choropleth(gdf, color_col: str, *, categorical: bool, title: str,
                color_map: dict | None = None, colorscale=None,
-               range_color=None, legend_title: str = "", height: int = 620) -> go.Figure:
-    """Built with graph_objects (one trace, one geojson) to stay pandas-3.0 safe."""
+               range_color=None, legend_title: str = "", height: int = 620,
+               labels: bool = False, label_col: str | None = None,
+               label_size: int = 9) -> go.Figure:
+    """Built with graph_objects (one trace, one geojson) to stay pandas-3.0 safe.
+    Set labels=True to overlay the area name (state/lga) at each polygon's centre."""
     gdf = gdf.reset_index(drop=True).copy()
     gdf["_uid"] = gdf.index.astype(str)
     gj = json.loads(gdf.to_json())
@@ -294,6 +297,18 @@ def choropleth(gdf, color_col: str, *, categorical: bool, title: str,
             marker_line_color="white", marker_line_width=0.3,
             colorbar=dict(title=clean(legend_title), len=0.85),
         ))
+    if labels:
+        lc = label_col or ("state" if "state" in gdf.columns
+                           else ("lga" if "lga" in gdf.columns else None))
+        if lc:
+            try:
+                pts = gdf.geometry.representative_point()
+                fig.add_trace(go.Scattergeo(
+                    lon=pts.x, lat=pts.y, mode="text", text=gdf[lc].astype(str),
+                    textfont=dict(size=label_size, color="#1A1A1A", family="IBM Plex Sans"),
+                    hoverinfo="skip", showlegend=False))
+            except Exception:
+                pass
     fig.update_geos(fitbounds="locations", visible=False, bgcolor="#E8F4F8",
                     showcountries=False, showframe=False)
     fig.update_layout(title=title, margin=dict(l=0, r=0, t=60, b=0))
