@@ -28,7 +28,7 @@ def _zone_bar(tab):
     return style_fig(fig, height=430)
 
 
-def _scatter(x, y, labels, xt, yt):
+def _scatter(x, y, labels, xt, yt, title=None):
     fig = go.Figure()
     mx = max(max(x), max(y)) * 1.1
     fig.add_scatter(x=[0, mx], y=[0, mx], mode="lines",
@@ -38,6 +38,8 @@ def _scatter(x, y, labels, xt, yt):
                     marker=dict(size=(11 if labels is not None else 6), color=C.GOLD,
                                 line=dict(color=C.NAVY, width=1)), showlegend=False)
     fig.update_layout(xaxis_title=xt, yaxis_title=yt)
+    if title:
+        fig.update_layout(title=title)
     fig.update_xaxes(range=[0, mx]); fig.update_yaxes(range=[0, mx])
     return style_fig(fig, height=430)
 
@@ -94,8 +96,9 @@ def render(data: dict):
                 "Our 2026 zone forecast against the independent zone estimate of Umar et al. (2025).")
         kpi_row([
             {"label": "Rank agreement", "value": f"rho {zc['rho']:.2f}",
-             "sub": clean(f"Spearman, {zc['n']} zones"), "color": C.NPHCDA_GREEN,
-             "help": "Spearman rank correlation: 1.00 means the two sources rank the zones identically."},
+             "sub": clean(f"Spearman, {zc['n']} zones, {T.pfmt(zc['p'])}"), "color": C.NPHCDA_GREEN,
+             "help": "Spearman rank correlation: 1.00 means the two sources rank the zones identically. "
+                     "The p-value is the chance of seeing this agreement if the rankings were unrelated."},
             {"label": "Worst zone (both)", "value": "North-West",
              "sub": "highest zero-dose in both", "color": C.ACCENT},
             {"label": "Method", "value": "Independent",
@@ -108,7 +111,8 @@ def render(data: dict):
             st.plotly_chart(_scatter(zc["table"]["Independent 2024 (%)"].tolist(),
                                      zc["table"]["Our model 2026 (%)"].tolist(),
                                      zc["table"]["Zone"].tolist(),
-                                     "Independent estimate, 2024 (%)", "Our model, 2026 forecast (%)"),
+                                     "Independent estimate, 2024 (%)", "Our model, 2026 forecast (%)",
+                                     title=f"Rank agreement: rho {zc['rho']:.2f}, {T.pfmt(zc['p'])}"),
                             use_container_width=True)
         st.dataframe(zc["table"], use_container_width=True, hide_index=True)
         st.caption(clean("Levels differ for low-burden zones (method and denominator); the agreement "
@@ -118,7 +122,8 @@ def render(data: dict):
                     "Our zone zero-dose (2026) next to an independent 2024 estimate, and the Spearman "
                     "rank correlation. State whether the two sources agree on the ranking of zones and "
                     "what that means for confidence in the targeting.",
-                    {"rho": zc["rho"], "table": zc["table"].to_dict(orient="records")})
+                    {"rho": zc["rho"], "p_value": T.pfmt(zc["p"]),
+                     "table": zc["table"].to_dict(orient="records")})
 
     # ---------- Tab 2: LGA ----------
     with tabs[1]:
@@ -134,8 +139,9 @@ def render(data: dict):
             return
         kpi_row([
             {"label": "Rank agreement", "value": f"rho {lc['rho']:.2f}",
-             "sub": clean(f"Spearman, {lc['n']} LGAs"), "color": C.NPHCDA_GREEN,
-             "help": "Rank correlation of our LGA coverage (2026) vs IHME (2018)."},
+             "sub": clean(f"Spearman, {lc['n']} LGAs, {T.pfmt(lc['p'])}"), "color": C.NPHCDA_GREEN,
+             "help": "Rank correlation of our LGA coverage (2026) vs IHME (2018). The p-value is the "
+                     "chance of seeing this agreement if the two rankings were unrelated."},
             {"label": "High confidence", "value": f"{lc['n_high']}",
              "sub": clean(f"{lc['n_high']/lc['n']*100:.0f}% same tercile"), "color": C.NPHCDA_GREEN},
             {"label": "Moderate", "value": f"{lc['n_mod']}",
@@ -152,7 +158,8 @@ def render(data: dict):
         with c2:
             st.plotly_chart(_scatter(lc["merged"]["IHME DTP1 coverage 2018 (%)"].tolist(),
                                      lc["merged"]["Our DTP1 coverage 2026 (%)"].tolist(), None,
-                                     "IHME DTP1 coverage, 2018 (%)", "Our DTP1 coverage, 2026 (%)"),
+                                     "IHME DTP1 coverage, 2018 (%)", "Our DTP1 coverage, 2026 (%)",
+                                     title=f"Rank agreement: rho {lc['rho']:.2f}, {T.pfmt(lc['p'])}"),
                             use_container_width=True)
         st.markdown("##### LGA confidence table")
         only_low = st.checkbox("Show only low-confidence LGAs (flagged for review)", value=False,
@@ -169,5 +176,5 @@ def render(data: dict):
                     "Rank correlation and tercile concordance between our LGA estimate (2026) and IHME "
                     "modelled LGA DTP1 coverage (2018). State the level of agreement, how many LGAs are "
                     "high/moderate/low confidence, and that low-confidence LGAs are flagged for review.",
-                    {"rho": lc["rho"], "n": lc["n"], "high": lc["n_high"], "moderate": lc["n_mod"],
-                     "low": lc["n_low"]})
+                    {"rho": lc["rho"], "p_value": T.pfmt(lc["p"]), "n": lc["n"],
+                     "high": lc["n_high"], "moderate": lc["n_mod"], "low": lc["n_low"]})

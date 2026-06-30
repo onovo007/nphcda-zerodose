@@ -27,6 +27,32 @@ IHME_CITATION = ("IHME Local Burden of Disease, Nigeria DTP1 vaccine coverage es
 TERCILES = ["Lower third (worst)", "Middle third", "Upper third (best)"]
 
 
+def exact_spearman_p(a, b) -> float:
+    """Two-sided exact permutation p-value for Spearman rho. Use for small n (e.g. 6 zones),
+    where the t-approximation is unreliable (it returns ~0 at rho = 1)."""
+    from itertools import permutations
+    a = list(a); b = list(b); n = len(a)
+    r0, _ = spearmanr(a, b)
+    hits = total = 0
+    for perm in permutations(range(n)):
+        r, _ = spearmanr(a, [b[i] for i in perm])
+        total += 1
+        if abs(r) >= abs(r0) - 1e-12:
+            hits += 1
+    return hits / total
+
+
+def pfmt(p) -> str:
+    """Conventional p-value string for display."""
+    try:
+        p = float(p)
+    except Exception:
+        return ""
+    if p < 0.001:
+        return "p < 0.001"
+    return f"p = {p:.3f}"
+
+
 def zone_crosscheck(res: pd.DataFrame) -> dict:
     """Aggregate our 37-state forecast to zones (cohort-weighted) and compare with UMAR_ZONE_2024."""
     d = res.copy()
@@ -45,7 +71,10 @@ def zone_crosscheck(res: pd.DataFrame) -> dict:
                      "Independent 2024 (%)": UMAR_ZONE_2024.get(z, np.nan)})
     tab = pd.DataFrame(rows).dropna(subset=["Independent 2024 (%)"])
     tab = tab.sort_values("Independent 2024 (%)", ascending=False).reset_index(drop=True)
-    rho, p = spearmanr(tab["Our model 2026 (%)"], tab["Independent 2024 (%)"])
+    rho, _ = spearmanr(tab["Our model 2026 (%)"], tab["Independent 2024 (%)"])
+    # Exact permutation p (small n: 6 zones); the t-approximation is unreliable at rho = 1.
+    p = exact_spearman_p(tab["Our model 2026 (%)"].tolist(), tab["Independent 2024 (%)"].tolist()) \
+        if len(tab) <= 8 else spearmanr(tab["Our model 2026 (%)"], tab["Independent 2024 (%)"])[1]
     return {"table": tab, "rho": round(float(rho), 3), "p": float(p), "n": len(tab)}
 
 
