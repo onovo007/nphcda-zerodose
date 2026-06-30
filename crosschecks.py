@@ -170,8 +170,7 @@ def render(data: dict):
         st.dataframe(view, use_container_width=True, height=420, hide_index=True)
         _download(lc["merged"], "Download LGA cross-check (CSV)", "crosscheck_lga_ihme.csv")
         st.caption(clean("Compared on rank/tercile, not levels: the 8-year gap (IHME 2018 vs our 2026) "
-                         "shifts levels (coverage fell in the North after 2019) but not the broad "
-                         "geography. Source: " + T.IHME_CITATION))
+                         "shifts levels but not the broad geography. Source: " + T.IHME_CITATION))
         ai.ai_block("xc_lga", "Triangulation - LGA cross-check vs IHME DTP1 coverage",
                     "Rank correlation and tercile concordance between our LGA estimate (2026) and IHME "
                     "modelled LGA DTP1 coverage (2018). State the level of agreement, how many LGAs are "
