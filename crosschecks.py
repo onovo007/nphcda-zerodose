@@ -54,7 +54,7 @@ def _matrix(ct):
         for j in range(3):
             fig.add_annotation(x=j, y=i, text=str(int(ct.iloc[i, j])), showarrow=False,
                                font=dict(size=18, color="#1A1A1A"))
-    tt = ["Lower (worst)", "Middle", "Upper (best)"]
+    tt = ["Lower (lowest coverage)", "Middle", "Upper (highest coverage)"]
     fig.update_xaxes(tickvals=[0, 1, 2], ticktext=tt, title="IHME DTP1 tercile (2018)")
     fig.update_yaxes(tickvals=[0, 1, 2], ticktext=tt, autorange="reversed",
                      title="Our DTP1 tercile (2026)")

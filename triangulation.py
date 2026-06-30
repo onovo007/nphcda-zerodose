@@ -24,7 +24,7 @@ UMAR_CITATION = ("Umar HJ, Onah SI, Popoola O, Jibril HH, Oyewole F. Widening ge
                  "trend analysis (2018-2024). Vaccines 2025;13(11):1135.")
 IHME_CITATION = ("IHME Local Burden of Disease, Nigeria DTP1 vaccine coverage estimates, admin-2, "
                  "2000-2018 (GHDx, 2022).")
-TERCILES = ["Lower third (worst)", "Middle third", "Upper third (best)"]
+TERCILES = ["Lower third (lowest coverage)", "Middle third", "Upper third (highest coverage)"]
 
 
 def exact_spearman_p(a, b) -> float:
