@@ -99,7 +99,7 @@ def render(data: dict):
              "sub": clean(f"Spearman, {zc['n']} zones, {T.pfmt(zc['p'])}"), "color": C.NPHCDA_GREEN,
              "help": "Spearman rank correlation: 1.00 means the two sources rank the zones identically. "
                      "The p-value is the chance of seeing this agreement if the rankings were unrelated."},
-            {"label": "Worst zone (both)", "value": "North-West",
+            {"label": "Highest zone (both)", "value": "North-West",
              "sub": "highest zero-dose in both", "color": C.ACCENT},
             {"label": "Method", "value": "Independent",
              "sub": "different surveys, different team", "color": C.STEEL},
