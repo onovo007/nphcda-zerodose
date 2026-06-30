@@ -78,30 +78,54 @@ def zone_crosscheck(res: pd.DataFrame) -> dict:
     return {"table": tab, "rho": round(float(rho), 3), "p": float(p), "n": len(tab)}
 
 
+# IHME spells one state differently, and uses a few pre-rename LGA names.
+STATE_ALIAS = {"nassarawa": "nasarawa"}
+IHME_LGA_ALIAS = {
+    ("ogun", "yewa north"): "egbadonorth", ("ogun", "yewa south"): "egbadosouth",
+    ("lagos", "lagos mainland"): "mainland", ("ekiti", "aiyekire"): "gboyin",
+    ("kogi", "kogi"): "kotonkar", ("abia", "obi nwga"): "oboma ngwa",
+}
+FUZZY_MIN = 0.70  # accept a fuzzy LGA match only at/above this similarity and clearly best
+
+
 def load_ihme_dtp1() -> pd.DataFrame:
-    """Bundled IHME admin-2 DTP1 coverage (2018), keyed for joining."""
+    """Bundled IHME admin-2 DTP1 coverage (2018), keyed for joining (state spelling harmonized)."""
     df = pd.read_csv(C.IHME_DTP1_ADMIN2)
-    df["sk"] = df["ADM1_NAME"].map(N.nstate)
+    df["sk"] = df["ADM1_NAME"].map(N.nstate).replace(STATE_ALIAS)
     df["lk"] = df["ADM2_NAME"].map(N.nlga)
     return df
 
 
 def _match_ihme(ihme: pd.DataFrame):
+    """Resolve an LGA to its IHME value: exact, then alias, then space-stripped prefix, then a
+    conservative fuzzy fallback (handles IHME's truncated/abbreviated names)."""
+    import difflib
     look = {(r["sk"], r["lk"]): r["dtp1_2018"] for _, r in ihme.iterrows()}
     by_state: dict = {}
     for _, r in ihme.iterrows():
-        by_state.setdefault(r["sk"], []).append((str(r["lk"]).replace(" ", ""), r["dtp1_2018"]))
+        by_state.setdefault(r["sk"], []).append((str(r["lk"]), r["dtp1_2018"]))
 
     def match(sk, lk):
-        if (sk, lk) in look:
+        if (sk, lk) in look:                                   # 1. exact
             return look[(sk, lk)]
-        alias = N.LGA_ALIAS.get((sk, lk))
-        if alias and (sk, alias) in look:
-            return look[(sk, alias)]
-        ns = str(lk).replace(" ", "")
-        hits = [v for n, v in by_state.get(sk, [])
-                if len(n) >= 5 and (ns.startswith(n) or n.startswith(ns))]
-        return hits[0] if len(hits) == 1 else np.nan
+        for amap in (IHME_LGA_ALIAS, N.LGA_ALIAS):             # 2. explicit aliases (renames)
+            al = amap.get((sk, lk))
+            if al and (sk, al) in look:
+                return look[(sk, al)]
+        cands = by_state.get(sk, [])
+        if not cands:
+            return np.nan
+        ns = str(lk).replace(" ", "")                          # 3. space-stripped prefix (unique)
+        pre = [v for n, v in cands if len(n.replace(" ", "")) >= 5
+               and (ns.startswith(n.replace(" ", "")) or n.replace(" ", "").startswith(ns))]
+        if len(pre) == 1:
+            return pre[0]
+        scored = sorted(((difflib.SequenceMatcher(None, lk, n).ratio(), v) for n, v in cands),
+                        key=lambda t: -t[0])                    # 4. fuzzy (best, clearly ahead)
+        if scored and scored[0][0] >= FUZZY_MIN and (len(scored) == 1
+                                                     or scored[0][0] - scored[1][0] >= 0.05):
+            return scored[0][1]
+        return np.nan
     return match
 
 
