@@ -44,6 +44,9 @@ GEO_LGAS = GEO_DIR / "nga_lgas.geojson"
 # Alternative under-five population vintage for the Domain 5 population sensitivity view.
 UNDER5_2025_PATH = DATA_DIR / "under_5_2025.csv"
 
+# IHME Local Burden of Disease, Nigeria DTP1 coverage admin-2 (2018), for the LGA cross-check.
+IHME_DTP1_ADMIN2 = DATA_DIR / "ihme_dtp1_admin2_2018.csv"
+
 # --------------------------------------------------------------------------------------
 # Model constants (verbatim from the notebooks)
 # --------------------------------------------------------------------------------------

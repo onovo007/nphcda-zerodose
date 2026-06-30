@@ -1,0 +1,775 @@
+ADM1_NAME,ADM2_NAME,dtp1_2018,dtp1_lo,dtp1_hi
+Abia,Aba North,93.78,85.99,98.2
+Abia,Aba South,92.83,84.14,97.78
+Abia,Arochukw,84.73,72.17,92.98
+Abia,Bende,87.18,76.18,94.29
+Abia,Ikwuano,88.11,77.44,95.1
+Abia,Isiala Ngwa North,89.75,80.28,96.0
+Abia,Isiala Ngwa South,88.53,78.36,95.87
+Abia,Isuikwua,85.98,73.46,93.92
+Abia,Oboma Ngwa,91.07,81.75,96.72
+Abia,Ohafia Abia,87.91,77.05,94.8
+Abia,Osisioma Ngwa,91.05,82.11,96.81
+Abia,Ugwunagbo,91.4,82.12,96.67
+Abia,Ukwa East,88.39,77.36,95.61
+Abia,Ukwa West,90.1,80.6,96.07
+Abia,Umu-Nneochi,88.3,76.59,95.65
+Abia,Umuahia North,90.45,80.46,96.38
+Abia,Umuahia South,90.83,81.33,96.69
+Adamawa,Demsa,73.84,58.24,86.89
+Adamawa,Fufore,56.88,42.48,71.38
+Adamawa,Ganye,76.28,59.82,89.39
+Adamawa,Girie,73.78,55.32,87.98
+Adamawa,Gombi,60.02,42.47,76.64
+Adamawa,Guyuk,72.29,54.62,86.15
+Adamawa,Hong,68.11,52.36,81.23
+Adamawa,Jada,75.45,58.62,88.03
+Adamawa,Lamurde,82.17,65.84,91.97
+Adamawa,Madagali,78.3,59.58,92.2
+Adamawa,Maiha,59.46,41.48,77.18
+Adamawa,Mayo-Bel,76.03,59.94,88.04
+Adamawa,Michika,78.52,60.83,91.06
+Adamawa,Mubi North,67.95,51.55,81.22
+Adamawa,Mubi South,64.65,46.58,79.69
+Adamawa,Numan,83.47,68.22,93.35
+Adamawa,Shelleng,75.14,60.12,87.92
+Adamawa,Song,62.54,45.42,78.78
+Adamawa,Teungo,74.08,55.09,88.42
+Adamawa,Yola North,72.35,54.75,86.84
+Adamawa,Yola South,66.83,48.88,83.58
+Akwa Ibom,Abak,90.94,80.11,96.96
+Akwa Ibom,Eastern Obolo,79.71,63.08,91.59
+Akwa Ibom,Eket,81.79,66.19,92.72
+Akwa Ibom,Esit Eket,77.63,61.68,90.1
+Akwa Ibom,Essien-U,91.22,82.15,96.64
+Akwa Ibom,EtimEkpo,89.6,79.05,95.89
+Akwa Ibom,Etinan,84.88,70.54,93.9
+Akwa Ibom,Ibeno,73.78,55.9,87.4
+Akwa Ibom,Ibesikpo Asutan,85.61,73.13,94.17
+Akwa Ibom,Ibiono Ibom,85.68,73.07,94.48
+Akwa Ibom,Ika,90.34,80.82,96.2
+Akwa Ibom,Ikono,87.93,76.35,95.6
+Akwa Ibom,Ikot-Aba,84.74,70.33,93.87
+Akwa Ibom,Ikot-Ekp,89.87,79.75,96.18
+Akwa Ibom,Ini,83.59,70.43,92.8
+Akwa Ibom,Itu,85.88,74.3,94.81
+Akwa Ibom,Mbo,68.93,50.07,85.41
+Akwa Ibom,Mkpat Enin,83.81,70.16,93.27
+Akwa Ibom,Nsit Atai,80.77,64.53,91.52
+Akwa Ibom,Nsit Ibom,86.12,73.15,94.28
+Akwa Ibom,Nsit Ubium,82.82,68.08,92.69
+Akwa Ibom,Obot Akara,87.8,76.27,95.39
+Akwa Ibom,Okobo,77.59,60.96,89.7
+Akwa Ibom,Onna,82.08,66.38,93.44
+Akwa Ibom,Oron,73.6,55.92,88.1
+Akwa Ibom,Oruk-Ana,85.1,70.46,94.45
+Akwa Ibom,Udung Uko,69.93,50.02,86.31
+Akwa Ibom,Ukanafun,88.17,75.51,95.83
+Akwa Ibom,Uruan,82.49,69.25,92.42
+Akwa Ibom,UrueOffo,75.28,56.99,88.82
+Akwa Ibom,Uyo,88.87,78.17,96.05
+Anambra,Aguata,91.12,82.0,96.61
+Anambra,Anambra East,90.53,80.63,96.28
+Anambra,Anambra West,79.68,64.13,90.75
+Anambra,Anaocha,93.17,84.83,97.31
+Anambra,AwkaNort,92.46,85.12,97.12
+Anambra,AwkaSout,94.3,87.66,97.97
+Anambra,Ayamelum,81.8,67.72,92.14
+Anambra,Dunukofia,94.39,87.08,98.02
+Anambra,Ekwusigo,91.22,81.46,96.46
+Anambra,Idemili North,94.15,86.15,98.06
+Anambra,Idemili South,92.93,84.39,97.31
+Anambra,Ihiala,86.33,73.47,94.58
+Anambra,Njikoka,94.6,87.46,98.14
+Anambra,NnewiNort,91.65,82.22,96.81
+Anambra,NnewiSou,89.26,78.6,95.76
+Anambra,Ogbaru,85.51,73.47,93.81
+Anambra,Onitsha North,93.85,85.86,97.96
+Anambra,Onitsha South,92.35,84.28,97.43
+Anambra,OrumbaNo,91.6,82.71,96.73
+Anambra,OrumbaSo,90.36,80.06,96.14
+Anambra,Oyi,94.12,86.06,97.98
+Bauchi,Alkaleri,54.74,38.36,69.96
+Bauchi,Bauchi,60.71,43.83,77.32
+Bauchi,Bogoro,83.65,67.69,93.68
+Bauchi,Damban,46.32,27.52,67.05
+Bauchi,Darazo,33.69,19.18,50.32
+Bauchi,Dass,78.31,60.52,91.15
+Bauchi,Gamawa,38.78,24.32,56.47
+Bauchi,Gamjuwa,53.68,37.31,68.8
+Bauchi,Giade,40.18,23.81,59.96
+Bauchi,Itas/Gad,42.54,27.84,59.3
+Bauchi,Jama'are,48.39,30.07,67.35
+Bauchi,Katagum,38.55,24.4,54.43
+Bauchi,Kirfi,45.93,27.97,66.32
+Bauchi,Misau,44.94,26.28,64.89
+Bauchi,Ningi,49.48,32.82,64.52
+Bauchi,Shira,37.86,22.21,56.8
+Bauchi,Tafawa-B,79.6,63.95,90.83
+Bauchi,Toro,64.64,50.65,77.58
+Bauchi,Warji,53.7,34.99,70.89
+Bauchi,Zaki,43.01,26.58,60.55
+Bayelsa,Brass,75.26,58.39,87.83
+Bayelsa,Ekeremor,60.18,42.04,77.06
+Bayelsa,Kolokuma/Opokuma,71.3,54.98,85.63
+Bayelsa,Nembe,73.63,53.04,88.75
+Bayelsa,Ogbia,72.76,54.17,88.01
+Bayelsa,Sagbama,69.59,53.41,82.67
+Bayelsa,Southern Ijaw,60.27,40.93,77.16
+Bayelsa,Yenegoa,75.3,60.01,87.94
+Benue,Ado,84.17,70.91,92.93
+Benue,Agatu,70.95,50.91,87.05
+Benue,Apa,76.29,58.8,89.59
+Benue,Buruku,71.27,55.1,84.76
+Benue,Gboko,74.84,56.38,87.68
+Benue,Guma,56.36,38.93,73.81
+Benue,Gwer East,74.05,59.96,86.0
+Benue,GwerWest,77.09,58.62,89.9
+Benue,Katsina (Benue),70.93,54.48,84.99
+Benue,Konshish,74.19,59.84,85.87
+Benue,Kwande,82.44,66.95,92.84
+Benue,Logo,63.51,46.24,79.53
+Benue,Makurdi,71.79,51.85,86.65
+Benue,Obi,85.01,71.73,94.7
+Benue,Ogbadibo,83.49,69.74,93.27
+Benue,Ohimini,83.59,67.38,93.12
+Benue,Oju,84.62,71.49,92.9
+Benue,Okpokwu,82.9,66.59,92.46
+Benue,Oturkpo,82.73,67.17,92.36
+Benue,Tarka,72.06,52.52,87.24
+Benue,Ukum,71.99,52.82,86.43
+Benue,Ushongo,76.8,61.62,89.31
+Benue,Vandeiky,82.79,67.35,93.02
+Borno,Abadam,23.26,10.1,42.85
+Borno,Askira/U,69.83,54.17,82.43
+Borno,Bama,48.56,29.49,70.34
+Borno,Bayo,45.92,26.49,65.05
+Borno,Biu,61.77,44.5,77.07
+Borno,Chibok,53.78,33.07,75.32
+Borno,Damboa,46.42,30.39,63.75
+Borno,Dikwa,46.19,25.02,71.63
+Borno,Gubio,15.45,6.68,28.34
+Borno,Guzamala,19.81,9.7,35.29
+Borno,Gwoza,64.76,42.14,83.23
+Borno,Hawul,78.65,63.5,89.73
+Borno,Jere,52.75,37.69,69.12
+Borno,Kaga,30.8,15.44,51.0
+Borno,Kala/Balge,49.62,30.39,72.57
+Borno,Konduga,54.81,39.27,69.74
+Borno,Kukawa,24.7,11.5,44.61
+Borno,Kwaya Kusar,61.44,42.5,77.73
+Borno,Mafa,44.25,24.98,67.29
+Borno,Magumeri,24.52,12.77,40.43
+Borno,Maidugur,59.45,42.38,76.83
+Borno,Marte,39.71,20.46,61.01
+Borno,Mobbar,16.17,7.99,28.44
+Borno,Monguno,29.81,14.08,50.9
+Borno,Ngala,49.23,28.87,70.75
+Borno,Nganzai,27.34,14.32,46.16
+Borno,Shani,69.07,50.37,83.99
+Cross River,Abi,92.73,85.29,97.6
+Cross River,Akamkpa,72.86,56.27,85.3
+Cross River,Akpabuyo,80.46,65.56,91.37
+Cross River,Bakassi,75.22,54.64,91.16
+Cross River,Bekwarra,87.08,73.78,95.48
+Cross River,Biase,82.0,67.87,92.0
+Cross River,Boki,86.1,72.28,95.22
+Cross River,Calabar,82.97,69.06,93.06
+Cross River,Calabar South,72.01,55.7,86.54
+Cross River,Etung,88.95,75.22,97.01
+Cross River,Ikom,89.57,79.18,96.28
+Cross River,Obanliku,87.49,71.58,95.95
+Cross River,Obubra,91.21,81.09,96.98
+Cross River,Obudu,87.84,72.12,96.13
+Cross River,Odukpani,75.55,60.08,87.63
+Cross River,Ogoja,88.97,76.64,96.11
+Cross River,Yakurr,91.56,81.86,97.1
+Cross River,Yala Cross,86.4,73.92,94.11
+Delta,AniochaN,84.37,67.97,94.96
+Delta,AniochaS,87.68,74.44,96.03
+Delta,Bomadi,72.58,55.02,86.6
+Delta,Burutu,62.84,44.88,78.87
+Delta,Ethiope West,85.16,71.87,94.56
+Delta,EthiopeE,85.52,72.4,94.86
+Delta,IkaNorth,91.17,80.77,97.27
+Delta,IkaSouth,92.89,83.94,97.89
+Delta,IsokoNor,84.04,70.42,93.44
+Delta,IsokoSou,81.95,67.21,92.14
+Delta,Ndokwa East,79.32,66.14,90.36
+Delta,Ndokwa West,84.39,71.72,93.74
+Delta,Okpe,85.4,71.81,94.15
+Delta,Oshimili North,85.8,73.5,94.26
+Delta,Oshimili South,91.48,83.12,96.88
+Delta,Patani,73.95,55.37,87.62
+Delta,Sapele,84.18,68.34,93.99
+Delta,Udu,86.57,73.08,95.21
+Delta,Ughelli North,84.3,71.18,93.46
+Delta,Ughelli South,80.58,66.29,91.56
+Delta,Ukwuani,88.52,77.67,96.35
+Delta,Uvwie,89.01,77.57,95.97
+Delta,Warri North,57.96,39.06,75.15
+Delta,Warri South,84.52,70.52,93.93
+Delta,Warri South-West,57.25,40.13,73.91
+Ebonyi,Abakalik,93.89,86.25,98.02
+Ebonyi,Afikpo,92.92,85.51,97.41
+Ebonyi,AfikpoSo,90.15,81.53,96.01
+Ebonyi,Ebonyi,93.21,85.17,97.72
+Ebonyi,Ezza North,92.92,85.56,97.54
+Ebonyi,Ezza South,93.49,86.64,97.62
+Ebonyi,Ikwo,93.1,86.44,97.56
+Ebonyi,Ishielu,92.44,83.82,97.32
+Ebonyi,Ivo,89.56,79.01,95.83
+Ebonyi,Izzi,91.59,83.14,96.96
+Ebonyi,Ohaozara,92.3,84.79,97.19
+Ebonyi,Ohaukwu,91.21,81.66,96.77
+Ebonyi,Onicha,93.27,86.41,97.44
+Edo,Akoko-Ed,84.44,71.42,93.6
+Edo,Egor,92.75,82.79,97.86
+Edo,EsanCent,95.04,88.85,98.63
+Edo,EsanNort,94.39,87.38,98.19
+Edo,EsanSout,87.95,77.89,94.94
+Edo,EsanWest,94.97,88.12,98.67
+Edo,Etsako Central,85.58,74.01,93.82
+Edo,EtsakoEa,81.59,67.6,91.4
+Edo,EtsakoWe,91.39,82.33,97.19
+Edo,Igueben,93.21,84.87,98.0
+Edo,Ikpoba-Okha,90.44,80.93,96.57
+Edo,Oredo Edo,91.05,80.16,96.96
+Edo,Orhionmw,86.38,74.65,94.57
+Edo,OviaNort,87.81,77.06,94.85
+Edo,OviaSouth-West,75.51,58.01,87.36
+Edo,Owan East,88.39,77.48,95.77
+Edo,OwanWest,91.33,81.5,97.21
+Edo,Uhunmwonde,91.57,82.43,97.06
+Ekiti,Ado-Ekiti,93.74,85.98,97.89
+Ekiti,Efon,90.15,78.74,96.41
+Ekiti,EkitiEas,91.41,80.97,97.13
+Ekiti,EkitiSouth-West,92.54,84.61,97.3
+Ekiti,EkitiWest,90.33,80.22,96.47
+Ekiti,Emure/Ise/Orun,91.53,81.83,97.21
+Ekiti,Gboyin,92.42,84.19,97.33
+Ekiti,Ido/Osi,92.84,84.49,97.42
+Ekiti,Ijero,91.0,80.82,96.46
+Ekiti,Ikere,93.71,85.05,98.07
+Ekiti,Ikole,89.89,79.78,96.49
+Ekiti,Ilejemeje,91.84,82.22,97.14
+Ekiti,Irepodun/Ifelodun,92.94,84.38,97.63
+Ekiti,Ise/Orun,92.39,82.44,97.74
+Ekiti,Moba,91.75,82.0,97.19
+Ekiti,Oye,91.69,81.0,97.41
+Enugu,Aninri,91.02,81.01,96.44
+Enugu,Awgu,93.24,84.68,97.52
+Enugu,Enugu East,95.1,89.96,98.38
+Enugu,Enugu North,96.53,92.28,98.89
+Enugu,EnuguSou,96.8,92.44,99.14
+Enugu,Ezeagu,92.45,83.27,97.65
+Enugu,Igbo-Eti,91.69,82.85,97.18
+Enugu,Igbo-eze North,83.43,68.8,93.36
+Enugu,Igbo-eze South,84.32,70.87,93.93
+Enugu,Isi-Uzo,90.34,80.59,96.2
+Enugu,Nkanu East,93.29,86.71,97.41
+Enugu,Nkanu West,96.3,91.32,98.95
+Enugu,Nsukka,88.65,78.73,95.5
+Enugu,Oji-River,92.14,82.52,97.05
+Enugu,Udenu,88.56,77.7,95.72
+Enugu,Udi,94.15,88.07,97.93
+Enugu,Uzo-Uwani,81.8,67.69,91.89
+Federal Capital Territory,Abaji,69.02,54.32,82.74
+Federal Capital Territory,AbujaMun,88.03,79.39,95.07
+Federal Capital Territory,Bwari,87.99,77.92,94.93
+Federal Capital Territory,Gwagwala,75.97,60.22,88.13
+Federal Capital Territory,Kuje,74.99,60.64,87.18
+Federal Capital Territory,Kwali,72.68,56.84,85.37
+Gombe,Akko,60.86,42.67,77.45
+Gombe,Balanga,66.59,49.35,80.79
+Gombe,Billiri,73.91,58.5,87.96
+Gombe,Dukku,26.96,15.08,42.65
+Gombe,Funakaye,29.27,15.97,44.88
+Gombe,Gombe,60.59,36.88,80.87
+Gombe,Kaltungo,67.86,48.92,83.09
+Gombe,Kwami,39.67,24.55,56.12
+Gombe,Nafada,32.02,19.21,48.37
+Gombe,Shomgom,78.67,63.58,90.53
+Gombe,Yamaltu,42.71,27.24,59.27
+Imo,Aboh-Mba,91.47,82.5,96.98
+Imo,Ahizu-Mb,91.75,82.94,97.1
+Imo,Ehime-Mb,88.98,78.96,95.39
+Imo,Ezinihit,91.63,82.68,97.07
+Imo,Ideato South,88.35,76.12,95.31
+Imo,IdeatoNo,89.33,78.88,95.72
+Imo,Ihitte/U,89.98,81.05,95.83
+Imo,Ikeduru,91.31,81.71,96.5
+Imo,IsialaMb,89.32,77.49,95.63
+Imo,Isu,89.53,76.64,96.38
+Imo,Mbaitoli,90.36,80.55,96.28
+Imo,Ngor-Okp,88.06,77.03,95.74
+Imo,Njaba,89.37,76.92,95.89
+Imo,Nkwerre,89.26,77.19,95.92
+Imo,Nwangele,88.99,77.31,95.55
+Imo,Obowo,91.19,82.52,96.55
+Imo,Oguta,83.94,70.04,93.37
+Imo,Ohaji/Eg,82.27,68.6,91.82
+Imo,Okigwe,87.24,76.03,94.42
+Imo,Orlu,89.48,78.64,95.85
+Imo,Orsu,88.33,77.88,95.3
+Imo,Oru East,88.01,76.53,95.07
+Imo,Oru West,86.79,73.94,94.67
+Imo,Owerri Municipal,92.6,82.86,97.61
+Imo,Owerri North,91.76,82.51,96.89
+Imo,Owerri West,90.69,78.65,96.76
+Imo,Unuimo,86.75,72.93,94.84
+Jigawa,Auyo,50.76,31.78,69.91
+Jigawa,Babura,62.46,45.72,79.19
+Jigawa,Biriniwa,48.73,32.28,68.04
+Jigawa,BirninKu,43.49,27.49,58.9
+Jigawa,Buji,42.06,26.87,58.52
+Jigawa,Dutse,46.96,31.44,64.7
+Jigawa,Gagarawa,66.49,47.91,82.53
+Jigawa,Garki,65.7,48.75,79.23
+Jigawa,Gumel,67.49,48.48,83.13
+Jigawa,Guri,51.93,32.84,70.47
+Jigawa,Gwaram,44.74,27.83,63.07
+Jigawa,Gwiwa,57.21,38.47,74.69
+Jigawa,Hadejia,63.73,42.72,83.77
+Jigawa,Jahun,58.83,40.95,75.22
+Jigawa,KafinHau,43.92,27.06,62.03
+Jigawa,Kaugama,60.22,44.74,77.76
+Jigawa,Kazaure,67.13,47.94,83.15
+Jigawa,KiriKasa,52.8,34.27,70.6
+Jigawa,Kiyawa,45.35,29.28,64.29
+Jigawa,Maigatari,59.88,41.5,75.43
+Jigawa,MalamMad,55.14,37.18,75.24
+Jigawa,Miga,61.48,43.69,77.83
+Jigawa,Ringim,62.11,44.97,78.32
+Jigawa,Roni,58.47,39.51,75.17
+Jigawa,Sule-Tan,67.5,50.59,82.58
+Jigawa,Taura,67.66,52.1,81.84
+Jigawa,Yankwashi,63.9,45.43,80.38
+Kaduna,Birnin-G,33.98,19.73,52.1
+Kaduna,Chikun,66.81,50.12,80.52
+Kaduna,Giwa,41.99,26.01,58.74
+Kaduna,Igabi,62.02,45.3,76.42
+Kaduna,Ikara,53.83,35.86,70.7
+Kaduna,Jaba,84.14,70.16,94.05
+Kaduna,Jema'a,77.84,62.75,90.18
+Kaduna,Kachia,64.92,48.49,80.74
+Kaduna,Kaduna North,78.14,55.66,91.03
+Kaduna,Kaduna South,79.58,59.69,91.88
+Kaduna,Kagarko,75.32,59.63,87.75
+Kaduna,Kajuru,66.74,45.43,84.37
+Kaduna,Kaura,84.93,71.95,94.62
+Kaduna,Kauru,63.33,48.09,78.7
+Kaduna,Kubau,50.95,35.35,67.49
+Kaduna,Kudan,53.43,37.1,70.55
+Kaduna,Lere,67.4,49.38,83.17
+Kaduna,Makarfi,55.34,36.88,74.39
+Kaduna,Sabon-Ga,60.72,43.15,77.38
+Kaduna,Sanga,75.98,59.64,88.54
+Kaduna,Soba,39.05,25.93,54.07
+Kaduna,ZangonKa,81.97,69.42,93.03
+Kaduna,Zaria,57.06,40.02,73.01
+Kano,Ajingi,53.01,35.42,71.97
+Kano,Albasu,49.92,34.05,68.53
+Kano,Bagwai,58.29,39.89,76.8
+Kano,Bebeji,47.03,30.68,64.11
+Kano,Bichi,53.06,33.65,70.58
+Kano,Bunkure,49.91,33.75,66.64
+Kano,Dala,80.1,63.85,91.06
+Kano,Dambatta,63.4,44.61,79.49
+Kano,DawakinK,52.92,36.21,68.43
+Kano,DawakinT,59.27,41.07,75.48
+Kano,Doguwa,53.15,35.18,70.55
+Kano,Fagge,81.4,64.29,91.67
+Kano,Gabasawa,57.69,38.25,72.94
+Kano,Garko,53.55,34.26,72.63
+Kano,Garum Mallam,49.78,32.27,68.46
+Kano,Gaya,50.81,34.73,69.0
+Kano,Gezawa,65.4,47.07,80.25
+Kano,Gwale,81.44,64.72,91.96
+Kano,Gwarzo,57.34,38.04,77.44
+Kano,Kabo,56.54,39.25,74.61
+Kano,Kano,77.13,60.19,90.05
+Kano,Karaye,55.77,38.02,73.0
+Kano,Kibiya,49.89,31.81,68.57
+Kano,Kiru,50.63,34.23,68.83
+Kano,Kumbotso,71.11,54.45,84.54
+Kano,Kunchi,52.73,33.19,70.33
+Kano,Kura,60.74,42.59,77.62
+Kano,Madobi,58.91,41.56,75.64
+Kano,Makoda,59.31,40.43,75.45
+Kano,Minjibir,59.48,40.3,76.73
+Kano,Nassaraw,82.05,66.42,92.21
+Kano,Rano,46.26,28.26,65.89
+Kano,RiminGad,57.91,39.9,74.63
+Kano,Rogo,55.15,37.7,72.77
+Kano,Shanono,58.47,41.2,75.89
+Kano,Sumaila,52.06,33.93,69.52
+Kano,Takai,49.28,31.16,68.88
+Kano,Tarauni,79.3,61.86,90.49
+Kano,Tofa,61.75,43.27,78.1
+Kano,Tsanyawa,59.76,40.5,78.13
+Kano,Tundun Wada,50.84,34.7,68.94
+Kano,Ungogo,77.09,60.92,88.07
+Kano,Warawa,61.74,43.57,76.87
+Kano,Wudil,52.86,34.31,71.15
+Katsina,Bakori,50.62,34.75,67.44
+Katsina,Batagarawa,41.88,25.54,61.44
+Katsina,Batsari,42.83,22.58,65.31
+Katsina,Baure,62.78,44.12,80.68
+Katsina,Bindawa,34.78,19.28,52.96
+Katsina,Charanchi,38.33,22.25,58.12
+Katsina,Dandume,40.64,22.95,61.28
+Katsina,Danja,52.56,36.0,70.95
+Katsina,Danmusa,35.68,19.12,53.91
+Katsina,Daura,59.25,40.44,77.84
+Katsina,Dutsi,45.96,28.17,64.96
+Katsina,Dutsin-M,44.34,24.89,65.7
+Katsina,Faskari,35.81,21.33,54.84
+Katsina,Funtua,50.06,30.4,69.0
+Katsina,Ingawa,41.69,25.43,60.49
+Katsina,Jibia,48.86,30.71,67.54
+Katsina,Kafur,56.93,39.85,73.92
+Katsina,Kaita,41.09,22.84,60.89
+Katsina,Kankara,39.57,25.11,56.24
+Katsina,Kankiya,42.96,26.18,64.33
+Katsina,Katsina (K),52.34,32.69,73.45
+Katsina,Kurfi,39.72,21.43,60.62
+Katsina,Kusada,45.88,28.61,65.03
+Katsina,Mai'Adua,55.46,37.02,75.12
+Katsina,Malumfashi,58.61,38.34,76.47
+Katsina,Mani,37.51,21.7,55.6
+Katsina,Mashi,40.6,23.1,59.43
+Katsina,Matazu,41.28,23.21,61.4
+Katsina,Musawa,45.8,27.71,65.36
+Katsina,Rimi,35.4,20.3,55.91
+Katsina,Sabuwa,33.39,16.86,55.38
+Katsina,Safana,40.05,21.39,62.61
+Katsina,Sandamu,61.36,42.91,78.76
+Katsina,Zango,67.52,49.05,83.31
+Kebbi,Aleiro,24.33,12.9,39.52
+Kebbi,Arewa,35.68,22.28,51.61
+Kebbi,Argungu,31.51,18.46,47.38
+Kebbi,Augie,27.46,15.7,42.75
+Kebbi,Bagudo,32.6,19.59,48.83
+Kebbi,BirninKe,30.88,18.22,46.18
+Kebbi,Bunza,22.33,11.27,37.45
+Kebbi,Dandi,35.68,19.38,52.84
+Kebbi,Danko Wasagu,25.59,14.18,39.45
+Kebbi,Fakai,28.14,15.32,46.15
+Kebbi,Gwandu,22.94,11.84,37.84
+Kebbi,Jega,22.27,11.97,36.44
+Kebbi,Kalgo,23.8,13.53,37.68
+Kebbi,Koko/Bes,21.8,11.05,37.67
+Kebbi,Maiyama,20.1,11.53,32.91
+Kebbi,Ngaski,34.13,20.99,49.13
+Kebbi,Sakaba,28.06,16.03,44.44
+Kebbi,Shanga,27.03,15.03,42.2
+Kebbi,Suru,23.78,13.5,37.53
+Kebbi,Yauri,35.2,20.6,54.01
+Kebbi,Zuru,38.52,21.11,60.45
+Kogi,Adavi,81.88,69.27,92.06
+Kogi,Ajaokuta,73.75,56.52,88.31
+Kogi,Ankpa,72.29,52.33,85.97
+Kogi,Bassa,64.62,47.66,81.43
+Kogi,Dekina,68.89,52.12,83.48
+Kogi,Ibaji,73.51,57.97,85.75
+Kogi,Idah,76.93,58.73,90.8
+Kogi,Igalamela-Odolu,71.1,54.62,85.79
+Kogi,Ijumu,82.91,66.48,93.3
+Kogi,Kabba/Bu,76.02,58.53,88.78
+Kogi,Kotonkar,62.26,43.08,80.26
+Kogi,Lokoja,69.84,52.23,84.01
+Kogi,Mopa-Muro,76.52,57.46,90.57
+Kogi,Ofu,67.9,52.78,82.41
+Kogi,Ogori/Magongo,84.09,70.09,93.67
+Kogi,Okehi,82.22,67.14,92.71
+Kogi,Okene,83.09,69.38,92.84
+Kogi,Olamabor,78.43,62.44,90.2
+Kogi,Omala,61.53,40.68,80.8
+Kogi,Yagba East,78.08,62.13,90.44
+Kogi,Yagba West,69.11,48.74,86.14
+Kwara,Asa,79.89,66.28,91.01
+Kwara,Baruten,35.14,21.93,50.76
+Kwara,Edu,66.94,49.56,81.73
+Kwara,Ekiti,85.09,70.29,94.21
+Kwara,Ifelodun,76.83,61.76,88.9
+Kwara,Ilorin East,86.25,73.62,95.03
+Kwara,Ilorin South,85.64,72.24,94.99
+Kwara,IlorinWe,86.93,74.48,95.9
+Kwara,Irepodun,85.17,70.73,93.92
+Kwara,Isin,82.89,65.89,93.8
+Kwara,Kaiama,31.95,19.59,48.36
+Kwara,Moro,71.25,56.3,84.58
+Kwara,Offa,84.12,68.17,94.55
+Kwara,Oke-Ero,84.52,71.13,93.29
+Kwara,Oyun,82.6,67.76,92.8
+Kwara,Pategi,53.01,34.13,72.78
+Lagos,Agege,92.29,83.94,96.91
+Lagos,Ajeromi/Ifelodun,93.92,87.2,97.92
+Lagos,Alimosho,91.59,83.98,96.84
+Lagos,Amuwo Odofin,92.55,85.22,97.02
+Lagos,Apapa,92.68,84.94,97.14
+Lagos,Badagary,76.58,60.9,88.49
+Lagos,Epe,81.38,68.11,91.65
+Lagos,Eti-Osa,91.2,82.66,96.43
+Lagos,Ibeju/Lekki,83.61,69.52,93.23
+Lagos,Ifako/Ijaye,90.52,82.14,96.15
+Lagos,Ikeja,92.38,85.02,97.13
+Lagos,Ikorodu,89.38,80.19,95.61
+Lagos,Kosofe,92.24,84.76,96.76
+Lagos,LagosIsland,91.69,84.26,96.49
+Lagos,Mainland,93.86,87.82,97.56
+Lagos,Mushin,94.12,87.47,97.73
+Lagos,Ojo,88.46,78.62,94.93
+Lagos,Oshodi/Isolo,93.39,86.13,97.45
+Lagos,Shomolu,93.77,86.94,97.55
+Lagos,Surulere,94.08,87.88,97.6
+Nassarawa,Akwanga,76.33,59.06,88.78
+Nassarawa,Awe,60.98,42.63,78.08
+Nassarawa,Doma,68.12,51.12,83.13
+Nassarawa,Karu,79.05,64.83,89.54
+Nassarawa,Keana,58.94,41.07,77.39
+Nassarawa,Keffi,75.45,57.23,89.12
+Nassarawa,Kokona,71.31,52.55,85.07
+Nassarawa,Lafia,75.14,59.13,86.97
+Nassarawa,Nasarawa,56.09,39.27,71.28
+Nassarawa,Nassarawa Egon,77.15,61.35,89.16
+Nassarawa,Obi,66.18,48.48,81.86
+Nassarawa,Toto,59.45,43.05,75.83
+Nassarawa,Wamba,76.15,58.41,89.48
+Niger,Agaie,38.49,23.49,55.81
+Niger,Agwara,39.56,23.68,58.87
+Niger,Bida,56.0,33.32,77.21
+Niger,Borgu,32.37,20.16,48.18
+Niger,Bosso,67.85,50.44,83.24
+Niger,Chanchaga,75.11,54.89,90.0
+Niger,Edati,59.68,40.42,78.14
+Niger,Gbako,57.33,39.78,73.81
+Niger,Gurara,76.78,58.51,89.06
+Niger,Katcha,43.74,29.53,60.52
+Niger,Kontogur,36.23,19.32,58.58
+Niger,Lapai,48.08,32.54,64.92
+Niger,Lavun,53.65,37.33,70.18
+Niger,Magama,35.23,21.64,53.22
+Niger,Mariga,23.96,13.89,37.41
+Niger,Mashegu,31.94,19.02,47.97
+Niger,Mokwa,54.54,37.92,70.57
+Niger,Muya,70.29,51.77,85.83
+Niger,Paikoro,60.16,43.26,77.33
+Niger,Rafi,52.82,35.36,72.93
+Niger,Rijau,33.63,19.99,50.71
+Niger,Shiroro,62.26,46.46,78.87
+Niger,Suleja,83.08,68.27,92.7
+Niger,Tafa,85.47,72.08,94.04
+Niger,Wushishi,65.79,45.79,83.36
+Ogun,Abeokuta South,78.54,60.85,91.13
+Ogun,AbeokutaNorth,66.36,46.4,82.15
+Ogun,AdoOdo/Ota,79.56,67.56,89.37
+Ogun,EgbadoNorth,46.26,28.06,65.07
+Ogun,EgbadoSouth,51.84,33.6,72.08
+Ogun,Ewekoro,64.39,46.99,80.21
+Ogun,Ifo,82.91,71.88,91.76
+Ogun,Ijebu North-East,78.39,59.86,91.1
+Ogun,IjebuEast,75.92,60.43,89.35
+Ogun,IjebuNorth,76.86,59.49,90.33
+Ogun,IjebuOde,81.38,65.21,92.43
+Ogun,Ikenne,83.47,68.04,93.58
+Ogun,Imeko-Afon,53.76,34.12,75.68
+Ogun,Ipokia,61.03,43.27,78.0
+Ogun,Obafemi-Owode,76.33,60.87,88.19
+Ogun,Odeda,77.57,62.45,89.65
+Ogun,Odogbolu,81.04,65.43,92.04
+Ogun,OgunWaterside,67.02,45.03,84.06
+Ogun,Remo-North,82.35,64.97,93.9
+Ogun,Shagamu,84.29,70.51,93.33
+Ondo,Akoko North-East,87.12,75.94,94.73
+Ondo,Akoko South-East,87.59,74.77,95.05
+Ondo,Akoko South-West,88.37,78.06,95.5
+Ondo,AkokoNorthWest,88.43,78.88,95.5
+Ondo,Akure North,93.12,84.6,97.96
+Ondo,Akure South,93.99,86.46,98.29
+Ondo,Ese-Odo,59.21,39.82,77.16
+Ondo,Idanre,88.03,77.74,95.29
+Ondo,Ifedore,93.92,86.61,98.03
+Ondo,IlajeEseodo,57.71,37.93,75.65
+Ondo,IleOluji/Okeigbo,92.58,84.17,97.77
+Ondo,Irele,73.25,54.71,87.2
+Ondo,Odigbo,81.59,67.76,91.34
+Ondo,Okitipupa,77.94,59.55,90.85
+Ondo,Ondo East,90.31,78.68,96.67
+Ondo,Ondo West,89.14,77.08,96.23
+Ondo,Ose,89.0,77.47,95.53
+Ondo,Owo,90.94,79.47,97.44
+Osun,Atakumosa East,91.75,81.91,97.21
+Osun,Atakumosa West,90.04,80.38,96.18
+Osun,Ayedaade,83.73,69.83,93.3
+Osun,Ayedire,85.22,69.21,94.76
+Osun,Boluwaduro,85.55,67.48,94.76
+Osun,Boripe,88.0,75.39,95.74
+Osun,Ede North,90.62,79.84,96.84
+Osun,Ede South,89.42,77.62,95.95
+Osun,Egbedore,89.75,78.49,96.43
+Osun,Ejigbo,86.08,72.31,94.42
+Osun,Ife East,89.96,79.0,96.71
+Osun,Ife North,89.32,78.93,96.15
+Osun,Ife South,88.01,74.91,95.86
+Osun,IfeCentral,91.54,82.51,97.49
+Osun,Ifedayo,88.36,74.42,95.81
+Osun,Ifelodun,88.17,75.45,95.66
+Osun,Ila,86.74,72.11,95.15
+Osun,Ilesha East,91.99,81.75,97.17
+Osun,Ilesha West,92.25,83.22,97.34
+Osun,Irepodun,89.25,77.04,96.5
+Osun,Irewole,84.61,69.94,94.34
+Osun,Isokan,79.68,63.34,91.9
+Osun,Iwo,87.84,74.01,95.97
+Osun,Obokun,88.6,76.27,95.53
+Osun,Odo0tin,85.51,71.75,94.19
+Osun,Ola-Oluwa,86.07,71.78,94.32
+Osun,Olorunda,90.65,78.76,97.14
+Osun,Oriade,90.95,80.06,96.75
+Osun,Orolu,89.81,77.53,96.85
+Osun,Osogbo,91.2,80.58,97.31
+Oyo,Afijio,79.22,64.31,91.21
+Oyo,Akinyele,82.94,69.61,92.46
+Oyo,Atiba,56.82,39.54,73.98
+Oyo,Atisbo,45.55,29.32,63.25
+Oyo,Egbeda,82.76,70.71,92.84
+Oyo,IbadanNorth,84.94,73.26,93.96
+Oyo,IbadanNorth-East,84.68,73.2,94.17
+Oyo,IbadanNorth-West,85.25,71.58,94.12
+Oyo,IbadanSouth-East,84.97,72.03,94.32
+Oyo,IbadanSouth-West,85.51,72.58,94.64
+Oyo,Ibarapa Central,69.74,49.04,86.83
+Oyo,Ibarapa East,76.37,57.6,91.41
+Oyo,Ibarapa North,67.91,47.35,85.6
+Oyo,Ido,82.88,69.2,92.18
+Oyo,Irepo,37.32,19.2,63.98
+Oyo,Iseyin,67.43,49.97,84.01
+Oyo,Itesiwaju,53.44,35.91,73.0
+Oyo,Iwajowa,65.73,46.8,84.84
+Oyo,Kajola,69.43,48.8,87.98
+Oyo,Lagelu,83.01,70.6,92.71
+Oyo,Ogbomosho North,77.22,56.87,91.04
+Oyo,Ogbomosho South,77.31,57.24,91.14
+Oyo,Ogo-Oluw,81.09,65.67,92.01
+Oyo,Olorunsogo,45.67,25.11,68.03
+Oyo,Oluyole,80.75,67.32,91.31
+Oyo,Ona-Ara,81.34,68.77,92.01
+Oyo,Orelope,39.85,19.73,65.48
+Oyo,Ori-Ire,61.23,43.22,77.92
+Oyo,Oyo East,79.28,62.99,91.86
+Oyo,Oyo West,75.93,59.3,89.19
+Oyo,Saki East,38.39,22.78,59.71
+Oyo,Saki West,41.38,24.66,63.25
+Oyo,Surulere,80.5,66.2,91.11
+Plateau,Barkin Ladi,90.11,80.44,96.83
+Plateau,Bassa,84.97,72.92,93.7
+Plateau,Bokkos,86.94,73.4,95.07
+Plateau,Jos East,91.53,83.14,96.97
+Plateau,Jos North,93.49,85.93,97.84
+Plateau,Jos South,93.04,84.87,97.65
+Plateau,Kanam,63.93,45.93,79.0
+Plateau,Kanke,86.74,75.16,94.54
+Plateau,Langtang North,74.94,57.44,87.85
+Plateau,Langtang South,74.98,53.0,90.42
+Plateau,Mangu,90.34,80.48,96.32
+Plateau,Mikang,80.6,65.32,91.13
+Plateau,Pankshin,88.86,77.97,95.95
+Plateau,Qua'anpa,75.5,59.59,87.86
+Plateau,Riyom,88.56,77.46,96.26
+Plateau,Shendam,78.64,64.0,90.75
+Plateau,Wase,56.12,38.72,71.63
+Rivers,Abua/Odu,79.76,64.09,91.48
+Rivers,Ahoada East,78.95,61.75,90.99
+Rivers,Ahoada West,77.33,59.91,89.79
+Rivers,Akukutor,80.45,62.57,92.11
+Rivers,Andoni/O,86.57,69.32,95.21
+Rivers,Asari-To,87.78,75.05,95.32
+Rivers,Bonny,85.55,69.77,94.74
+Rivers,Degema,84.64,71.84,93.55
+Rivers,Eleme,90.92,80.8,96.65
+Rivers,Emuoha,81.57,68.27,91.27
+Rivers,Etche,84.98,71.82,93.83
+Rivers,Gokana,89.96,77.37,96.28
+Rivers,Ikwerre,83.82,71.29,93.03
+Rivers,Khana,88.29,75.52,95.54
+Rivers,Obio/Akp,90.19,80.64,96.28
+Rivers,Ogba/Egbe,78.25,62.53,90.35
+Rivers,Ogu/Bolo,88.67,75.48,95.6
+Rivers,Okrika,88.65,77.18,95.45
+Rivers,Omumma,87.23,75.5,94.98
+Rivers,Opobo/Nkoro,85.51,69.12,94.6
+Rivers,Oyigbo,89.9,79.42,95.96
+Rivers,Port Harcourt,90.13,79.51,96.1
+Rivers,Tai,90.3,78.88,96.26
+Sokoto,Binji,18.95,8.2,34.55
+Sokoto,Bodinga,23.24,12.44,38.17
+Sokoto,Dange-Shuni,24.76,13.76,39.9
+Sokoto,Gada,30.56,17.17,47.11
+Sokoto,Goronyo,17.33,8.36,32.3
+Sokoto,Gudu,32.94,17.58,52.81
+Sokoto,Gwadabaw,20.42,11.06,33.34
+Sokoto,Illela,24.43,12.56,41.33
+Sokoto,Isa,15.94,7.58,27.62
+Sokoto,Kebbe,19.41,10.79,32.17
+Sokoto,Kware,22.75,12.9,34.59
+Sokoto,Rabah,15.55,7.96,26.28
+Sokoto,Sabon Birni,19.11,8.92,32.92
+Sokoto,Shagari,17.8,9.09,29.7
+Sokoto,Silame,20.43,10.22,35.46
+Sokoto,Sokoto North,36.09,20.23,54.1
+Sokoto,Sokoto South,35.58,19.6,52.81
+Sokoto,Tambawal,19.63,11.45,32.7
+Sokoto,Tangazar,21.81,11.48,35.61
+Sokoto,Tureta,24.51,12.73,41.31
+Sokoto,Wamakko,34.89,20.91,51.86
+Sokoto,Wurno,17.92,9.76,30.1
+Sokoto,Yabo,19.25,10.23,32.17
+Taraba,Ardo-Kola,72.55,56.95,86.12
+Taraba,Bali,47.68,34.6,62.25
+Taraba,Donga,56.87,37.82,74.7
+Taraba,Gashaka,58.22,40.46,74.91
+Taraba,Gassol,48.58,33.14,64.4
+Taraba,Ibi,66.14,47.52,80.84
+Taraba,Jalingo,80.3,64.51,91.56
+Taraba,Karim-La,69.04,53.95,81.03
+Taraba,Kurmi,56.53,38.97,74.37
+Taraba,Lau,79.73,65.69,90.44
+Taraba,Sardauna,58.99,42.41,76.84
+Taraba,Takum,68.61,50.02,84.33
+Taraba,Ussa,76.03,57.29,90.07
+Taraba,Wukari,66.32,49.28,81.03
+Taraba,Yorro,73.68,56.1,86.87
+Taraba,Zing,74.58,55.34,88.58
+Yobe,Bade,49.86,32.06,67.9
+Yobe,Borsari,42.34,25.25,63.09
+Yobe,Damaturu,43.34,23.5,65.13
+Yobe,Fika,41.06,25.54,58.11
+Yobe,Fune,37.66,23.51,54.2
+Yobe,Geidam,27.42,13.27,46.49
+Yobe,Gujba,44.53,24.91,66.66
+Yobe,Gulani,40.17,23.23,59.51
+Yobe,Jakusko,41.9,25.93,60.53
+Yobe,Karasuwa,48.0,32.33,66.24
+Yobe,Machina,48.64,32.96,66.1
+Yobe,Nangere,49.14,31.11,67.64
+Yobe,Nguru,55.94,35.9,74.95
+Yobe,Potiskum,50.73,32.47,69.5
+Yobe,Tarmuwa,31.24,15.64,51.81
+Yobe,Yunusari,32.2,17.42,51.03
+Yobe,Yusufari,37.78,23.63,54.68
+Zamfara,Anka,17.51,8.96,29.74
+Zamfara,Bakura,20.08,10.56,34.84
+Zamfara,Birnin-Magaji/Kiyaw,19.2,9.26,34.24
+Zamfara,Bukkuyum,17.27,8.82,27.89
+Zamfara,Bungudu,24.3,13.52,39.91
+Zamfara,Gummi,18.17,9.17,30.27
+Zamfara,Gusau,31.04,18.43,48.13
+Zamfara,Kaura-Na,17.33,8.43,30.49
+Zamfara,Maradun,15.75,8.02,27.41
+Zamfara,Maru,19.84,11.98,30.7
+Zamfara,Shinkafi,15.82,7.17,28.84
+Zamfara,Talata-Mafara,17.77,8.5,30.74
+Zamfara,Tsafe,29.14,17.2,46.21
+Zamfara,Zurmi,20.97,10.8,35.0

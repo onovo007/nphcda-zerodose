@@ -31,6 +31,7 @@ import ai  # noqa: E402
 import impsci  # noqa: E402
 import auth  # noqa: E402
 import domain1, domain2, domain5  # noqa: E402
+import crosschecks  # noqa: E402
 
 STATUS_ICON = {"ok": "🟢", "partial": "🟡", "invalid": "🔴", "missing": "⚪"}
 
@@ -44,7 +45,8 @@ def sidebar() -> str:
         st.caption(clean("CIDRE and Quantium Insights LLC, in technical support of NPHCDA. "
                          "Funders and reviewers: GAVI and UNICEF."))
         nav_options = ["Home", "Data and Quality", "Coverage Forecasting", "Dropout & Completion",
-                       "Zero-Dose & Hotspots", "Exploratory Data Analysis", "Ask the Analyst",
+                       "Zero-Dose & Hotspots", "Triangulation & Cross-Checks",
+                       "Exploratory Data Analysis", "Ask the Analyst",
                        "Reports & Briefs", "Program Q&A (RAG)", "User Guide (SOP)",
                        "Methods & Validation"]
         # Allow other pages to request navigation (e.g. the Home "Upload your own data" button).
@@ -967,6 +969,8 @@ def main():
         domain2.render(data)
     elif page.startswith("Zero-Dose"):
         domain5.render(data)
+    elif page.startswith("Triangulation"):
+        crosschecks.render(data)
     elif page.startswith("Exploratory"):
         page_impsci()
     elif page.startswith("Ask the Analyst"):
