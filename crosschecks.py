@@ -115,8 +115,9 @@ def render(data: dict):
                                      title=f"Rank agreement: rho {zc['rho']:.2f}, {T.pfmt(zc['p'])}"),
                             use_container_width=True)
         st.dataframe(zc["table"], use_container_width=True, hide_index=True)
-        st.caption(clean("Levels differ for low-burden zones (method and denominator); the agreement "
-                         "is on WHERE the burden concentrates. Source: " + T.UMAR_CITATION))
+        st.caption(clean("Absolute levels differ between the two methods (different surveys, reference "
+                         "years and averaging); the agreement is on where the burden concentrates "
+                         "(convergent validity). Source: " + T.UMAR_CITATION))
         _download(zc["table"], "Download zone cross-check (CSV)", "crosscheck_zone.csv")
         ai.ai_block("xc_zone", "Triangulation - zone cross-check vs independent estimate",
                     "Our zone zero-dose (2026) next to an independent 2024 estimate, and the Spearman "
@@ -169,7 +170,7 @@ def render(data: dict):
             view = view[view["Confidence"] == "Low confidence"]
         st.dataframe(view, use_container_width=True, height=420, hide_index=True)
         _download(lc["merged"], "Download LGA cross-check (CSV)", "crosscheck_lga_ihme.csv")
-        st.caption(clean("Compared on rank/tercile, not levels: the 8-year gap (IHME 2018 vs our 2026) "
+        st.caption(clean("Compared on rank and tercile: the 8-year gap (IHME 2018 vs our 2026) "
                          "shifts levels but not the broad geography. Source: " + T.IHME_CITATION))
         ai.ai_block("xc_lga", "Triangulation - LGA cross-check vs IHME DTP1 coverage",
                     "Rank correlation and tercile concordance between our LGA estimate (2026) and IHME "
