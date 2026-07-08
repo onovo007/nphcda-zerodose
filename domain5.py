@@ -18,6 +18,40 @@ def _download(df: pd.DataFrame, label: str, fname: str):
     st.download_button(label, df.to_csv(index=False).encode("utf-8"), fname, "text/csv")
 
 
+# Clean, executive-ready columns for the LGA priority downloads (drop the within-state tier/severity
+# measures and internal flags that confuse a general audience).
+PRIORITY_COLS = ["Burden rank", "State", "LGA", "Zone", "Zero-dose children (est)",
+                 "Zero-dose rate (%)", "Cumulative % of burden", "Priority band"]
+
+
+def _lga_workbook_bytes(all_df, top20, top80, n20, n80, n_all):
+    """Build the 3-sheet (+ notes) Excel workbook of LGA priority lists, as bytes."""
+    from io import BytesIO
+    notes = pd.DataFrame({"NPHCDA zero-dose LGA priority lists": [
+        "Contents:",
+        f"  Sheet 1 - All ranked LGAs: all {n_all} reporting LGAs, ranked by estimated zero-dose children.",
+        f"  Sheet 2 - Top 20% ({n20} LGAs): the highest-burden fifth; about 62% of all zero-dose children.",
+        f"  Sheet 3 - Top {n80} LGAs: about 80% of all zero-dose children.",
+        "",
+        "How to read:",
+        "  Burden rank - ranked by the NUMBER of zero-dose children (a larger LGA can rank higher even",
+        "    at a lower rate).",
+        "  Zero-dose rate (%) - modelled estimate, capped at 99% (the worst LGAs sit at that ceiling).",
+        "  Cumulative % of burden - running share of the national total down to that LGA.",
+        "  Priority band - A drives the first 50% of the burden, B is 50-80%, C is the long tail.",
+        "",
+        f"Note: {n_all} of Nigeria's 774 LGAs are shown; the rest were excluded in data-quality cleaning.",
+        "Figures are model estimates, best used as a relative priority ranking.",
+    ]})
+    buf = BytesIO()
+    with pd.ExcelWriter(buf, engine="openpyxl") as w:
+        all_df.to_excel(w, sheet_name="1. All ranked LGAs", index=False)
+        top20.to_excel(w, sheet_name=f"2. Top 20pct ({n20})", index=False)
+        top80.to_excel(w, sheet_name=f"3. Top {n80} (80pct)", index=False)
+        notes.to_excel(w, sheet_name="Notes", index=False)
+    return buf.getvalue()
+
+
 def render(data: dict):
     domain_banner("_banner_d5.jpg", "Zero-Dose & Hotspots",
                   "Where are zero-dose children most concentrated, and what local factors contribute? "
@@ -141,18 +175,26 @@ def render(data: dict):
         show = highlight_classes(pareto.head(60), col_sev, SEVERITY_CELL) if col_sev else pareto.head(60)
         st.dataframe(show, use_container_width=True, height=420)
         rank_col = "Burden rank" if "Burden rank" in pareto.columns else pareto.columns[0]
-        top20 = pareto[pareto[rank_col] <= n20]
-        top80 = pareto[pareto[rank_col] <= lga["n80"]]
-        st.markdown("**Download the priority list:**")
-        dc1, dc2, dc3 = st.columns(3)
+        # Executive-ready download set: clean columns only (drop within-state tier/severity/flags).
+        dl_cols = [c for c in PRIORITY_COLS if c in pareto.columns] or list(pareto.columns)
+        par_all = pareto[dl_cols].copy()
+        par_top20 = par_all[pareto[rank_col] <= n20]
+        par_top80 = par_all[pareto[rank_col] <= lga["n80"]]
+        st.markdown("**Download the priority list** (LGAs ranked by the number of zero-dose children):")
+        dc1, dc2, dc3, dc4 = st.columns(4)
         with dc1:
-            _download(pareto, f"All {lga['n_lgas']} ranked LGAs (CSV)", "D5_lga_pareto_all.csv")
+            _download(par_all, f"All {lga['n_lgas']} LGAs (CSV)", "NPHCDA_LGA_ranked_all.csv")
         with dc2:
-            _download(top20, f"Top 20% - {n20} LGAs = {lga['top20_pct']:.0f}% of burden (CSV)",
-                      "D5_lga_pareto_top20pct.csv")
+            _download(par_top20, f"Top 20% - {n20} LGAs ({lga['top20_pct']:.0f}% of burden) (CSV)",
+                      "NPHCDA_LGA_top20pct.csv")
         with dc3:
-            _download(top80, f"Top {lga['n80']} LGAs = 80% of burden (CSV)",
-                      "D5_lga_pareto_80pct.csv")
+            _download(par_top80, f"Top {lga['n80']} LGAs (80% of burden) (CSV)",
+                      "NPHCDA_LGA_top80pct.csv")
+        with dc4:
+            xlsx = _lga_workbook_bytes(par_all, par_top20, par_top80, n20, lga["n80"], lga["n_lgas"])
+            st.download_button("All three as Excel (.xlsx)", xlsx,
+                               "NPHCDA_LGA_Priority_Lists.xlsx",
+                               "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
         ai.ai_block("d5_pareto", "Zero-Dose & Hotspots - LGA Pareto concentration of zero-dose burden",
                     f"Top LGAs ranked by estimated zero-dose children. Nationally about "
                     f"{lga['national_total']:,} children across {lga['n_lgas']} LGAs; the top 20 "
