@@ -14,7 +14,7 @@ import streamlit as st
 
 import config as C
 import names as N
-from data_io import prep_dhis2
+from data_io import prep_dhis2, prep_under5
 
 
 def run_prophet(ts_df: pd.DataFrame, periods: int = C.FORECAST_MONTHS):
@@ -253,4 +253,77 @@ def lga_at_risk_screen(_dhis2, key: str) -> pd.DataFrame:
     out = pd.DataFrame(rows)
     if not out.empty:
         out = out.sort_values("Projected % of baseline (12m)").reset_index(drop=True)
+    return out
+
+
+@st.cache_data(show_spinner="Screening LGA estimated coverage (eligible cohort)...")
+def lga_estimated_coverage_screen(_dhis2, _under5, _lga_population, key: str) -> pd.DataFrame:
+    """
+    LGA estimated coverage of the eligible cohort: project 12 months ahead (linear trend) and express
+    as coverage against the LGA's estimated 12-23 month cohort (2024 under-five / 5, apportioned to
+    each LGA by its population). Flags below-80% (at risk), over-100% (denominator or reporting
+    artefact) and low reporting completeness. Returns all matched LGA-antigen rows, coverage ascending.
+    """
+    import difflib
+    d = prep_dhis2(_dhis2)
+    u = prep_under5(_under5)
+    state_cohort = dict(zip(u["state_raw"].map(N.nstate),
+                            pd.to_numeric(u["cohort_12_23m"], errors="coerce")))
+    pop = _lga_population.copy()
+    pop = pop[pop["Status"].astype(str).str.strip() == "Local Government Area"].copy()
+    pop.loc[pop["Name"].isin(N.FCT6), "State"] = "FCT"
+    pop["ns"] = pop["State"].map(N.nstate)
+    pop["nl"] = pop["Name"].map(N.nlga)
+    pop["tk"] = pop["Name"].map(N.tok)
+    pop["P"] = pd.to_numeric(pop["PopulationProjection2022-03-21"], errors="coerce")
+    state_P = pop.groupby("ns")["P"].transform("sum")
+    pop["cohort"] = [(state_cohort.get(ns, np.nan) * p / sp) if (sp and sp > 0) else np.nan
+                     for ns, p, sp in zip(pop["ns"], pop["P"], state_P)]
+
+    def lga_cohort(ns, nl, tk):
+        nl = N.LGA_ALIAS.get((ns, nl), nl)
+        sub = pop[pop["ns"] == ns]
+        for col, val in [("nl", nl), ("tk", tk)]:
+            m = sub[sub[col] == val]
+            if len(m):
+                return float(m["cohort"].iloc[0])
+        c = difflib.get_close_matches(nl, list(sub["nl"]), n=1, cutoff=0.80)
+        return float(sub[sub["nl"] == c[0]]["cohort"].iloc[0]) if c else np.nan
+
+    grp_cols = ["state", "lga"]
+    rows = []
+    for keys, g in d.groupby(grp_cols):
+        g = g.sort_values("ds")
+        st_name, lg_name = keys
+        lg_clean = N.clean_lga_name(str(lg_name))
+        coh = lga_cohort(N.nstate(str(st_name)), N.nlga(lg_clean), N.tok(lg_clean))
+        if not coh or coh <= 0 or (isinstance(coh, float) and np.isnan(coh)):
+            continue
+        cutoff = g["ds"].max() - pd.DateOffset(months=11)
+        for antigen, col in C.ANTIGEN_TS.items():
+            if col not in g:
+                continue
+            ts = g[["ds", col]].dropna()
+            if len(ts) < 12:
+                continue
+            t = (ts["ds"] - ts["ds"].min()).dt.days.values.astype(float)
+            y = ts[col].values.astype(float)
+            try:
+                slope, intercept = np.polyfit(t, y, 1)
+            except Exception:
+                continue
+            proj = max(slope * (t.max() + 365.0) + intercept, 0.0)
+            cov = proj * 12.0 / coh * 100.0
+            complete = round(g[g["ds"] >= cutoff][col].notna().sum() / 12.0 * 100, 0)
+            rows.append({"State": st_name, "LGA": lg_clean, "Antigen": antigen,
+                         "Projected doses/month (12m)": round(proj, 1),
+                         "LGA cohort (12-23m)": int(round(coh)),
+                         "Estimated coverage (12m) %": round(cov, 1),
+                         "Over 100%": "Yes" if cov > 100 else "",
+                         "Reporting completeness (12m) %": complete,
+                         "Low reporting": "Yes" if complete < 50 else "",
+                         "Projection month": (g["ds"].max() + pd.DateOffset(months=12)).strftime("%b %Y")})
+    out = pd.DataFrame(rows)
+    if not out.empty:
+        out = out.sort_values("Estimated coverage (12m) %").reset_index(drop=True)
     return out

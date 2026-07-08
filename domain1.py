@@ -11,6 +11,7 @@ from theme import section, kpi_row, clean, highlight_below, domain_banner
 from data_io import (prep_dhis2, national_monthly, df_hash, prep_under5,
                      national_live_births, survey_national_coverage)
 from models.d1_forecast import (national_forecasts, lga_at_risk_screen,
+                                lga_estimated_coverage_screen,
                                 state_antigen_forecasts, lga_antigen_projections, backtest_national)
 
 
@@ -298,23 +299,72 @@ def render(data: dict):
                       suggestions=["Which antigen is most at risk?", "When does Penta3 bottom out?"])
 
     with tabs[1]:
-        section("LGA at-risk screen (fast trend projection)",
-                "Runs automatically on the loaded data: a linear-trend projection 12 months ahead per "
-                "LGA and antigen, flagged below 80 percent of the LGA's 2024 baseline. The 'Projection "
-                "month' column shows the period of performance.")
-        screen = lga_at_risk_screen(data["dhis2"], key=kd)
-        if screen.empty:
-            st.success("No LGAs projected below the 80 percent target on the fast screen.")
+        lga_metric = st.radio(
+            "LGA screen metric",
+            ["Early-Warning Alert (2024 baseline)", "Estimated coverage (eligible cohort)"],
+            horizontal=True, key="d1_lga_metric",
+            help="Early-Warning Alert = each LGA vs its own 2024 level (denominator-free tripwire). "
+                 "Estimated coverage = projected doses vs the LGA's estimated 12-23 month cohort "
+                 "(2024 under-five / 5, apportioned by LGA population).")
+
+        if lga_metric.startswith("Early"):
+            section("LGA at-risk screen (fast trend projection)",
+                    "Runs automatically on the loaded data: a linear-trend projection 12 months ahead per "
+                    "LGA and antigen, flagged below 80 percent of the LGA's 2024 baseline. The 'Projection "
+                    "month' column shows the period of performance.")
+            screen = lga_at_risk_screen(data["dhis2"], key=kd)
+            if screen.empty:
+                st.success("No LGAs projected below the 80 percent target on the fast screen.")
+            else:
+                st.write(clean(f"{len(screen)} LGA-and-antigen combinations project below 80 percent "
+                               "(all flagged in red)."))
+                st.dataframe(highlight_below(screen, "Projected % of baseline (12m)"),
+                             use_container_width=True, height=460)
+                _download(screen, "Download LGA at-risk screen (CSV)", "D1_lga_at_risk_screen.csv")
+                ai.ai_block("d1_atrisk", "Coverage Forecasting - LGA at-risk screen",
+                            "LGAs whose linear-trend projection 12 months ahead falls below 80 percent of "
+                            "their 2024 baseline, by antigen. Name the worst-hit states/LGAs and antigens "
+                            "and give a prioritized catch-up action.", screen.head(60))
         else:
-            st.write(clean(f"{len(screen)} LGA-and-antigen combinations project below 80 percent "
-                           "(all flagged in red)."))
-            st.dataframe(highlight_below(screen, "Projected % of baseline (12m)"),
-                         use_container_width=True, height=460)
-            _download(screen, "Download LGA at-risk screen (CSV)", "D1_lga_at_risk_screen.csv")
-            ai.ai_block("d1_atrisk", "Coverage Forecasting - LGA at-risk screen",
-                        "LGAs whose linear-trend projection 12 months ahead falls below 80 percent of "
-                        "their 2024 baseline, by antigen. Name the worst-hit states/LGAs and antigens "
-                        "and give a prioritized catch-up action.", screen.head(60))
+            if data.get("under5") is None or data.get("lga_population") is None:
+                st.warning("The estimated-coverage LGA screen needs the under-five population and LGA "
+                           "population files. Load the bundled sample data or upload them, then retry.")
+            else:
+                section("LGA estimated-coverage screen (eligible cohort)",
+                        "Projected doses 12 months ahead vs each LGA's estimated 12-23 month cohort "
+                        "(2024 under-five / 5, apportioned to the LGA by its population). Flagged below "
+                        "80 percent coverage.")
+                st.caption(clean(
+                    "Denominator caveat: the LGA cohort is the state cohort split by LGA population, "
+                    "not a directly measured LGA denominator. Where population or reporting do not line "
+                    "up, an LGA can read over 100 percent (a denominator or reporting artefact, not a "
+                    "true coverage claim). LGAs with low reporting completeness are flagged so a "
+                    "reporting gap is not mistaken for low coverage."))
+                ku = df_hash(data["under5"])
+                kp = df_hash(data["lga_population"])
+                esc = lga_estimated_coverage_screen(data["dhis2"], data["under5"],
+                                                    data["lga_population"], key=f"{kd}-{ku}-{kp}")
+                if esc.empty:
+                    st.info("No matched LGAs to score (check the LGA population file names align).")
+                else:
+                    at_risk = esc[esc["Estimated coverage (12m) %"] < 80]
+                    n_over = int((esc["Over 100%"] == "Yes").sum())
+                    n_low = int((esc["Low reporting"] == "Yes").sum())
+                    st.write(clean(
+                        f"{len(at_risk)} of {len(esc)} matched LGA-and-antigen combinations are below 80 "
+                        f"percent estimated coverage. {n_over} read over 100 percent (excluded from the "
+                        f"at-risk list as a denominator or reporting artefact); {n_low} have low reporting "
+                        "completeness (interpret with caution)."))
+                    st.dataframe(highlight_below(at_risk, "Estimated coverage (12m) %"),
+                                 use_container_width=True, height=460)
+                    _download(esc, "Download full LGA estimated-coverage screen (CSV)",
+                              "D1_lga_estimated_coverage_screen.csv")
+                    ai.ai_block("d1_atrisk_cov",
+                                "Coverage Forecasting - LGA estimated-coverage screen (eligible cohort)",
+                                "LGAs whose projected estimated coverage of the eligible 12-23 month cohort "
+                                "falls below 80 percent, by antigen. Name the worst-hit states and antigens, "
+                                "note any that are flagged low-reporting or over 100 percent, and give a "
+                                "prioritized catch-up action.", at_risk.head(60))
 
     with tabs[2]:
         section("Microplanning downloads (2026-2027 projections)",
