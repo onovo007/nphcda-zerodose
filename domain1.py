@@ -355,6 +355,16 @@ def render(data: dict):
                         f"percent estimated coverage. {n_over} read over 100 percent (excluded from the "
                         f"at-risk list as a denominator or reporting artefact); {n_low} have low reporting "
                         "completeness (interpret with caution)."))
+                    # Distinct-LGA counts (a combination is one LGA x one antigen; an LGA can appear more
+                    # than once). "All antigens" = every antigen that LGA reports is below 80 percent.
+                    _keys = ["State", "LGA"]
+                    n_any = int(at_risk.drop_duplicates(_keys).shape[0])
+                    _tot = esc.groupby(_keys).size()
+                    _bel = at_risk.groupby(_keys).size()
+                    n_all = int((_bel == _tot.reindex(_bel.index)).sum()) if len(_bel) else 0
+                    st.write(clean(
+                        f"That is {n_any} distinct LGAs with at least one antigen below 80 percent "
+                        f"({n_all} have all of their reported antigens below 80 percent)."))
                     st.dataframe(highlight_below(at_risk, "Estimated coverage (12m) %"),
                                  use_container_width=True, height=460)
                     _download(esc, "Download full LGA estimated-coverage screen (CSV)",
