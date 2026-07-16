@@ -85,6 +85,18 @@ PROVENANCE = [
     ("Under-five population", "City Population (NPC 2022 projection)", "2024", "Under-5 by state; birth cohort = /5"),
     ("DHIS2 live births", "NPHCDA DHIS2 export", "2021-2025 monthly", "Facility-reported live births by LGA"),
     ("LGA population", "City Population / NPC 2022 projection", "2022", "Population by LGA for burden weighting"),
+    # LGA archetype analysis - admin-2 covariate surfaces (used offline to build the archetype master;
+    # results bundled into the app on the LGA Priority & Archetypes and Zero-Dose pages).
+    ("LGA education", "IHME LMIC educational attainment", "2000-2017 (2017 used)", "Women's mean years of schooling by LGA - archetype covariate"),
+    ("LGA child growth", "IHME LMIC child growth failure", "2000-2017 (2017)", "Stunting, wasting, underweight prevalence by LGA"),
+    ("LGA DPT dropout", "IHME Africa DPT", "2000-2016 (2016)", "DPT1-DPT3 dropout by LGA - archetype covariate"),
+    ("LGA measles coverage", "IHME LMIC MCV1", "2000-2019", "Measles-1 coverage surface by LGA"),
+    ("LGA breastfeeding and ORS", "IHME LMIC EBF and ORT", "2000-2017 (2017)", "Exclusive breastfeeding and oral rehydration coverage by LGA"),
+    ("LGA maternal service coverage", "DHS Spatial Data Repository (2018 DHS)", "2018", "ANC 4+, facility delivery, improved water surfaces by LGA"),
+    ("LGA travel time to care", "Weiss et al., Nature Medicine", "2020", "Motorised travel time to health facilities by LGA"),
+    ("LGA relative wealth", "Meta Relative Wealth Index", "2021", "Relative Wealth Index by LGA"),
+    ("LGA political violence", "ACLED", "2021-2024", "Political-violence events and fatalities by LGA"),
+    ("LGA poverty", "Subnational poverty mapping (GADM admin-2)", "~2014", "Poverty headcount rate by LGA"),
 ]
 
 ANTIGEN_TS = {

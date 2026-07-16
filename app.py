@@ -216,6 +216,13 @@ def page_data():
         st.caption(clean("Figures are model estimates from these sources; cite the vintage when "
                          "sharing. Denominators: under-five from NPC 2022 projections (City "
                          "Population); LGA population NPC 2022."))
+        st.caption(clean("The 'LGA ...' rows are admin-2 (local-government) modelled covariate surfaces "
+                         "(IHME, DHS Spatial Data Repository, Meta Relative Wealth Index, Weiss travel "
+                         "time, ACLED). They are harmonised to the 774 local governments offline to build "
+                         "the LGA archetype covariate master; the results are bundled into the app on the "
+                         "LGA Priority & Archetypes page and the Zero-Dose & Hotspots screen (archetype "
+                         "and equity-tier columns). They are not live uploads because they are static "
+                         "external surfaces, not routine NPHCDA data."))
 
     if data.get("dhis2") is None:
         return
