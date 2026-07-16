@@ -513,23 +513,32 @@ def _eda_lga():
         _download("Download the LGA archetype master (CSV)", df.to_csv(index=False).encode("utf-8"),
                   "NPHCDA_LGA_archetype_master.csv", "text/csv")
     with tabs[1]:
-        fig = px.imshow(df[NUM].corr(), color_continuous_scale="RdBu_r", zmin=-1, zmax=1, aspect="auto")
-        fig.update_layout(height=680, title="Correlation of LGA covariates and modelled zero-dose")
+        fig = px.imshow(df[NUM].corr().round(2), color_continuous_scale="RdBu_r", zmin=-1, zmax=1,
+                        aspect="auto", text_auto=".2f")
+        fig.update_traces(textfont_size=8)
+        fig.update_layout(height=760, title="Correlation of LGA covariates and modelled zero-dose "
+                          "(Pearson r in each cell)")
         st.plotly_chart(fig, use_container_width=True)
     with tabs[2]:
         col = st.selectbox("Variable", NUM, key="eda_lga_hist")
         st.plotly_chart(px.histogram(df, x=col, nbins=40, marginal="box"), use_container_width=True)
     with tabs[3]:
         x = st.selectbox("Driver", drivers, key="eda_lga_scatter")
+        sub = df[[x, y]].dropna()
+        if len(sub) > 2:
+            from scipy.stats import pearsonr
+            r, p = pearsonr(sub[x], sub[y])
+            pstr = "p < 0.001" if p < 0.001 else f"p = {p:.3f}"
+            m1, m2, m3 = st.columns(3)
+            m1.metric("Pearson r", f"{r:+.2f}")
+            m2.metric("Significance", pstr)
+            m3.metric("Local governments", f"{len(sub):,}")
         fig = px.scatter(df, x=x, y=y, color="archetype_type" if "archetype_type" in df else None,
                          hover_name="platform_LGA" if "platform_LGA" in df else None)
         fig.update_layout(height=560)
         st.plotly_chart(fig, use_container_width=True)
-        sub = df[[x, y]].dropna()
-        if len(sub) > 2:
-            r = sub.corr().iloc[0, 1]
-            st.caption(clean(f"Pearson correlation of {x} with the modelled zero-dose rate: "
-                             f"r = {r:.2f} (n = {len(sub)})."))
+        st.caption(clean("Pearson correlation of the selected driver with the modelled zero-dose rate. "
+                         "An ecological (local-government-level) association, not a causal effect."))
     with tabs[4]:
         if "archetype_type" in df and y in df:
             fig = px.box(df.dropna(subset=[y]), x="archetype_type", y=y, color="archetype_type",
