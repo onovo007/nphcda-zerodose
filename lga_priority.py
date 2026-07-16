@@ -83,18 +83,13 @@ def render():
     st.write(clean(f"**{len(f)} local governments** shown, holding **{tot:,} zero-dose children** "
                    f"(of {nat:,} across all reporting local governments)."))
 
-    def _row(r):
-        base = "background-color:#F7D9D4" if r["Priority flag"] == "TOP PRIORITY" else ""
-        return [base] * len(r)
-
-    def _tier(v):
-        c = TIER_COLOR.get(v, "")
-        return f"background-color:{c};color:{'white' if v in ('Critical', 'High') else '#111'}" if c else ""
-
-    sty = (f.style.apply(_row, axis=1).applymap(_tier, subset=["Equity tier"])
-           .format({"Equity index": "{:.2f}", "Zero-dose children": "{:,.0f}",
-                    "Zero-dose rate (%)": "{:.1f}"}))
-    st.dataframe(sty, use_container_width=True, height=460)
+    # Plain, robust table (no heavy per-row Styler that can choke Streamlit on 700 rows); the equity
+    # tier and archetype colours are explained in the legend above.
+    st.dataframe(f, use_container_width=True, height=460, hide_index=True, column_config={
+        "Equity index": st.column_config.NumberColumn(format="%.2f"),
+        "Zero-dose children": st.column_config.NumberColumn(format="%d"),
+        "Zero-dose rate (%)": st.column_config.NumberColumn(format="%.1f"),
+    })
     st.download_button("Download this list (CSV)", f.to_csv(index=False).encode("utf-8"),
                        "NPHCDA_LGA_priority_list.csv", "text/csv")
 
