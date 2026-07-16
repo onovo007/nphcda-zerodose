@@ -480,10 +480,76 @@ def page_reports():
 # --------------------------------------------------------------------------------------
 # Implementation Science - EDA
 # --------------------------------------------------------------------------------------
+def _eda_lga():
+    """Exploratory analysis of the cleaned 774-local-government archetype master (covariates +
+    modelled zero-dose). Independent of the state impsci helpers."""
+    import plotly.express as px
+    path = C.DATA_DIR / "lga_archetype_master.csv"
+    if not path.exists():
+        st.warning("The LGA archetype master is not bundled.")
+        return
+    df = pd.read_csv(path)
+    NUM = [c for c in df.columns
+           if c not in ("platform_State", "platform_LGA", "archetype", "archetype_type")
+           and pd.api.types.is_numeric_dtype(df[c])]
+    y = "zero_dose_rate_pct" if "zero_dose_rate_pct" in df.columns else NUM[0]
+    drivers = [c for c in NUM if c not in ("zero_dose_rate_pct", "zero_dose_children")]
+    kpi_row([
+        {"label": "Local governments", "value": str(len(df)), "sub": "admin-2 (LGA)", "color": C.NAVY},
+        {"label": "Covariates", "value": str(len(drivers)), "sub": "modelled predictors", "color": "#2E6E8E"},
+        {"label": "Mean zero-dose rate",
+         "value": f"{df[y].mean():.0f}%" if y in df else "-", "sub": "across LGAs", "color": "#C8902A"},
+        {"label": "Archetypes", "value": str(df["archetype"].nunique()) if "archetype" in df else "-",
+         "sub": "data-driven clusters", "color": "#1C7A3D"},
+    ])
+    st.caption(clean("The cleaned 774-local-government archetype master: 15 modelled covariates (IHME, "
+                     "DHS, Meta Relative Wealth Index, Weiss travel time, ACLED) plus the modelled "
+                     "zero-dose rate and count. Explore relationships at local-government resolution."))
+    tabs = st.tabs(["Descriptive stats", "Correlation", "Distribution", "Driver vs zero-dose",
+                    "By archetype"])
+    with tabs[0]:
+        st.dataframe(df[NUM].describe().T.round(2), use_container_width=True)
+        _download = st.download_button
+        _download("Download the LGA archetype master (CSV)", df.to_csv(index=False).encode("utf-8"),
+                  "NPHCDA_LGA_archetype_master.csv", "text/csv")
+    with tabs[1]:
+        fig = px.imshow(df[NUM].corr(), color_continuous_scale="RdBu_r", zmin=-1, zmax=1, aspect="auto")
+        fig.update_layout(height=680, title="Correlation of LGA covariates and modelled zero-dose")
+        st.plotly_chart(fig, use_container_width=True)
+    with tabs[2]:
+        col = st.selectbox("Variable", NUM, key="eda_lga_hist")
+        st.plotly_chart(px.histogram(df, x=col, nbins=40, marginal="box"), use_container_width=True)
+    with tabs[3]:
+        x = st.selectbox("Driver", drivers, key="eda_lga_scatter")
+        fig = px.scatter(df, x=x, y=y, color="archetype_type" if "archetype_type" in df else None,
+                         hover_name="platform_LGA" if "platform_LGA" in df else None)
+        fig.update_layout(height=560)
+        st.plotly_chart(fig, use_container_width=True)
+        sub = df[[x, y]].dropna()
+        if len(sub) > 2:
+            r = sub.corr().iloc[0, 1]
+            st.caption(clean(f"Pearson correlation of {x} with the modelled zero-dose rate: "
+                             f"r = {r:.2f} (n = {len(sub)})."))
+    with tabs[4]:
+        if "archetype_type" in df and y in df:
+            fig = px.box(df.dropna(subset=[y]), x="archetype_type", y=y, color="archetype_type",
+                         points=False)
+            fig.update_layout(showlegend=False, xaxis_title="", height=520,
+                              title="Zero-dose rate by archetype")
+            st.plotly_chart(fig, use_container_width=True)
+
+
 def page_impsci():
     domain_banner("_banner_impsci.jpg", "Exploratory Data Analysis",
-                  "Descriptive statistics and univariate / bivariate analysis of the state zero-dose "
-                  "dataset to surface the drivers that should shape implementation.")
+                  "Descriptive statistics and univariate / bivariate analysis of the zero-dose "
+                  "datasets to surface the drivers that should shape implementation.")
+    _ds = st.radio("Dataset to explore",
+                   ["State equity dataset (37 states)",
+                    "LGA archetype dataset (774 local governments)"],
+                   horizontal=True, key="eda_dataset")
+    if _ds.startswith("LGA"):
+        _eda_lga()
+        return
     data = io.get_active_data()
     if not data or data.get("model_dataset") is None:
         st.warning("This domain needs the zero-dose model dataset (equity covariates). Load the "
