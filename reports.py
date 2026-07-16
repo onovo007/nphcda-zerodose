@@ -684,7 +684,7 @@ def sop_docx() -> bytes:
         "Sign in: enter your name and email (and access code if required). Your sign-in is recorded for usage tracking.",
         "Load the data: on Home, click Use bundled project sample data, or Upload your own data on the Data and Quality page.",
         "Check data quality and anomalies: review completeness, reporting rates, the missing-value heatmap and the Anomaly detection tab.",
-        "Run the models: Coverage Forecasting (80% target; forecast end-year to 2032; 3/6/12-month scorecard horizon; Estimated-coverage mode (doses / estimated eligible cohort) with a selectable denominator and NDHS survey reference lines; LGA at-risk screen); Dropout & Completion (forecasts, state and LGA-covariate LASSO drivers, heatmap); Zero-Dose & Hotspots (Bayesian model, LGA burden with archetype and equity-tier columns, Pareto, Gi* maps); LGA Priority & Archetypes (five data-driven local-government archetypes from 15 admin-2 covariates via agglomerative clustering, with an equity-deprivation tier and a filterable, downloadable priority ranking).",
+        "Run the models: Coverage Forecasting (80% target; forecast end-year to 2032; 3/6/12-month scorecard horizon; Estimated-coverage mode (doses / estimated eligible cohort) with a selectable denominator and NDHS survey reference lines; LGA at-risk screen); Dropout & Completion (forecasts, LASSO drivers, heatmap); Zero-Dose & Hotspots (Bayesian model, LGA burden, Pareto, Gi* maps).",
         "Explore and test (Implementation Science): correlation with multicollinearity flags, distributions, scatter, zone violins, and the Hypothesis tests tab (t-test, ANOVA, chi-square).",
         "Ask the Analyst: add your OpenAI key in the sidebar, then ask grounded cross-domain questions.",
         "Generate reports: on Reports & Briefs, produce the factsheet, the Word policy brief and the PowerPoint deck.",
@@ -803,41 +803,12 @@ def methods_sections() -> list:
           "paired t-test, ANOVA and chi-square.",
           "All driver results are cross-sectional, ecological state-level associations (n=37), framed as "
           "directional and uncertainty-quantified - not causal effects."]),
-        ("LGA archetypes and equity classification (admin-2 extension)", "bullets",
-         ["Covariate master: 15 local-government (admin-2) covariates harmonised to Nigeria's 774 local "
-          "governments - education, child undernutrition (stunting, wasting, underweight), poverty, "
-          "relative wealth, exclusive breastfeeding, oral rehydration, antenatal care 4+, facility "
-          "delivery, improved water, motorised travel time, DPT1-DPT3 dropout and political-violence "
-          "events and fatalities - from IHME, the DHS Spatial Data Repository, the Meta Relative Wealth "
-          "Index, Weiss travel-time surfaces and ACLED.",
-          "Archetypes: agglomerative hierarchical clustering (Ward linkage) on the standardized "
-          "covariates - the same unsupervised method used at state level - with five clusters selected "
-          "and validated by the silhouette and Calinski-Harabasz criteria. Zero-dose is not a clustering "
-          "input; it is the outcome, modelled separately and joined afterward.",
-          "Convergent validity: the covariate-only archetypes reproduce the modelled zero-dose gradient "
-          "(the two most-affected archetypes carry about 69% of zero-dose children), and the LGA equity-"
-          "deprivation index correlates with modelled zero-dose (Pearson r = 0.45).",
-          "Equity classification: a composite equity-deprivation index (remoteness, low education, "
-          "poverty, low wealth; each min-max scaled and equally weighted) cut into four tiers, with LGA "
-          "and updated state rankings.",
-          "Local drivers: multiscale geographically weighted regression (MGWR) at LGA level, benchmarked "
-          "against ordinary least squares and geographically weighted regression, shows the drivers act "
-          "locally (OLS explains about 39% of the variation, GWR 56%, MGWR 55%). A local-government LASSO "
-          "identifies covariates associated with each antigen-dropout transition.",
-          "Intervention bundles are matched to each archetype by an evidence-to-barrier method (WHO "
-          "Reaching Every District and Reaching Every Community; the Gavi zero-dose IRMMA framework; WHO, "
-          "UNICEF and Gavi 'The Big Catch-Up'), aligned to the NPHCDA archetype framing.",
-          "Covariate vintages span 2014-2021 (DHS surfaces 2018, ACLED 2021-2024); these are modelled "
-          "admin-2 surfaces with their own uncertainty, widest in data-sparse and insecure areas."]),
         ("Key parameters", "table",
          (["Component", "Setting"],
           [["Prophet", "yearly + semi-annual seasonality; changepoint_prior_scale 0.05; 95% PI (80% PI = 0.654x half-width)"],
            ["Bayesian Beta", "hierarchical national-zone-state; precision scaled by survey n; nutpie NUTS, 2 chains, target_accept 0.92; live 1000 draws (full 3000)"],
            ["Getis-Ord Gi*", "k=5 nearest neighbours; row-standardized; permutation p (0.01/0.05/0.10)"],
-           ["LASSO drivers", "standardized; 5-fold CV; 200-bootstrap stability; parsimonious top-4 with HC3 robust SE or Beta + 95% CI"],
-           ["LGA archetypes", "agglomerative Ward clustering on 15 z-scored admin-2 covariates; k=5 (silhouette + Calinski-Harabasz)"],
-           ["LGA equity index", "4 equal-weight components (remoteness, low education, poverty, low wealth), min-max 0-100, four tiers at 25/50/75"],
-           ["LGA drivers", "MGWR vs OLS/GWR on modelled zero-dose; local-government LASSO per dropout transition"]])),
+           ["LASSO drivers", "standardized; 5-fold CV; 200-bootstrap stability; parsimonious top-4 with HC3 robust SE or Beta + 95% CI"]])),
         ("Limitations and honest caveats", "bullets",
          ["DHIS2 is administrative data; reporting completeness affects counts. The coverage index is "
           "relative to 2024 unless a proper denominator is supplied. DHIS2-reported live births "
@@ -850,10 +821,7 @@ def methods_sections() -> list:
           "slightly narrow; the zero-dose model extrapolates a linear-in-logit time trend from four NDHS "
           "waves.",
           "Unmatched geographies in the Gi* step are median-imputed; the LGA reporting drill-down and "
-          "anomaly tab help surface data-quality issues before modelling.",
-          "The LGA archetype covariates are modelled admin-2 surfaces from external sources with mixed "
-          "vintages (2014-2021) and their own uncertainty; the archetypes are unsupervised groupings for "
-          "targeting, and the intervention bundles are evidence-informed guidance, not causal claims."]),
+          "anomaly tab help surface data-quality issues before modelling."]),
         ("Reproducibility and governance", "bullets",
          ["Content-hashed caching means re-runs are instant but genuinely recomputed when data changes; "
           "dependencies are version-pinned and the container is reproducible.",
