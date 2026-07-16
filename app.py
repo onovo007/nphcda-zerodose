@@ -45,7 +45,8 @@ def sidebar() -> str:
         st.caption(clean("CIDRE and Quantium Insights LLC, in technical support of NPHCDA. "
                          "Funders and reviewers: GAVI and UNICEF."))
         nav_options = ["Home", "Data and Quality", "Coverage Forecasting", "Dropout & Completion",
-                       "Zero-Dose & Hotspots", "Triangulation & Cross-Checks",
+                       "Zero-Dose & Hotspots", "LGA Priority & Archetypes",
+                       "Triangulation & Cross-Checks",
                        "Exploratory Data Analysis", "Ask the Analyst",
                        "Reports & Briefs", "Program Q&A (RAG)", "User Guide (SOP)",
                        "Methods & Validation"]
@@ -969,6 +970,9 @@ def main():
         domain2.render(data)
     elif page.startswith("Zero-Dose"):
         domain5.render(data)
+    elif page.startswith("LGA Priority"):
+        import lga_priority
+        lga_priority.render()
     elif page.startswith("Triangulation"):
         crosschecks.render(data)
     elif page.startswith("Exploratory"):
