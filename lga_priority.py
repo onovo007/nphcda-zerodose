@@ -61,6 +61,14 @@ def render():
                     "local-government covariates):")
         _chips(ARCH_COLOR, ARCH_DEF)
 
+    _img = C.ASSETS_DIR / "lga_archetype_overlay.png"
+    if _img.exists():
+        st.image(str(_img), use_container_width=True,
+                 caption=clean("Nigeria local-government archetypes (colour) with modelled zero-dose "
+                               "children as bubbles sized by number. The panels show the zero-dose rate "
+                               "distribution and total burden per archetype. Archetypes 1 and 2 (Remote "
+                               "Rural and Conflict-Affected) carry about 69 percent of zero-dose children."))
+
     c1, c2, c3 = st.columns(3)
     states = c1.multiselect("State", sorted(df["State"].dropna().unique()))
     archs = c2.multiselect("Archetype", [a for a in ARCH_COLOR if a in set(df["Archetype"])])
