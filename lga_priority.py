@@ -91,16 +91,14 @@ def render():
     st.write(clean(f"**{len(f)} local governments** shown, holding **{tot:,} zero-dose children** "
                    f"(of {nat:,} across all reporting local governments)."))
 
-    # Robust table (no heavy per-row Styler that can choke Streamlit on 700 rows). The equity tier
-    # carries a colour badge matching the legend; full cell shading is avoided for stability.
-    badge = {"Critical": "\U0001F534", "High": "\U0001F7E0", "Moderate": "\U0001F7E1", "Low": "\U0001F535"}
-    fd = f.copy()
-    fd["Equity tier"] = fd["Equity tier"].map(lambda t: f"{badge.get(t, '')} {t}")
-    st.dataframe(fd, use_container_width=True, height=460, hide_index=True, column_config={
-        "Equity index": st.column_config.NumberColumn(format="%.2f"),
-        "Zero-dose children": st.column_config.NumberColumn(format="%d"),
-        "Zero-dose rate (%)": st.column_config.NumberColumn(format="%.1f"),
-    })
+    # Light single-column styler: colours only the Equity tier cell (700 cells) - far lighter than a
+    # per-row styler, so it is stable while still shading the tier the same colours as the legend.
+    tier_bg = {"Critical": "#EDA9A2", "High": "#F6C9AE", "Moderate": "#FBE7B0", "Low": "#BBD5EA"}
+    sty = (f.style.hide(axis="index")
+           .applymap(lambda v: f"background-color:{tier_bg.get(v, '')}", subset=["Equity tier"])
+           .format({"Equity index": "{:.2f}", "Zero-dose children": "{:,.0f}",
+                    "Zero-dose rate (%)": "{:.1f}"}))
+    st.dataframe(sty, use_container_width=True, height=460)
     st.download_button("Download this list (CSV)", f.to_csv(index=False).encode("utf-8"),
                        "NPHCDA_LGA_priority_list.csv", "text/csv")
 
