@@ -103,7 +103,7 @@ def render(data: dict):
     kpi_row(hcards)
 
     tabs = st.tabs(["Dropout forecasts", "Drivers (LASSO)", "State-year heatmap",
-                    "Microplanning downloads"])
+                    "Microplanning downloads", "Drivers - LGA covariates (LASSO)"])
     drivers_summary: dict = {}
 
     with tabs[0]:
@@ -217,6 +217,55 @@ def render(data: dict):
             st.dataframe(sdf.head(30), use_container_width=True, height=260)
             _download(sdf, "Download state dropout forecasts (CSV)",
                       "D2_state_dropout_forecast_2026_2027.csv")
+
+    with tabs[4]:
+        section("Drivers of dropout - LGA archetype covariates (LASSO)",
+                "Cross-validated LASSO on the 15 local-government archetype covariates (IHME, DHS, Meta "
+                "Relative Wealth Index, Weiss travel time, ACLED political violence), replacing the state "
+                "equity set with local-government predictors for each dropout transition.")
+        try:
+            _lc = pd.read_csv(C.DATA_DIR / "domain2_lasso_coefficients_lga.csv", index_col=0)
+        except Exception:
+            _lc = None
+        if _lc is None:
+            st.info("LGA LASSO coefficients file not found.")
+        else:
+            _tmap = {"dropout_p1p3": ("Penta1 to Penta3", "#C8902A"),
+                     "dropout_p1m1": ("Penta1 to Measles1", "#8E44AD"),
+                     "dropout_m1m2": ("Measles1 to Measles2", "#1F3B57")}
+            _labels = {"edu_mean_years_women_15_49": "Maternal education (yrs)", "stunting_prev_u5": "Stunting",
+                       "wasting_prev_u5": "Wasting", "underweight_prev_u5": "Underweight",
+                       "dpt1_3_dropout": "DPT1-3 dropout (IHME)", "poverty_rate": "Poverty",
+                       "exclusive_breastfeeding": "Exclusive breastfeeding", "ors_coverage": "ORS coverage",
+                       "anc4plus": "ANC 4+", "delivery_hf": "Facility delivery",
+                       "improved_water": "Improved water", "travel_time_hc": "Travel time to care",
+                       "relative_wealth_index": "Relative Wealth Index", "conflict_events": "Conflict events",
+                       "conflict_fatalities": "Conflict fatalities"}
+            _cols = st.columns(3)
+            for _i, (_tk, (_title, _c)) in enumerate(_tmap.items()):
+                with _cols[_i]:
+                    if _tk not in _lc.columns:
+                        st.caption(f"{_title}: not available."); continue
+                    _s = _lc[_tk][_lc[_tk].abs() > 1e-6]
+                    _s = _s.reindex(_s.abs().sort_values(ascending=False).index).head(10)
+                    _s.index = [_labels.get(x, x) for x in _s.index]
+                    if _s.empty:
+                        st.caption(clean(f"{_title}: no non-zero LASSO coefficients."))
+                    else:
+                        st.plotly_chart(viz.lasso_bars_fig(_s, _title, _c), use_container_width=True)
+            st.caption(clean(
+                "Cross-validated LASSO on the local-government archetype master (about 739 local "
+                "governments). Larger magnitude means a stronger association; the sign shows direction. "
+                "Covariate vintages 2014-2021. These are ecological, directional associations to "
+                "prioritize hypotheses, not causal effects. Source: consortium LGA archetype covariate "
+                "master."))
+            ai.ai_block("d2_drivers_lga", "Dropout drivers - LGA archetype covariates (LASSO)",
+                        "LGA-level LASSO coefficients linking archetype covariates (education, nutrition, "
+                        "wealth, access, conflict) to each dropout transition. Name the leading LGA-level "
+                        "drivers per pair and contrast them with the state-level drivers.",
+                        {_t: {_labels.get(k, k): round(float(v), 3)
+                              for k, v in _lc[_c2][_lc[_c2].abs() > 1e-6].head(6).items()}
+                         for _c2, (_t, _) in _tmap.items() if _c2 in _lc.columns})
 
     # Per-state dropout (observed) so the chat can answer "which states have the highest dropout".
     state_dropout = {}

@@ -171,12 +171,28 @@ def render(data: dict):
             "band: A = drives the first 50 percent of national burden, B = 50-80 percent, C = the long "
             "tail. Use Severity to triage where to deploy catch-up first, and Priority band to size "
             "how many LGAs to cover for a target share of the burden."))
+        # Enrich with the LGA archetype and equity-deprivation tier (from the LGA archetype master).
+        try:
+            import re as _re
+            def _nk(s, l):
+                return (_re.sub(r"[^a-z0-9]", "", str(s).lower()) + "|"
+                        + _re.sub(r"[^a-z0-9]", "", _re.sub(r"local government area|lga", "", str(l).lower())))
+            _lut = pd.read_csv(C.DATA_DIR / "lga_priority_ranking.csv")
+            _lut["_k"] = [_nk(s, l) for s, l in zip(_lut["State"], _lut["LGA"])]
+            _am = dict(zip(_lut["_k"], _lut["Archetype"]))
+            _tm = dict(zip(_lut["_k"], _lut["Equity tier"]))
+            _pk = [_nk(s, l) for s, l in zip(pareto["State"], pareto["LGA"])]
+            pareto["Archetype"] = [_am.get(k) for k in _pk]
+            pareto["Equity tier"] = [_tm.get(k) for k in _pk]
+        except Exception:
+            pass
         col_sev = "Severity (within state)" if "Severity (within state)" in pareto.columns else None
         show = highlight_classes(pareto.head(60), col_sev, SEVERITY_CELL) if col_sev else pareto.head(60)
         st.dataframe(show, use_container_width=True, height=420)
         rank_col = "Burden rank" if "Burden rank" in pareto.columns else pareto.columns[0]
         # Executive-ready download set: clean columns only (drop within-state tier/severity/flags).
         dl_cols = [c for c in PRIORITY_COLS if c in pareto.columns] or list(pareto.columns)
+        dl_cols += [c for c in ["Archetype", "Equity tier"] if c in pareto.columns]
         par_all = pareto[dl_cols].copy()
         par_top20 = par_all[pareto[rank_col] <= n20]
         par_top80 = par_all[pareto[rank_col] <= lga["n80"]]

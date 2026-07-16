@@ -1,0 +1,16 @@
+,dropout_p1p3,dropout_p1m1,dropout_m1m2
+edu_mean_years_women_15_49,0.0,0.0,-0.0
+stunting_prev_u5,-0.0,-0.0,-3.904
+wasting_prev_u5,-1.234,-0.0,-0.0
+underweight_prev_u5,-0.0,-0.118,-5.517
+dpt1_3_dropout,-0.011,-0.0,1.359
+poverty_rate,-0.0,-0.0,-0.48
+exclusive_breastfeeding,0.0,0.0,0.0
+ors_coverage,-0.0,-0.0,-0.725
+anc4plus,0.0,0.0,-1.672
+delivery_hf,0.0,0.412,-0.0
+improved_water,-0.0,0.0,-0.226
+travel_time_hc,-0.0,-0.0,-1.47
+relative_wealth_index,-0.0,0.0,-4.369
+conflict_events,-0.0,-0.0,-6.36
+conflict_fatalities,0.0,-0.0,2.317
