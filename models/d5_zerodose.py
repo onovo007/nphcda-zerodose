@@ -10,6 +10,7 @@ All logic is lifted from D5__zero_dose_analysis5.ipynb (cells 14, 15, 17, 23, 24
 from __future__ import annotations
 
 import difflib
+import json
 
 import numpy as np
 import pandas as pd
@@ -18,6 +19,51 @@ import streamlit as st
 import config as C
 import names as N
 from data_io import prep_dhis2, prep_under5
+
+
+# --------------------------------------------------------------------------------------
+# Precomputed results (bundled sample only). The live PyMC/nutpie sampler is heavy and can
+# segfault native BLAS on small shared containers; for the bundled demo data we ship the exact
+# model outputs and load them instead of sampling. Uploaded data still runs live (fingerprint
+# mismatch -> falls through). Any load error falls back to live sampling, so this never blocks use.
+# --------------------------------------------------------------------------------------
+_PRECOMP = C.DATA_DIR / "precomputed"
+
+
+def _fp_state(ndhs_long) -> str:
+    z = pd.to_numeric(ndhs_long.get("zero_dose_pct"), errors="coerce")
+    return f"{len(ndhs_long)}|{ndhs_long['state'].astype(str).nunique()}|{round(float(z.sum()), 2)}"
+
+
+def _fp_lga(dhis2_raw, res) -> str:
+    d = prep_dhis2(dhis2_raw)
+    return f"{len(d)}|{round(float(pd.to_numeric(res['zd_pred_2026_mean'], errors='coerce').sum()), 2)}"
+
+
+def _load_precomp_state(ndhs_long):
+    try:
+        meta = json.loads((_PRECOMP / "state_meta.json").read_text())
+        if meta.get("fp") != _fp_state(ndhs_long):
+            return None
+        return {"res": pd.read_parquet(_PRECOMP / "state_res.parquet"),
+                "diag": pd.read_parquet(_PRECOMP / "state_diag.parquet"),
+                "max_rhat": meta["max_rhat"], "min_ess": meta["min_ess"], "n_draws": meta["n_draws"]}
+    except Exception:
+        return None
+
+
+def _load_precomp_lga(dhis2_raw, res):
+    try:
+        stats = json.loads((_PRECOMP / "lga_stats.json").read_text())
+        if stats.get("fp") != _fp_lga(dhis2_raw, res):
+            return None
+        out = {"clean": pd.read_parquet(_PRECOMP / "lga_clean.parquet"),
+               "pareto": pd.read_parquet(_PRECOMP / "lga_pareto.parquet")}
+        for k in ("national_total", "n_lgas", "top20_pct", "n80", "matched_pop"):
+            out[k] = stats[k]
+        return out
+    except Exception:
+        return None
 
 
 # --------------------------------------------------------------------------------------
@@ -86,6 +132,11 @@ def run_state_model(_ndhs_long, _under5, _dhis2, key: str,
     string columns break the default hasher); caching keys on the explicit `key` string.
     """
     ndhs_long, under5, dhis2_raw = _ndhs_long, _under5, _dhis2
+
+    _pc = _load_precomp_state(ndhs_long)          # bundled sample -> ship results, skip live sampling
+    if _pc is not None:
+        return _pc
+
     import pymc as pm
     import arviz as az
 
@@ -273,6 +324,11 @@ def _build_state_results(a: dict, fc_mu: np.ndarray) -> pd.DataFrame:
 @st.cache_data(show_spinner=False)
 def run_lga_burden(_dhis2, _res, _lga_population, key: str) -> dict:
     dhis2_raw, res, lga_population = _dhis2, _res, _lga_population
+
+    _pc = _load_precomp_lga(dhis2_raw, res)       # bundled sample -> ship results, skip recompute
+    if _pc is not None:
+        return _pc
+
     d = prep_dhis2(dhis2_raw)
     # DHIS2 LGA names carry a 2-letter prefix and a 'Local Government Area' suffix; clean them
     # so they display correctly and join to the population file and GRID3 geometry (D5 cell 12).
