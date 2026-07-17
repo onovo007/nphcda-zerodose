@@ -31,4 +31,27 @@ lo["pareto"].to_parquet(_PRECOMP / "lga_pareto.parquet")
     "national_total": int(lo["national_total"]), "n_lgas": int(lo["n_lgas"]),
     "top20_pct": lo["top20_pct"], "n80": int(lo["n80"]), "matched_pop": int(lo["matched_pop"])}))
 print(f"  lga: {lo['n_lgas']} LGAs | total = {lo['national_total']:,} | top20%={lo['top20_pct']}")
+
+print("Computing Getis-Ord Gi* (LGA + per forecast year state)...")
+import names as N
+import spatial
+from spatial import _fp_gi_lga, _fp_gi_state
+clean_df = lo["clean"].rename(columns={"State": "state", "LGA": "lga", "ZD proxy (%)": "zd_proxy_pct"}
+                              )[["state", "lga", "zd_proxy_pct"]]
+gi = spatial.lga_gi_star(clean_df, key="precompute")
+gi.to_parquet(_PRECOMP / "lga_gi.parquet")
+gi_meta = {"lga_fp": _fp_gi_lga(clean_df), "state": {}}
+res_keyed = so["res"].copy()
+res_keyed["state_key"] = res_keyed["state"].map(N.nstate)
+for yr in C.FORECAST_YEARS:
+    vcol = f"zd_pred_{yr}_mean"
+    if vcol not in res_keyed.columns:
+        continue
+    sv = res_keyed[["state_key", vcol]].rename(columns={vcol: "value"})
+    sg = spatial.state_gi_star(sv, key=f"pc-{yr}", value_col="value")
+    fn = f"state_gi_{yr}.parquet"
+    sg.to_parquet(_PRECOMP / fn)
+    gi_meta["state"][_fp_gi_state(sv, "value")] = fn
+(_PRECOMP / "gi_meta.json").write_text(json.dumps(gi_meta))
+print(f"  gi: LGA hotspots {gi['gi_class'].value_counts().to_dict()} | state years {list(gi_meta['state'].values())}")
 print("Saved precomputed results to", _PRECOMP)
