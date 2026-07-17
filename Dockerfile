@@ -13,17 +13,7 @@ ENV PYTHONUNBUFFERED=1 \
     NUMBA_CACHE_DIR=/tmp/numba \
     XDG_CACHE_HOME=/tmp/cache \
     STREAMLIT_SERVER_HEADLESS=true \
-    STREAMLIT_BROWSER_GATHERUSAGESTATS=false \
-    OMP_NUM_THREADS=1 \
-    OPENBLAS_NUM_THREADS=1 \
-    MKL_NUM_THREADS=1 \
-    NUMEXPR_NUM_THREADS=1 \
-    VECLIB_MAXIMUM_THREADS=1 \
-    NUMBA_NUM_THREADS=1 \
-    RAYON_NUM_THREADS=1
-# Thread-pool serialisation: OpenBLAS (numpy/scipy), OpenMP (numba/sklearn) and Rayon (nutpie's
-# Rust NUTS) each spawn their own thread pools; on a shared container they oversubscribe and
-# segfault (exit 139) during heavy math. Forcing 1 thread each removes the collision.
+    STREAMLIT_BROWSER_GATHERUSAGESTATS=false
 
 # libgomp1: OpenMP runtime used by numba/scipy/scikit-learn. Other geo libs ship self-contained wheels.
 RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
@@ -32,6 +22,18 @@ RUN apt-get update && apt-get install -y --no-install-recommends libgomp1 \
 WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --upgrade pip && pip install -r requirements.txt
+
+# Thread-pool serialisation (placed AFTER pip install so the install layer stays cached).
+# OpenBLAS (numpy/scipy), OpenMP (numba/sklearn) and Rayon (nutpie's Rust NUTS) each spawn their
+# own thread pools; on a shared container they oversubscribe and segfault (exit 139) during heavy
+# math (live PyMC/nutpie sampling, MGWR). Forcing 1 thread each removes the collision.
+ENV OMP_NUM_THREADS=1 \
+    OPENBLAS_NUM_THREADS=1 \
+    MKL_NUM_THREADS=1 \
+    NUMEXPR_NUM_THREADS=1 \
+    VECLIB_MAXIMUM_THREADS=1 \
+    NUMBA_NUM_THREADS=1 \
+    RAYON_NUM_THREADS=1
 
 COPY . .
 RUN mkdir -p /tmp/mpl /tmp/numba /tmp/cache && chmod -R 777 /tmp/mpl /tmp/numba /tmp/cache
