@@ -30,6 +30,31 @@ ARCH_DEF = {
 }
 
 
+METHOD_MD = """
+**Evidence-to-barrier method - how the intervention bundles were developed (not guesswork or AI-only):**
+
+1. Each archetype's covariate signature identifies its **binding constraint(s)** - a demand-side,
+physical-access, security, or health-system barrier.
+2. For each binding constraint we selected intervention packages that the **normative and peer-reviewed
+immunization-implementation literature** shows to be effective against that specific barrier.
+3. The approach follows the **Gavi zero-dose IRMMA framework** (Identify, Reach, Monitor and Measure,
+Advocate) and the **WHO Reaching Every District / Reaching Every Community** strategy, and is deliberately
+**multi-programme** (immunization, nutrition, reproductive/maternal and newborn health, family planning,
+water and sanitation, service delivery), because the determinants are multi-programme.
+
+**Key frameworks cited**
+- WHO Reaching Every District / Reaching Every Community (RED/REC)
+- Gavi zero-dose IRMMA framework (Identify, Reach, Monitor and Measure, Advocate)
+- WHO, UNICEF and Gavi 'The Big Catch-Up' (2023)
+- WHO Periodic Intensification of Routine Immunization (PIRI)
+- WHO Behavioural and Social Drivers of vaccination (BeSD)
+- Polio-programme negotiated access / 'Days of Tranquility'; permanent transit-point vaccination
+
+These are framework references; align to the current NPHCDA National Immunization Policy and routine-
+immunization microplanning guidelines before implementation.
+"""
+
+
 @st.cache_data(show_spinner=False)
 def _load(path):
     return pd.read_csv(path)
@@ -108,6 +133,9 @@ def render():
             st.caption(clean("Interventions matched to each archetype's binding constraint using an "
                              "evidence-to-barrier method (WHO Reaching Every District/Community; Gavi "
                              "zero-dose IRMMA; WHO/UNICEF Big Catch-Up; PIRI; BeSD)."))
+    with st.expander("How the intervention bundles were developed - method and evidence "
+                     "(open this if asked how it was done)"):
+        st.markdown(METHOD_MD)
     st.caption(clean("Zero-dose figures are model estimates. Archetype and equity tier use modelled "
                      "covariate surfaces (2014-2021). Local governments without DTP1 reporting are not "
                      "ranked here."))

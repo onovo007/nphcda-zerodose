@@ -168,9 +168,10 @@ def render(data: dict):
         st.caption(clean(
             "Severity classes (within state): Critical = Tier 1, the highest-burden LGAs (red) - act "
             "first; High = Tier 2 (orange); Moderate = Tier 3 (amber); Lower = Tier 4 (blue). Priority "
-            "band: A = drives the first 50 percent of national burden, B = 50-80 percent, C = the long "
-            "tail. Use Severity to triage where to deploy catch-up first, and Priority band to size "
-            "how many LGAs to cover for a target share of the burden."))
+            "band (share of the national zero-dose burden): A = the first 0 to 50 percent, B = 50 to 80 "
+            "percent, C = the final 80 to 100 percent (the long tail). Use Severity to triage where to "
+            "deploy catch-up first, and Priority band to size how many LGAs to cover for a target share "
+            "of the burden. Scroll the table to see all local governments."))
         # Enrich with the LGA archetype and equity-deprivation tier (from the LGA archetype master).
         try:
             import re as _re
@@ -187,8 +188,8 @@ def render(data: dict):
         except Exception:
             pass
         col_sev = "Severity (within state)" if "Severity (within state)" in pareto.columns else None
-        show = highlight_classes(pareto.head(60), col_sev, SEVERITY_CELL) if col_sev else pareto.head(60)
-        st.dataframe(show, use_container_width=True, height=420)
+        show = highlight_classes(pareto, col_sev, SEVERITY_CELL) if col_sev else pareto
+        st.dataframe(show, use_container_width=True, height=520)
         rank_col = "Burden rank" if "Burden rank" in pareto.columns else pareto.columns[0]
         # Executive-ready download set: clean columns only (drop within-state tier/severity/flags).
         dl_cols = [c for c in PRIORITY_COLS if c in pareto.columns] or list(pareto.columns)
