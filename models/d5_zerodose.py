@@ -137,6 +137,16 @@ def run_state_model(_ndhs_long, _under5, _dhis2, key: str,
     if _pc is not None:
         return _pc
 
+    # Updated / uploaded data: run the live fit in an isolated child process, so a native
+    # SIGSEGV in PyMC/nutpie kills only that child instead of the whole app. Identical code,
+    # identical data, identical seed -> identical results; only the process boundary differs.
+    from isolation import run_isolated
+    return run_isolated("state", dict(ndhs_long=ndhs_long, under5=under5,
+                                      dhis2_raw=dhis2_raw, draws=draws, tune=tune))
+
+
+def _fit_state_live(ndhs_long, under5, dhis2_raw, draws: int, tune: int) -> dict:
+    """The live Bayesian fit itself. Executed inside the isolated worker process."""
     import pymc as pm
     import arviz as az
 
