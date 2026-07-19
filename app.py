@@ -7,7 +7,14 @@ Entry point for Streamlit / Hugging Face Spaces.
 """
 from __future__ import annotations
 
+import faulthandler
 import os
+
+# A SIGSEGV inside a native library (BLAS/OpenMP/GDAL) kills the process with no Python
+# traceback, which makes exit-139 crashes impossible to locate from the logs. faulthandler
+# dumps the Python stack at the moment of the fault, so the container log names the exact
+# frame. Diagnostic only - no effect on behaviour or performance.
+faulthandler.enable()
 
 os.environ.setdefault("PYTENSOR_FLAGS", "cxx=")  # no system C++ compiler needed (nutpie sampler)
 
