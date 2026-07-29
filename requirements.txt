@@ -9,6 +9,10 @@ python-pptx==1.0.2
 statsmodels==0.14.4
 pandas==2.2.3
 numpy==1.26.4
+# pyarrow MUST be pinned to a numpy-1.x-built wheel. Unpinned it resolves to a numpy-2-era build
+# (e.g. 25.x) whose Arrow conversion segfaults (exit 139) against numpy 1.26 on every st.dataframe
+# render - the root cause of the intermittent crashes. 16.1.0 is the last comfortable numpy-1.26 line.
+pyarrow==16.1.0
 plotly==5.18.0
 openpyxl==3.1.2
 scikit-learn==1.9.0
