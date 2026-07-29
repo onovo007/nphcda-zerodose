@@ -273,6 +273,24 @@ def render(data: dict):
             _download(escreen, "Download additional-antigen LGA at-risk screen (CSV)",
                       "D1_additional_lga_at_risk.csv")
 
+        ai.ai_block(
+            "d1_additional_antigens",
+            "Coverage Forecasting - additional antigens (established and recently introduced)",
+            "Interpret the additional-antigen forecasts. For the ESTABLISHED antigens (OPV3, IPV1, "
+            "PCV3, Yellow Fever, Men A), state whether each is projected to stay above or fall below "
+            "80 percent of its 2024 level - the at-risk-of-decline early-warning - name any that are "
+            "flagged and the lowest one. For the RECENTLY INTRODUCED antigens (IPV2, Rotavirus 1-3), "
+            "explain they are still scaling up from recent introduction, so they are monitored for "
+            "uptake, not decline; comment on whether uptake is rising and do NOT describe them as "
+            "failing. Note how many LGA-and-antigen combinations carry the at-risk-of-decline flag, "
+            "name the worst-hit states or antigens if visible, and give one priority action. Be clear "
+            "that this is an early-warning of decline against the 2024 level, not coverage of the "
+            "eligible child population.",
+            {"metric": "percent of 2024 level (at-risk-of-decline early-warning)",
+             "established_min_forecasts": est["summary"].to_dict(orient="records"),
+             "recently_introduced_min_forecasts": newf["summary"].to_dict(orient="records"),
+             "lga_at_risk_flagged_combinations": int(0 if escreen.empty else len(escreen))})
+
     with tabs[0]:
         section(f"National coverage forecasts ({unit_label})",
                 f"Forecast period {period}. Solid line fitted, dashed forecast, shaded 80/95 percent "
