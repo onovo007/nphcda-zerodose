@@ -93,9 +93,34 @@ ANTIGEN_TS = {
     "Penta3": "penta_3_count",
     "Measles1": "measles_1_count",
 }
+# Additional antigens requested by NPHCDA (ED). Two groups, treated differently:
+#  - ESTABLISHED: stable multi-year history -> screened for an at-risk-of-decline flag (below 80%
+#    of the 2024 level), exactly like the four tracers above.
+#  - RECENTLY INTRODUCED: still scaling up (Rotavirus from 2022; second IPV dose) -> monitored for
+#    UPTAKE, never given a decline flag (a "% of 2024" comparison is meaningless while a vaccine ramps).
+ANTIGEN_TS_EXTRA = {
+    "OPV3": "opv_3_count",
+    "IPV1": "ipv_1_count",
+    "PCV3": "pcv_3_count",
+    "Yellow Fever": "yellow_fever_count",
+    "Men A": "men_a_count",
+}
+ANTIGEN_TS_NEW = {
+    "IPV2": "ipv_2_count",
+    "Rota1": "rota_1_count",
+    "Rota2": "rota_2_count",
+    "Rota3": "rota_3_count",
+}
+# All established antigens that carry the at-risk-of-decline early-warning (tracers + extra).
+ANTIGEN_TS_ESTABLISHED = {**ANTIGEN_TS, **ANTIGEN_TS_EXTRA}
 COUNT_COLS = [
     "bcg_count", "penta_1_count", "pent_2_count", "penta_3_count",
     "measles_1_count", "measles_2_count",
+    # additional antigens (coerced to numeric in prep_dhis2 so forecasts can use them)
+    "opv_0_count", "opv_1_count", "opv_2_count", "opv_3_count",
+    "pcv_1_count", "pcv_2_count", "pcv_3_count",
+    "ipv_1_count", "ipv_2_count", "rota_1_count", "rota_2_count", "rota_3_count",
+    "yellow_fever_count", "men_a_count",
 ]
 
 # Domain 2 - LASSO driver features (verbatim from the D1_D2 notebook, cell 29)
@@ -144,6 +169,17 @@ ANTIGEN_PAL = {
     "Penta1": "#2E7D32",
     "Penta3": "#E65100",
     "Measles1": "#880E4F",
+    # additional established antigens
+    "OPV3": "#00838F",
+    "IPV1": "#5E35B1",
+    "PCV3": "#AD1457",
+    "Yellow Fever": "#EF6C00",
+    "Men A": "#3949AB",
+    # recently introduced (scale-up)
+    "IPV2": "#7CB342",
+    "Rota1": "#00ACC1",
+    "Rota2": "#039BE5",
+    "Rota3": "#1E88E5",
 }
 # Okabe-Ito colour-blind-safe categorical palette (north = warm, south = cool, all distinguishable
 # under deuteranopia/protanopia).

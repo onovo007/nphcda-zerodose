@@ -749,7 +749,7 @@ def methods_sections() -> list:
           "piecewise-linear trend with automatic changepoints, yearly plus an added semi-annual "
           "seasonality; 95% and 80% prediction intervals.",
           "Two reporting modes: a denominator-free index (percent of the 2024 baseline; the 80% line is "
-          "a decline tripwire) and estimated coverage of the eligible cohort (doses divided by an eligible "
+          "an at-risk-of-decline early-warning) and estimated coverage of the eligible cohort (doses divided by an eligible "
           "infant denominator: under-five/5 demographic proxy by default, or DHIS2 live births).",
           "Admin-vs-survey triangulation: NDHS 2024 survey coverage is overlaid per antigen so a large "
           "admin-vs-survey gap flags a denominator or reporting-completeness issue.",

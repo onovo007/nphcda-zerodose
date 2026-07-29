@@ -35,7 +35,8 @@ def _horizon_to(last_ds, year: int = 2027, month: int = 12) -> int:
 
 @st.cache_data(show_spinner="Fitting national antigen forecasts (Prophet)...")
 def national_forecasts(_nat, key: str, end_year: int = 2027,
-                       metric: str = "baseline", cohort_annual: float | None = None) -> dict:
+                       metric: str = "baseline", cohort_annual: float | None = None,
+                       _antigens: dict | None = None) -> dict:
     """Return per-antigen series + the at-risk summary table.
 
     end_year sets how far ahead Prophet forecasts (to December of that year). The forecast
@@ -56,7 +57,7 @@ def national_forecasts(_nat, key: str, end_year: int = 2027,
     series = {}
     summary = []
     monthly_long = []
-    for antigen, col in C.ANTIGEN_TS.items():
+    for antigen, col in (_antigens or C.ANTIGEN_TS).items():
         if col not in nat.columns:
             continue
         ts = nat[["ds", col]].rename(columns={col: "y"})
@@ -214,11 +215,11 @@ def lga_antigen_projections(_dhis2, key: str) -> pd.DataFrame:
 
 
 @st.cache_data(show_spinner="Screening LGAs for at-risk antigens...")
-def lga_at_risk_screen(_dhis2, key: str) -> pd.DataFrame:
+def lga_at_risk_screen(_dhis2, key: str, _antigens: dict | None = None) -> pd.DataFrame:
     """
     Fast linear-trend screen across all LGAs and antigens: project 12 months ahead and
-    express as a percent of the LGA's 2024 baseline; flag projections below 80 percent.
-    This is the always-on light path; the full per-LGA Prophet is the on-demand heavy run.
+    express as a percent of the LGA's 2024 baseline; flag projections below 80 percent
+    (the at-risk-of-decline early-warning). Always-on light path; full per-LGA Prophet is on-demand.
     """
     d = prep_dhis2(_dhis2)
     rows = []
@@ -228,7 +229,7 @@ def lga_at_risk_screen(_dhis2, key: str) -> pd.DataFrame:
         rec = dict(zip(grp_cols, keys if isinstance(keys, tuple) else (keys,)))
         if "lga" in rec:
             rec["lga"] = N.clean_lga_name(rec["lga"])
-        for antigen, col in C.ANTIGEN_TS.items():
+        for antigen, col in (_antigens or C.ANTIGEN_TS).items():
             if col not in g:
                 continue
             ts = g[["ds", col]].dropna()

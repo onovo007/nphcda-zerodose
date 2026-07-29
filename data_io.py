@@ -111,8 +111,9 @@ def prep_dhis2(df: pd.DataFrame) -> pd.DataFrame:
 
 def national_monthly(dhis2_prepped: pd.DataFrame) -> pd.DataFrame:
     """National monthly antigen counts + dropout series (nat frame in D1_D2 cell 9)."""
-    cc = [c for c in ["penta_1_count", "penta_3_count", "measles_1_count",
-                      "measles_2_count", "bcg_count"] if c in dhis2_prepped.columns]
+    _extra = list(C.ANTIGEN_TS_EXTRA.values()) + list(C.ANTIGEN_TS_NEW.values())
+    cc = [c for c in (["penta_1_count", "penta_3_count", "measles_1_count",
+                       "measles_2_count", "bcg_count"] + _extra) if c in dhis2_prepped.columns]
     nat = dhis2_prepped.groupby("ds")[cc].sum().reset_index()
     nat["dropout_p1p3"] = ((nat["penta_1_count"] - nat["penta_3_count"]) / nat["penta_1_count"] * 100).clip(-50, 100)
     if "measles_1_count" in nat:

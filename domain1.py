@@ -105,7 +105,7 @@ def render(data: dict):
         ["Early-Warning Alert (Relative to 2024 baseline)", "Estimated coverage (eligible cohort)"],
         index=0, horizontal=True, key="d1_metric",
         help=("Early-Warning Alert = doses vs the antigen's mean 2024 level (denominator-free; a "
-              "decline tripwire). Estimated coverage = doses divided by the estimated 12-23 month "
+              "at-risk-of-decline early-warning). Estimated coverage = doses divided by the estimated 12-23 month "
               "eligible cohort (under-five / 5), i.e. coverage of the eligible infants."))
     metric = "baseline" if metric_choice.startswith("Early") else "coverage"
     cohort_annual = None
@@ -160,7 +160,7 @@ def render(data: dict):
         + (f" - estimated coverage of the eligible cohort = monthly doses / (annual {denom_label} / 12)."
            if metric == "coverage"
            else " - each antigen vs its own mean 2024 monthly level; the 80% line marks an 80%-of-2024 "
-                "decline tripwire, not literal coverage.")
+                "at-risk-of-decline early-warning, not literal coverage.")
         + f" Forecast starts after the last observed data ({last_obs:%b %Y}) to Dec {end_year}; "
           "longer horizons widen the prediction intervals."))
     if metric == "baseline":
@@ -215,7 +215,63 @@ def render(data: dict):
     fmonths = pd.to_datetime(next(iter(series.values()))["fore_x"])
     period = f"{fmonths.min():%b %Y} to {fmonths.max():%b %Y}"
 
-    tabs = st.tabs(["National forecast", "LGA at-risk screen", "Microplanning downloads"])
+    tabs = st.tabs(["National forecast", "LGA at-risk screen", "Microplanning downloads",
+                    "Additional antigens"])
+
+    with tabs[3]:
+        section("Additional antigens (NPHCDA request)",
+                "Established antigens are screened for a projected decline below 80% of their 2024 "
+                "level (an at-risk-of-decline early-warning). Recently introduced antigens (IPV2, "
+                "Rotavirus) are still scaling up, so they are monitored for uptake rather than decline.")
+        st.markdown(clean("**Established additional antigens (OPV3, IPV1, PCV3, Yellow Fever, Men A)** "
+                          "- at-risk-of-decline early-warning"))
+        est = national_forecasts(nat, key=f"{kd}-extra", metric="baseline",
+                                 end_year=end_year, _antigens=C.ANTIGEN_TS_EXTRA)
+        ecols = st.columns(2)
+        for i, (a, s) in enumerate(est["series"].items()):
+            with ecols[i % 2]:
+                st.plotly_chart(viz.forecast_band_fig(
+                    s, C.ANTIGEN_PAL.get(a, C.NAVY), f"{a} - national ({est['unit_label']})",
+                    est["unit_label"], threshold=C.THRESHOLD_PCT, mark_below=True),
+                    use_container_width=True)
+        st.caption(clean("Values below 80% of the 2024 level carry the at-risk-of-decline flag."))
+        st.dataframe(highlight_below(est["summary"], est["value_col"]), use_container_width=True)
+        _download(est["summary"], "Download established-antigen forecast (CSV)",
+                  "D1_additional_established_forecast.csv")
+
+        st.divider()
+        st.markdown(clean("**Recently introduced antigens (IPV2, Rotavirus 1-3)** - uptake, not a "
+                          "decline flag"))
+        st.caption(clean("These vaccines are still scaling up from recent introduction (Rotavirus from "
+                         "2022; second IPV dose), so no 80% at-risk-of-decline flag is applied - the "
+                         "curves show uptake. A value above 100% means volume is still growing past the "
+                         "2024 level."))
+        newf = national_forecasts(nat, key=f"{kd}-new", metric="baseline",
+                                  end_year=end_year, _antigens=C.ANTIGEN_TS_NEW)
+        ncols = st.columns(2)
+        for i, (a, s) in enumerate(newf["series"].items()):
+            with ncols[i % 2]:
+                st.plotly_chart(viz.forecast_band_fig(
+                    s, C.ANTIGEN_PAL.get(a, C.STEEL), f"{a} - national uptake ({newf['unit_label']})",
+                    newf["unit_label"], threshold=None, mark_below=False),
+                    use_container_width=True)
+
+        st.divider()
+        section("LGA at-risk screen - established additional antigens",
+                "Each LGA-and-antigen projected 12 months ahead, flagged below 80% of its own 2024 "
+                "level. Worst (lowest projection) first.")
+        with st.spinner("Screening LGAs for the additional antigens..."):
+            escreen = lga_at_risk_screen(data["dhis2"], key=f"{kd}-extra",
+                                         _antigens=C.ANTIGEN_TS_EXTRA)
+        if escreen.empty:
+            st.success("No LGAs projected below 80% for the additional established antigens.")
+        else:
+            st.write(clean(f"{len(escreen)} LGA-and-antigen combinations carry the at-risk-of-decline "
+                           "flag for the additional established antigens."))
+            st.dataframe(highlight_below(escreen, "Projected % of baseline (12m)"),
+                         use_container_width=True, height=420)
+            _download(escreen, "Download additional-antigen LGA at-risk screen (CSV)",
+                      "D1_additional_lga_at_risk.csv")
 
     with tabs[0]:
         section(f"National coverage forecasts ({unit_label})",
@@ -303,7 +359,7 @@ def render(data: dict):
             "LGA screen metric",
             ["Early-Warning Alert (2024 baseline)", "Estimated coverage (eligible cohort)"],
             horizontal=True, key="d1_lga_metric",
-            help="Early-Warning Alert = each LGA vs its own 2024 level (denominator-free tripwire). "
+            help="Early-Warning Alert = each LGA vs its own 2024 level (denominator-free at-risk-of-decline flag). "
                  "Estimated coverage = projected doses vs the LGA's estimated 12-23 month cohort "
                  "(2024 under-five / 5, apportioned by LGA population).")
 
