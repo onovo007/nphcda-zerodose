@@ -8,3 +8,8 @@ _test_d5.py
 .venv/
 venv/
 .claude/
+
+# Handover artifacts and notebooks - kept in the git repo for GitHub, excluded from the runtime image
+handover/
+notebooks/
+*.ipynb
