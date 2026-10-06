@@ -27,7 +27,8 @@ This document records exactly what is being handed over.
 - `Final_NPHCDA_Consolidated_Report_UPDATED_08_09_2026.docx` (repo `handover/`).
 
 ### 5. Final presentation deck
-- `NPHCDA_ZeroDose_RI_Team_Presentation_9.27.2026.pptx` (repo `handover/`).
+- `NPHCDA_ZeroDose_RI_Team_Presentation_ED_Updates.10.6.2026.pptx` (repo `handover/`) - **current version**. Adds the Executive Director request tracker (slide 2), which maps his three review requests to the slides that answer them, and carries the scope statements as at completion.
+- `NPHCDA_ZeroDose_RI_Team_Presentation_9.27.2026.pptx` (repo `handover/`) - the deck as handed over on 27 September 2026, retained as the record of that handover.
 
 ### 6. Analytical notebooks (Google Colab - reproducible)
 - Full set in the repo `notebooks/`: Domains 1-7, the LGA archetype notebook, and cross-checks / triangulation. Each re-runs on updated data.
@@ -38,7 +39,11 @@ This document records exactly what is being handed over.
 - `handover/HANDOVER_MANIFEST.md` - this document.
 
 ### 8. Methods and validation
-- One method per domain; external validation against NmDHS 2025-26 (state rho = 0.88) and the IHME DTP1 surface (LGA rho = 0.60); documented 730-modelled / 44-excluded data-quality accounting.
+- One method per domain; external validation against NmDHS 2025-26 (state rho = 0.88) and the IHME DTP1 surface (LGA rho = 0.60); documented 730-modelled / 44-excluded data-quality accounting (see item 9).
+
+### 9. Priority lists and data-quality accounting
+- `NPHCDA_LGA_Priority_Lists_7.8.2026.xlsx` (repo `handover/`) - all 730 reporting local government areas ranked by modelled zero-dose burden, each carrying its zero-dose rate, cumulative share of the national burden, and priority band. Three sheets: all ranked LGAs; the top 20 percent (146 LGAs, about 62 percent of the burden); and the top 270 (about 80 percent).
+- `NPHCDA_Excluded_44_LGAs_DataQuality.7.10.26.xlsx` and `.docx` (repo `handover/`) - the 44 local government areas excluded from the burden model for incomplete Penta1 reporting, listed by state and zone with the documented data-quality issue and the months reported for each. These are a DHIS2 data-element gap, not a finding of zero coverage.
 
 ---
 
@@ -53,3 +58,9 @@ The **hosting and ongoing maintenance of the live web application** continue wit
 ## Access and security notes
 - No credentials (API keys or tokens) are included in this package. Access is granted by adding authorized emails; any keys remain in the hosting environment.
 - The GitHub repository and the Google Drive folder mirror each other by design (same domain structure, same dictionary).
+
+---
+
+## Revision history
+- **2026-09-27** - original handover: manifest, dataset dictionary, final report, final deck, notebooks and README.
+- **2026-10-06** - added the LGA priority lists and the excluded-44 data-quality files (item 9); added the 10.6.2026 deck as the current presentation deck (item 5).
