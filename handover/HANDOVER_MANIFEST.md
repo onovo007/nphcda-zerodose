@@ -24,11 +24,10 @@ This document records exactly what is being handed over.
 - Large and harmonized datasets are stored here, since GitHub does not host large files.
 
 ### 4. Final technical report
-- `Final_NPHCDA_Consolidated_Report_UPDATED_08_09_2026.docx` (repo `handover/`).
+- `Final_NPHCDA_Consolidated_Report_UPDATED_10.6.2026.docx` (repo `handover/`) - **current version**. Archetype figures reconciled with the corrected datasets, table and figure pagination fixed, and typography normalised to Times New Roman throughout.
 
 ### 5. Final presentation deck
 - `NPHCDA_ZeroDose_RI_Team_Presentation_ED_Updates.10.6.2026.pptx` (repo `handover/`) - **current version**. Adds the Executive Director request tracker (slide 2), which maps his three review requests to the slides that answer them, and carries the scope statements as at completion.
-- `NPHCDA_ZeroDose_RI_Team_Presentation_9.27.2026.pptx` (repo `handover/`) - the deck as handed over on 27 September 2026, retained as the record of that handover.
 
 ### 6. Analytical notebooks (Google Colab - reproducible)
 - Full set in the repo `notebooks/`: Domains 1-7, the LGA archetype notebook, and cross-checks / triangulation. Each re-runs on updated data.
@@ -44,6 +43,7 @@ This document records exactly what is being handed over.
 ### 9. Priority lists and data-quality accounting
 - `NPHCDA_LGA_Priority_Lists_7.8.2026.xlsx` (repo `handover/`) - all 730 reporting local government areas ranked by modelled zero-dose burden, each carrying its zero-dose rate, cumulative share of the national burden, and priority band. Three sheets: all ranked LGAs; the top 20 percent (146 LGAs, about 62 percent of the burden); and the top 270 (about 80 percent).
 - `NPHCDA_Excluded_44_LGAs_DataQuality.7.10.26.xlsx` and `.docx` (repo `handover/`) - the 44 local government areas excluded from the burden model for incomplete Penta1 reporting, listed by state and zone with the documented data-quality issue and the months reported for each. These are a DHIS2 data-element gap, not a finding of zero coverage.
+- `NPHCDA_LGA_Archetype_List_updated_10.6.2026.xlsx` (repo `handover/`) - all 774 local government areas with their archetype, zero-dose figures and the 15 model covariates. Opens on a data dictionary giving every column's unit, range and source. All percentage variables are on a 0 to 100 scale.
 
 ---
 
@@ -64,3 +64,4 @@ The **hosting and ongoing maintenance of the live web application** continue wit
 ## Revision history
 - **2026-09-27** - original handover: manifest, dataset dictionary, final report, final deck, notebooks and README.
 - **2026-10-06** - added the LGA priority lists and the excluded-44 data-quality files (item 9); added the 10.6.2026 deck as the current presentation deck (item 5).
+- **2026-10-06** - corrected the FCT area councils, previously filed under Enugu; recovered 30 LGAs lost to name mismatches in the burden join, bringing the archetype files to the full 2,085,312 national total; added the archetype list workbook (item 9); replaced the final report with the 10.6.2026 version (item 4).
