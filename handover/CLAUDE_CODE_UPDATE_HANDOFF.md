@@ -125,4 +125,30 @@ python precompute_d5.py                               # regenerate precomputed r
 - Run `_smoke_test.py` and verify the app renders (sign-in -> Use bundled sample data -> open each page) before pushing.
 - When the correction lands, update the report, deck, figures, and the 44-LGA documents consistently - the headline numbers (773 modelled / 1 excluded / new burden total) must match everywhere.
 
+## 9. Exact propagation map - where the 730/44/2.09M numbers live (current 10.6.2026 files)
+
+After recomputing on 773 LGAs, every item below must change to **773 modelled / 1 excluded** and the **revised (higher) burden total**. Re-derive the percentages and LGA counts from the new results (do not hand-edit without re-running).
+
+**Deck - `NPHCDA_ZeroDose_RI_Team_Presentation_ED_Updates.10.6.2026.pptx`:**
+- Slide 2: "All 730 reporting LGAs... 146 LGAs cover 62 percent"
+- Slide 9 (whole slide): "The 44 local government areas we could not model"; "730 of the 774... met the standard"; the breakdown "23 North-West, 16 North-East, 3 North-Central, 2 South-South" -> rewrite to **1 excluded / 773 modelled**, and reframe the 43 as a DHIS2-to-GRID3 **name-mapping correction**, not missing data
+- Slide 10: "591 of the 730 reporting areas" (recompute denominator)
+- Slide 17: "730 modelled local government areas"; "62% top 20%"; "270 hold 80%"
+- Slide 18: "top 150 reach 62 percent; top 270 reach 80 percent"
+- Slides 20 and 22: "146"
+- Slide 26 (cross-check): "Only 44 were far apart" vs the IHME surface - re-run the concordance
+- Slide 27: "730 reporting... national total 2.09 million"
+- Slide 31: "about 150 LGAs reach roughly 62%"
+
+**Report - `Final_NPHCDA_Consolidated_Report_UPDATED_10.6.2026.docx`:**
+- Table 3b "The 44 LGAs excluded from DHIS2-based modelling" -> revise to the **1 true non-reporter** (optionally add a table of the 43 recovered by the name-mapping fix)
+- "Of Nigeria's 774 LGAs, 730 met the Penta1 reporting standard... Forty-four were excluded" -> **773 / 1**
+- The remediation narrative ("in most of these LGAs other antigens report normally... the Penta1 data element itself has been dropped or misconfigured") -> **reframe**: 43 were a DHIS2-to-GRID3 admin-2 name-mapping mismatch (now corrected); only 1 is a genuine non-reporter
+- Figure 14 "Pareto... across 730 reporting LGAs (total approx 2.09 million)" -> 773 + new total
+- "top 146 LGAs... close to two-thirds"; "top 270" -> recompute
+- "Archetypes 1 and 2 hold approximately 1.50 million of the roughly 2.09 million" -> recompute
+- "Forty-four LGAs (Table 3b)... concentrated in the North-West and North-East" -> revise
+
+**Web app:** these numbers are produced live/precomputed, so they update automatically once the model is re-run and `precompute_d5.py` regenerates `data/sample/precomputed/` - no hand-editing needed, but verify the Zero-Dose page total and the LGA Priority counts after regeneration.
+
 Consortium: CIDRE and Quantium Insights LLC, in technical support of NPHCDA; funders and reviewers GAVI and UNICEF.
