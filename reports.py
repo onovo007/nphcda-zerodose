@@ -46,7 +46,13 @@ def _d5_two_methods(TM, data) -> dict:
     r1, r2 = TM.lga_ranked(tm, TM.M1), TM.lga_ranked(tm, TM.M2)
     tier1 = res[res["priority_tier"].astype(str) == "Tier 1: Critical"]["state"].tolist()
     zone = tm["national_zone"].iloc[1:]
+    st2 = tm["state"].sort_values("m2_children", ascending=False).head(8)
     return {
+        "how_to_read": ("Two zero-dose methods. Every field at this level (national totals, n50/n60/n80, "
+                        "tier1_states, top_states, top_lgas, zone_burden) is METHOD 1. All Method 2 (SAE) "
+                        "figures are inside 'm2'. 'top_states' is ordered by the state risk index (rate, burden, "
+                        "trend, uncertainty), not by count; 'top_lgas' and 'm2.top_states_by_children' are "
+                        "ordered by number of children. Always name the method when quoting a number."),
         "method": TM.M1,
         "national_zd_count_2026": int(nat["m1_children"]),
         "lga_total": int(nat["m1_children"]), "lga_count": int(S["m1"]["lgas"]),
@@ -58,7 +64,9 @@ def _d5_two_methods(TM, data) -> dict:
                "lo95": int(nat["m2_lo95"]), "hi95": int(nat["m2_hi95"]),
                "n50": TM.n_for_share(r2, 50), "n60": TM.n_for_share(r2, 60), "n80": TM.n_for_share(r2, 80),
                "top_lgas": [{"lga": r["LGA"], "state": r["State"], "zd_count": int(r["Zero-dose children (est)"]),
-                             "zd_rate_pct": float(r["Zero-dose rate (%)"])} for _, r in r2.head(10).iterrows()]},
+                             "zd_rate_pct": float(r["Zero-dose rate (%)"])} for _, r in r2.head(10).iterrows()],
+               "top_states_by_children": [{"state": r["state"], "zd_2026_pct": round(float(r["m2_rate"]), 1),
+                                           "zd_2026_count": int(r["m2_children"])} for _, r in st2.iterrows()]},
         "overlap_top155": int(S["overlap_top155"]), "rank_corr": round(float(S["rank_corr"]), 2),
         "top_states": [
             {"state": r["state"], "zone": r["zone"], "zd_2026_pct": round(float(r["zd_pred_2026_mean"]), 1),
