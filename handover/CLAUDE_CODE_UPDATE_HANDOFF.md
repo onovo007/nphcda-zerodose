@@ -10,8 +10,10 @@
 
 **Consequence:**
 - The correct count is **773 modelled / 1 excluded** (not 730 / 44).
-- Additional **data-row issues** were also found, so the **total zero-dose burden increases** (currently reported as ~2.08 million across 730 LGAs; it must be re-computed and will be higher).
+- Additional **data-row issues** were also found, so the **total zero-dose burden increases** (currently reported as ~2.08 million / 2,085,312 across 730 LGAs; it must be re-computed and will be higher).
 - This flows into the **report, the slide deck, and the web app** - all three must be updated, plus the 44-LGA data-quality documents.
+
+**WORK ALREADY IN PROGRESS (continue from here, do not redo):** a prior session recovered **30 LGAs** lost to name mismatches in the **archetype burden join** (archetype files now reach the 2,085,312 total) and fixed the FCT area councils that were filed under Enugu. STILL TO DO: (a) extend the name-mapping fix into the **Domain 5 zero-dose MODEL** itself, where the 730/44 exclusion lives (not just the archetype files) so the burden total is recomputed on 773 LGAs; (b) reconcile the true exclusion to **1 LGA**; (c) propagate the new totals to the report, deck, web app and the excluded-LGA documents. Check `git log` for the latest state before starting.
 
 ### Where the name-matching / inclusion logic lives (fix here)
 The exclusion was a side effect of fuzzy matching failing, so Penta1 looked absent. The fix is a **deterministic DHIS2-to-GRID3 admin-2 crosswalk** (a lookup table), replacing or backstopping the fuzzy matching at every site:
@@ -33,8 +35,8 @@ The app loads **precomputed** Domain 5 results for the bundled data (that is the
 3. Re-run the archetype pipeline in `Archtyping at LGA level/` (build_lga_archetype_master -> cluster_lga_archetypes -> finalize_master -> domain3_composite -> domain3_mgwr) to refresh the 773-LGA master, equity index, MGWR, and figures.
 4. Regenerate the LGA priority ranking (`regen_priority.py`) and the bundled `data/sample/lga_archetype_master.csv`, `lga_priority_ranking.csv`, `lga_archetype_summary.csv`.
 5. Run `_smoke_test.py` to confirm everything still works end to end.
-6. Update the report (`handover/Final_NPHCDA_Consolidated_Report_UPDATED_08_09_2026.docx`), the deck (`handover/NPHCDA_ZeroDose_RI_Team_Presentation_9.27.2026.pptx`), the figures, and the 44-LGA data-quality files in `01_Reports/NPHCDA_Excluded_44_LGAs_DataQuality.*` -> they must now state **1 excluded / 773 modelled** and the revised burden total.
-7. Update every place that says "730", "44", "2.08 million", "62% in top 20%" - re-derive from the new results.
+6. Update the CURRENT artifacts in `handover/` (file names change over time - check `ls handover/`): the report `Final_NPHCDA_Consolidated_Report_UPDATED_10.6.2026.docx`, the deck `NPHCDA_ZeroDose_RI_Team_Presentation_ED_Updates.10.6.2026.pptx`, the excluded-LGA files `NPHCDA_Excluded_44_LGAs_DataQuality.*` (rename/retitle to reflect **1 excluded**), the priority lists `NPHCDA_LGA_Priority_Lists_*.xlsx`, and the archetype list `NPHCDA_LGA_Archetype_List_updated_*.xlsx`. They must all state **1 excluded / 773 modelled** and the revised burden total.
+7. Update every place that says "730", "44", "2.08 million" / "2,085,312", "62% in top 20%", "top 146 / top 270" - re-derive from the new results.
 
 **Verify before push:** `_smoke_test.py` passes; the Zero-Dose page total reflects the new burden; the MGWR map white cells drop to ~1 (the true non-reporter) plus any missing-covariate LGAs.
 
