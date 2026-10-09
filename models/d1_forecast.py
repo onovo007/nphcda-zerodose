@@ -36,7 +36,7 @@ def load_lga_prophet(_dhis2_raw, key: str) -> dict | None:
         if meta.get("fp") != _fp_d1(_dhis2_raw):
             return None
         return {"summary": pd.read_parquet(_PRECOMP / "d1_lga_prophet.parquet"),
-                "monthly": pd.read_parquet(_PRECOMP / "d1_lga_prophet_monthly.parquet"),
+                "monthly": pd.read_csv(_PRECOMP / "d1_lga_prophet_monthly.csv"),
                 "skipped": pd.read_parquet(_PRECOMP / "d1_lga_not_forecast.parquet"),
                 "meta": meta}
     except Exception:

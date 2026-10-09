@@ -117,7 +117,7 @@ def main():
     summ["Severity band"] = severity(summ["Lowest forecast, months 6-12 (% of 2024)"],
                                      summ["Early-warning flag"])
     summ.to_parquet(_PRECOMP / "d1_lga_prophet.parquet")
-    monthly.to_parquet(_PRECOMP / "d1_lga_prophet_monthly.parquet")
+    monthly.to_csv(_PRECOMP / "d1_lga_prophet_monthly.csv", index=False)  # text: Space binary limits
     skipped.to_parquet(_PRECOMP / "d1_lga_not_forecast.parquet")
     flags = summ[summ["Early-warning flag"]]
     meta = {"fp": _fp_d1(raw), "forecasts": int(len(summ)), "lgas": int(summ["LGA"].nunique()),
