@@ -136,3 +136,27 @@ def state_gi_star(_state_df, key: str, value_col: str = "value") -> pd.DataFrame
         st.info(f"State Gi* computation unavailable, showing rates only ({exc}).")
     return pd.DataFrame(merged.drop(columns="geometry"))[
         ["state_key", "state", value_col, "gi_z", "gi_p", "gi_class"]]
+
+
+def gi_keyed(level: str, values: pd.DataFrame, value_col: str) -> pd.DataFrame:
+    """Getis-Ord Gi* on values already keyed to the geometry (state_key [, lga_key]).
+    LGA level uses k=5 nearest neighbours, state level Queen contiguity; row-standardized weights,
+    999 permutations, seed 42. Used by precompute_d5.py for the two-method hotspot maps."""
+    from libpysal.weights import Queen, KNN
+    from esda.getisord import G_Local
+    keys = ["state_key", "lga_key"] if level == "lga" else ["state_key"]
+    gdf = load_gdf(level).copy()
+    merged = gdf.merge(values[keys + [value_col]].drop_duplicates(keys), on=keys, how="left")
+    merged[value_col] = pd.to_numeric(merged[value_col], errors="coerce")
+    merged["imputed"] = merged[value_col].isna()
+    merged[value_col] = merged[value_col].fillna(merged[value_col].median())
+    if level == "lga":
+        w = KNN.from_dataframe(merged, k=C.LGA_KNN)
+    else:
+        w = Queen.from_dataframe(merged, use_index=False)
+    w.transform = "r"
+    gi = G_Local(merged[value_col].values, w, star=True, seed=42)
+    merged["gi_z"], merged["gi_p"] = gi.Zs, gi.p_sim
+    merged["gi_class"] = [N.hotspot_class(z, p) for z, p in zip(gi.Zs, gi.p_sim)]
+    cols = keys + [c for c in ("state", "lga") if c in merged.columns] + [value_col, "gi_z", "gi_p", "gi_class", "imputed"]
+    return pd.DataFrame(merged.drop(columns="geometry"))[cols]

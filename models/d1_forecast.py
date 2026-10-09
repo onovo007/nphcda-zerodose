@@ -3,10 +3,13 @@ Domain 1 - Antigen coverage forecasting.
 
 Live national Prophet forecasts for BCG, Penta1, Penta3 and Measles1, re-expressed as a
 percent of the 2024 baseline so the 80 percent target is a meaningful line (D1_D2 cells
-19-20). Plus a fast linear-trend LGA at-risk screen (the full per-LGA Prophet is the
-on-demand heavy path).
+19-20). At LGA level the same Prophet model is fitted per LGA and antigen; for the bundled data
+those fits are precomputed (precompute_d1.py) and served, and uploaded data uses a fast
+linear-trend screen.
 """
 from __future__ import annotations
+
+import json
 
 import numpy as np
 import pandas as pd
@@ -14,7 +17,30 @@ import streamlit as st
 
 import config as C
 import names as N
-from data_io import prep_dhis2, prep_under5
+from data_io import prep_dhis2, prep_under5, to_count
+
+_PRECOMP = C.DATA_DIR / "precomputed"
+
+
+def _fp_d1(dhis2_raw: pd.DataFrame) -> str:
+    """Fingerprint of a DHIS2 export: row count and total Penta1 doses."""
+    p1 = to_count(dhis2_raw["penta_1_count"]) if "penta_1_count" in dhis2_raw else pd.Series(dtype=float)
+    return f"{len(dhis2_raw)}|{round(float(p1.sum()), 0)}"
+
+
+@st.cache_data(show_spinner=False)
+def load_lga_prophet(_dhis2_raw, key: str) -> dict | None:
+    """Precomputed per-LGA Prophet early-warning forecasts for the bundled data, else None."""
+    try:
+        meta = json.loads((_PRECOMP / "d1_lga_meta.json").read_text())
+        if meta.get("fp") != _fp_d1(_dhis2_raw):
+            return None
+        return {"summary": pd.read_parquet(_PRECOMP / "d1_lga_prophet.parquet"),
+                "monthly": pd.read_parquet(_PRECOMP / "d1_lga_prophet_monthly.parquet"),
+                "skipped": pd.read_parquet(_PRECOMP / "d1_lga_not_forecast.parquet"),
+                "meta": meta}
+    except Exception:
+        return None
 
 
 def run_prophet(ts_df: pd.DataFrame, periods: int = C.FORECAST_MONTHS):
@@ -328,3 +354,57 @@ def lga_estimated_coverage_screen(_dhis2, _under5, _lga_population, key: str) ->
     if not out.empty:
         out = out.sort_values("Estimated coverage (12m) %").reset_index(drop=True)
     return out
+
+
+@st.cache_data(show_spinner="Fitting additional-antigen forecasts (Prophet)...")
+def additional_forecasts(_nat, key: str, _antigens: dict, established: bool = True,
+                         periods: int = 30) -> dict:
+    """National forecasts for the additional antigens (D1 additional-antigens notebook): months with
+    zero national doses are dropped (the antigen was not yet reported), Prophet with yearly
+    seasonality and a 95% interval, a 30-month horizon, and the minimum over the horizon expressed
+    as a percent of the antigen's 2024 mean monthly doses. Established antigens carry the
+    at-risk-of-decline flag below 80%; recently introduced antigens are read as uptake."""
+    from prophet import Prophet
+    nat = _nat
+    unit_label = "% of 2024 baseline"
+    value_col = f"Min forecast ({unit_label})"
+    series, summary = {}, []
+    for antigen, col in _antigens.items():
+        if col not in nat.columns:
+            continue
+        ts = nat[["ds", col]].rename(columns={col: "y"}).dropna()
+        ts = ts[ts["y"] > 0].sort_values("ds")
+        base = ts[ts["ds"].dt.year == 2024]["y"].mean()
+        if len(ts) < 12 or not base or base <= 0:
+            continue
+        m = Prophet(yearly_seasonality=True, weekly_seasonality=False, daily_seasonality=False,
+                    interval_width=0.95).fit(ts)
+        fc = m.predict(m.make_future_dataframe(periods=periods, freq="MS"))
+        cutoff = ts["ds"].max()
+        pct = fc.copy()
+        for c in ["yhat", "yhat_lower", "yhat_upper"]:
+            pct[c] = fc[c] / base * 100
+        hist = pct[pct["ds"] <= cutoff]
+        fore = pct[pct["ds"] > cutoff].reset_index(drop=True)
+        lo80 = fore["yhat"] - (fore["yhat"] - fore["yhat_lower"]) * C.PI_80_FACTOR
+        hi80 = fore["yhat"] + (fore["yhat_upper"] - fore["yhat"]) * C.PI_80_FACTOR
+        min_pct = float(fore["yhat"].min())
+        series[antigen] = dict(
+            obs_x=ts["ds"].dt.strftime("%Y-%m-%d").tolist(), obs_y=(ts["y"] / base * 100).tolist(),
+            hist_x=hist["ds"].dt.strftime("%Y-%m-%d").tolist(), hist_y=hist["yhat"].tolist(),
+            fore_x=fore["ds"].dt.strftime("%Y-%m-%d").tolist(), fore_y=fore["yhat"].tolist(),
+            lo95=fore["yhat_lower"].tolist(), hi95=fore["yhat_upper"].tolist(),
+            lo80=lo80.tolist(), hi80=hi80.tolist(), cutoff=cutoff.strftime("%Y-%m-%d"),
+            at_risk=bool(established and min_pct < C.THRESHOLD_PCT))
+        obs25 = ts[ts["ds"].dt.year == 2025]["y"].mean()
+        summary.append({
+            "Antigen": antigen,
+            "2024 baseline (doses/month)": int(round(base)),
+            "2025 observed (% of 2024)": round(float(obs25 / base * 100), 1) if pd.notna(obs25) else None,
+            value_col: round(min_pct, 1),
+            "Month of minimum": fore.loc[fore["yhat"].idxmin(), "ds"].strftime("%b %Y"),
+            "Early-warning": (("At risk of decline" if min_pct < C.THRESHOLD_PCT else "On track")
+                              if established else "Scaling up (uptake)"),
+        })
+    return {"series": series, "summary": pd.DataFrame(summary), "unit_label": unit_label,
+            "value_col": value_col}

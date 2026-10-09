@@ -93,13 +93,25 @@ def parse_period(s: pd.Series) -> pd.Series:
     return best
 
 
+def to_count(s: pd.Series) -> pd.Series:
+    """Numeric dose counts from a DHIS2 column, accepting thousands separators ("1,234")."""
+    if pd.api.types.is_numeric_dtype(s):
+        return s.astype(float)
+    return pd.to_numeric(s.astype(str).str.replace(",", "", regex=False).str.strip()
+                         .replace({"": np.nan, "nan": np.nan, "None": np.nan}), errors="coerce")
+
+
 def prep_dhis2(df: pd.DataFrame) -> pd.DataFrame:
-    """Parse period, coerce counts, add year/month and dropout columns (D1_D2 cell 9)."""
+    """Parse period, coerce counts, add year/month and dropout columns (D1_D2 cell 9).
+
+    DHIS2 exports print counts of 1,000 or more with a thousands separator ("1,234"), so the
+    separator is removed before conversion; otherwise those counts would be read as missing.
+    """
     d = df.copy()
     d.columns = [c.strip() for c in d.columns]
     for c in C.COUNT_COLS:
         if c in d.columns:
-            d[c] = pd.to_numeric(d[c], errors="coerce")
+            d[c] = to_count(d[c])
     d["ds"] = parse_period(d["period"])
     d["year"] = d["ds"].dt.year
     d["month"] = d["ds"].dt.month

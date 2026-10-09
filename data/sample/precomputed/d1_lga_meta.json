@@ -1,0 +1,21 @@
+{
+  "fp": "43656|38124754.0",
+  "forecasts": 3092,
+  "lgas": 767,
+  "lgas_key": 773,
+  "alerts": 1302,
+  "lgas_with_alert": 513,
+  "alerts_by_antigen": {
+    "Measles1": 393,
+    "Penta1": 320,
+    "Penta3": 312,
+    "BCG": 277
+  },
+  "severity": {
+    "Severe (40-70%)": 653,
+    "Warning (70-80%)": 464,
+    "Critical (0-40%)": 148,
+    "Unstable forecast (<0%)": 37
+  },
+  "last_observed": "Dec 2025"
+}

@@ -114,7 +114,7 @@ def page_home():
          "why they are missed, and where to act first, so NPHCDA can optimize Nigeria's immunization "
          "programme and ensure that no child is left behind or exposed to vaccine-preventable disease.",
          ["Coverage Forecasting", "Dropout & Completion", "Zero-Dose & Hotspots",
-          "Bayesian + Prophet + spatial"])
+          "Two Bayesian methods + Prophet + spatial"])
     st.caption(clean("A decision-support platform for the NPHCDA Digital Innovation Hub. Upload your "
                      "data or use the bundled sample to run every model live."))
 
@@ -123,13 +123,18 @@ def page_home():
         section("What this tool does")
         st.markdown(clean(
             "- **Coverage Forecasting.** National Prophet forecasts of BCG, Penta1, Penta3 and "
-            "Measles1 as a percent of the 2024 baseline, against the 80 percent target, plus an LGA "
-            "at-risk screen and state/LGA microplanning projections.\n"
+            "Measles1 as a percent of the 2024 level, with an 80 percent early-warning line, a Prophet "
+            "early-warning for every LGA, nine additional antigens and state/LGA microplanning forecasts.\n"
             "- **Dropout & Completion.** Prophet forecasts of Penta1-to-Penta3, Penta1-to-Measles1 "
-            "and Measles1-to-Measles2 dropout, with LASSO-selected drivers and state-by-year heatmaps.\n"
-            "- **Zero-Dose & Hotspots.** A Bayesian hierarchical Beta regression of state zero-dose "
-            "rates with credible intervals, population-weighted LGA burden, Pareto prioritization and "
-            "Getis-Ord Gi* hotspot maps.\n"
+            "and Measles1-to-Measles2 dropout, with state and LGA LASSO drivers and state-by-year heatmaps.\n"
+            "- **Zero-Dose & Hotspots.** Two Bayesian methods estimate the 2026 zero-dose rate and number "
+            "of children for every LGA - Method 1 (hierarchical model with DHIS2-calibrated LGA allocation) "
+            "and Method 2 (small-area estimation, SAE) - with 50/60/80 percent Pareto lists, Getis-Ord Gi* "
+            "hotspots and a side-by-side comparison.\n"
+            "- **LGA Priority & Archetypes.** Every LGA ranked by zero-dose children, with its archetype, "
+            "equity-deprivation tier and matched intervention bundle.\n"
+            "- **Triangulation & Cross-Checks.** Both methods checked against the NmDHS 2025-26 survey, an "
+            "independent zone synthesis and IHME LGA estimates.\n"
             "- **Exploratory Data Analysis.** Exploratory analysis of the state zero-dose dataset - a "
             "correlation matrix with multicollinearity flags, distributions, scatter with Pearson r "
             "and p, violin by zone with a Kruskal-Wallis test, burden-band bars, a Bland-Altman "
@@ -161,12 +166,23 @@ def page_home():
 
     section("Workstreams and research questions")
     st.dataframe(pd.DataFrame([
+        {"Workstream": "Data and Quality",
+         "Research question": "Is the DHIS2 data complete enough to model, and where are the reporting gaps?"},
         {"Workstream": "Coverage Forecasting",
-         "Research question": "Which antigens fall below the 80% target in 6-12 months?"},
+         "Research question": "Which antigens, nationally and in which LGAs, are projected below 80% of their "
+                             "2024 level in 6-12 months?"},
         {"Workstream": "Dropout & Completion",
          "Research question": "What are predicted dropout rates and what drives incomplete vaccination?"},
         {"Workstream": "Zero-Dose & Hotspots",
-         "Research question": "Where are zero-dose children most concentrated and why?"},
+         "Research question": "Where are zero-dose children most concentrated, under each of the two methods?"},
+        {"Workstream": "LGA Priority & Archetypes",
+         "Research question": "Which LGAs come first, what kind of place are they, and which interventions fit?"},
+        {"Workstream": "Triangulation & Cross-Checks",
+         "Research question": "Do independent surveys and models agree with our estimates?"},
+        {"Workstream": "Exploratory Data Analysis",
+         "Research question": "Which state and LGA characteristics move with zero-dose?"},
+        {"Workstream": "Ask the Analyst, Reports & Briefs, Program Q&A",
+         "Research question": "Grounded answers, factsheets, policy briefs and document Q&A from the results."},
     ]), use_container_width=True, hide_index=True)
 
 
@@ -252,6 +268,17 @@ def page_data():
              "value": f"{q['reporting_rate']:.0f}%" if pd.notna(q["reporting_rate"]) else "-",
              "sub": clean(span_txt), "color": C.STEEL},
         ])
+        gaps = dq.coverage_gaps(d)
+        if gaps["late_start_states"]:
+            st.info(clean(
+                "Reporting starts later for some states (no DHIS2 rows before the month shown): "
+                + "; ".join(f"{s_} from {m_}" for s_, m_ in gaps["late_start_states"].items())
+                + ". These months are true gaps in the export, not zero doses; state trends and forecasts "
+                  "for these states rest on the shorter series."))
+        if not gaps["lga_gaps"].empty:
+            with st.expander(clean(f"LGAs with two or more years without Penta1 reported "
+                                   f"({len(gaps['lga_gaps'])}) - verify in DHIS2 at source")):
+                st.dataframe(gaps["lga_gaps"], use_container_width=True)
         ai.ai_block("dq_overview", "DHIS2 data quality overview",
                     "Headline data-quality metrics: number of states and LGAs in the file, LGAs "
                     "reporting non-zero Penta1 in the latest year (of 774), count completeness, the "
@@ -488,37 +515,47 @@ def page_reports():
 # Implementation Science - EDA
 # --------------------------------------------------------------------------------------
 def _eda_lga():
-    """Exploratory analysis of the cleaned 774-local-government archetype master (covariates +
-    modelled zero-dose). Independent of the state impsci helpers."""
+    """Exploratory analysis of the 774 local governments: 15 modelled covariates, the archetype and
+    both 2026 zero-dose estimates (Method 1 and Method 2, SAE). Independent of the state helpers."""
     import plotly.express as px
-    path = C.DATA_DIR / "lga_archetype_master.csv"
-    if not path.exists():
-        st.warning("The LGA archetype master is not bundled.")
+    from models import d5_two_methods as TM
+    try:
+        tm = TM.load()
+        cov = pd.read_csv(TM.TM_DIR / "lga_archetype_covariates_774.csv")
+    except Exception:
+        st.warning("The LGA covariate file is not bundled.")
         return
-    df = pd.read_csv(path)
-    NUM = [c for c in df.columns
-           if c not in ("platform_State", "platform_LGA", "archetype", "archetype_type")
-           and pd.api.types.is_numeric_dtype(df[c])]
-    y = "zero_dose_rate_pct" if "zero_dose_rate_pct" in df.columns else NUM[0]
-    drivers = [c for c in NUM if c not in ("zero_dose_rate_pct", "zero_dose_children")]
+    lg = tm["lga"][["lga_uid", "m1_rate", "m1_children", "m2_rate", "m2_children"]]
+    raw = cov.merge(lg, on="lga_uid", how="left")
+    covs = [c for c in C.FEATURE_LABELS if c in raw.columns]
+    out_cols = {"m1_rate": "Zero-dose rate 2026, Method 1 (%)", "m2_rate": "Zero-dose rate 2026, Method 2 SAE (%)",
+                "m1_children": "Zero-dose children 2026, Method 1",
+                "m2_children": "Zero-dose children 2026, Method 2 SAE"}
+    df = raw[["state", "lga", "archetype", "archetype_type"] + covs + list(out_cols)].rename(
+        columns={**{c: C.feature_label(c) for c in covs}, **out_cols,
+                 "state": "State", "lga": "LGA", "archetype_type": "Archetype"})
+    drivers = [C.feature_label(c) for c in covs]
+    NUM = drivers + list(out_cols.values())
+    y = st.radio("Zero-dose outcome", [out_cols["m1_rate"], out_cols["m2_rate"]], horizontal=True,
+                 key="eda_lga_y")
     kpi_row([
         {"label": "Local governments", "value": str(len(df)), "sub": "admin-2 (LGA)", "color": C.NAVY},
         {"label": "Covariates", "value": str(len(drivers)), "sub": "modelled predictors", "color": "#2E6E8E"},
-        {"label": "Mean zero-dose rate",
-         "value": f"{df[y].mean():.0f}%" if y in df else "-", "sub": "across LGAs", "color": "#C8902A"},
-        {"label": "Archetypes", "value": str(df["archetype"].nunique()) if "archetype" in df else "-",
-         "sub": "data-driven clusters", "color": "#1C7A3D"},
+        {"label": "Mean zero-dose rate", "value": f"{df[y].mean():.0f}%", "sub": "across LGAs (unweighted)",
+         "color": "#C8902A"},
+        {"label": "Archetypes", "value": str(df["archetype"].nunique()), "sub": "data-driven clusters",
+         "color": "#1C7A3D"},
     ])
-    st.caption(clean("The cleaned 774-local-government archetype master: 15 modelled covariates (IHME, "
-                     "DHS, Meta Relative Wealth Index, Weiss travel time, ACLED) plus the modelled "
-                     "zero-dose rate and count. Explore relationships at local-government resolution."))
+    st.caption(clean("774 local governments: 15 modelled covariates (IHME, DHS, Meta Relative Wealth Index, "
+                     "Weiss travel time, ACLED), the archetype, and the 2026 zero-dose rate and children "
+                     "under both Domain 5 methods. Explore relationships at local-government resolution."))
     tabs = st.tabs(["Descriptive stats", "Correlation", "Distribution", "Driver vs zero-dose",
                     "By archetype"])
     with tabs[0]:
         st.dataframe(df[NUM].describe().T.round(2), use_container_width=True)
         _download = st.download_button
-        _download("Download the LGA archetype master (CSV)", df.to_csv(index=False).encode("utf-8"),
-                  "NPHCDA_LGA_archetype_master.csv", "text/csv")
+        _download("Download the LGA dataset (CSV)", df.to_csv(index=False).encode("utf-8"),
+                  "NPHCDA_LGA_covariates_and_zero_dose_774.csv", "text/csv")
     with tabs[1]:
         fig = px.imshow(df[NUM].corr().round(2), color_continuous_scale="RdBu_r", zmin=-1, zmax=1,
                         aspect="auto", text_auto=".2f")
@@ -540,15 +577,14 @@ def _eda_lga():
             m1.metric("Pearson r", f"{r:+.2f}")
             m2.metric("Significance", pstr)
             m3.metric("Local governments", f"{len(sub):,}")
-        fig = px.scatter(df, x=x, y=y, color="archetype_type" if "archetype_type" in df else None,
-                         hover_name="platform_LGA" if "platform_LGA" in df else None)
+        fig = px.scatter(df, x=x, y=y, color="Archetype", hover_name="LGA", hover_data=["State"])
         fig.update_layout(height=560)
         st.plotly_chart(fig, use_container_width=True)
         st.caption(clean("Pearson correlation of the selected driver with the modelled zero-dose rate. "
                          "An ecological (local-government-level) association, not a causal effect."))
     with tabs[4]:
-        if "archetype_type" in df and y in df:
-            fig = px.box(df.dropna(subset=[y]), x="archetype_type", y=y, color="archetype_type",
+        if "Archetype" in df and y in df:
+            fig = px.box(df.dropna(subset=[y]), x="Archetype", y=y, color="Archetype",
                          points=False)
             fig.update_layout(showlegend=False, xaxis_title="", height=520,
                               title="Zero-dose rate by archetype")
@@ -919,13 +955,19 @@ def page_sop():
                       "obvious data issues before modelling."))
     st.markdown("#### 4. Run the models")
     st.markdown(clean(
-        "- **Coverage Forecasting** - which antigens fall below the 80% target; choose the forecast "
-        "end-year (to 2032) and the 3/6/12-month scorecard horizon; switch to **Estimated coverage "
-        "coverage** to pick the eligible-infant denominator (under-five proxy or DHIS2 live births) "
-        "and show the **NDHS survey reference lines**; review the LGA at-risk screen.\n"
-        "- **Dropout & Completion** - dropout forecasts, LASSO drivers and the state-by-year heatmap.\n"
-        "- **Zero-Dose & Hotspots** - the Bayesian state model, LGA burden, Pareto priorities and the "
-        "Getis-Ord Gi* hotspot maps (run automatically)."))
+        "- **Coverage Forecasting** - which antigens are projected below 80% of their 2024 level in 6 to "
+        "12 months (an early-warning of decline); choose the forecast end-year (to 2032) and the 3/6/12-month "
+        "scorecard horizon; switch to **Estimated coverage** to pick the eligible-infant denominator "
+        "(under-five proxy or DHIS2 live births) and show the **NDHS survey reference lines**; review the "
+        "**LGA early-warning** (Prophet for every LGA) and the additional antigens.\n"
+        "- **Dropout & Completion** - dropout forecasts, state and LGA LASSO drivers and the state-by-year "
+        "heatmap.\n"
+        "- **Zero-Dose & Hotspots** - choose **Method 1** (Bayesian hierarchical model with DHIS2-calibrated "
+        "LGA allocation) or **Method 2** (Bayesian small-area estimation, SAE), or compare both; review state "
+        "estimates, the 50/60/80 percent Pareto lists, the Gi* hotspot maps and the external validation.\n"
+        "- **LGA Priority & Archetypes** - the ranked list with archetype, equity tier and intervention "
+        "bundle under either method.\n"
+        "- **Triangulation & Cross-Checks** - both methods against NmDHS 2025-26, Umar et al. and IHME."))
     st.markdown("#### 5. Explore and test (Implementation Science)")
     st.markdown(clean("Use the correlation matrix (with multicollinearity flags), distributions, scatter "
                       "and zone violins, and the **Hypothesis tests** tab to run a t-test, ANOVA or "
@@ -942,10 +984,11 @@ def page_sop():
 
     section("How to read the outputs")
     st.dataframe(pd.DataFrame([
-        {"Signal": "Coverage / at-risk", "Meaning": "Red = below the 80% target; green = on target"},
+        {"Signal": "Early-warning (Coverage)", "Meaning": "Red = projected below 80% of the 2024 level; green = on track"},
         {"Signal": "Anomaly severity", "Meaning": "High (|z| >= 3) vs Moderate; spike or drop flagged"},
-        {"Signal": "Priority tier (LGA)", "Meaning": "Tier 1 Critical (red) to Tier 4 (blue), by burden"},
-        {"Signal": "Pareto severity", "Meaning": "Critical/High/Moderate/Lower within state; band A/B/C of burden"},
+        {"Signal": "Early-warning severity (LGA)", "Meaning": "Warning 70-80%, Severe 40-70%, Critical 0-40%; Unstable = check DHIS2 reporting"},
+        {"Signal": "Priority band (Pareto)", "Meaning": "A = LGAs holding the first 50% of zero-dose children, B = 50-60%, C = 60-80%, D = the long tail"},
+        {"Signal": "Equity tier (LGA)", "Meaning": "Critical/High/Moderate/Low = quartiles of the deprivation index"},
         {"Signal": "Gi* hotspot", "Meaning": "Hot Spot (red) = significant high-burden cluster; p<0.01 most confident"},
         {"Signal": "Survey line (Coverage)", "Meaning": "Dotted purple = NDHS survey coverage; a large gap vs admin flags denominator/reporting issues"},
         {"Signal": "Credible / prediction interval", "Meaning": "The plausible range; wider = more uncertainty"},
@@ -1024,9 +1067,11 @@ def page_agent():
     with st.spinner("ZARA is assembling results from all workstreams (first run may fit the zero-dose model)..."):
         ctx = reports.build_findings(data)
     ai.chat_panel("analyst", "All workstream results (coverage, dropout, zero-dose, hotspots)",
-                  "Combined live outputs: national antigen coverage forecasts and at-risk antigens; "
-                  "dropout forecasts and drivers; state zero-dose forecasts, tiers and burden; "
-                  "population-weighted LGA burden, Pareto concentration and the top LGAs.", ctx,
+                  "Combined outputs: national antigen early-warning forecasts (percent of the 2024 level) "
+                  "and the LGA Prophet early-warning summary; dropout forecasts and drivers; Domain 5 zero-dose "
+                  "estimates under Method 1 (Bayesian hierarchical model with DHIS2-calibrated LGA allocation; "
+                  "headline figures) and Method 2 (Bayesian small-area estimation, SAE; under 'm2'), state "
+                  "tiers, 50/60/80 percent Pareto concentration and the top LGAs.", ctx,
                   suggestions=["Which states and LGAs should we prioritize first, and why?",
                                "What is the single biggest risk across all workstreams?",
                                "Draft three recommendations for the next quarter."],

@@ -91,17 +91,24 @@ def antigen_eda_fig(nat: pd.DataFrame) -> go.Figure:
 # --------------------------------------------------------------------------------------
 # D2 LASSO driver bars
 # --------------------------------------------------------------------------------------
-def lasso_bars_fig(coefs: pd.Series, label: str, color: str) -> go.Figure:
-    top = coefs.head(12).iloc[::-1]
-    names = [clean(f.replace("pct_", "").replace("_", " ").title()) for f in top.index]
+def lasso_bars_fig(coefs: pd.Series, label: str, color: str | None = None) -> go.Figure:
+    """Signed standardized LASSO coefficients (largest magnitude first). Red = associated with higher
+    dropout, green = lower dropout. Labels are readable names; the axis is padded so no bar or value
+    label is clipped."""
+    c = coefs[coefs.abs() > 1e-9]
+    top = c.reindex(c.abs().sort_values(ascending=False).index).head(10).iloc[::-1]
+    names = [clean(C.feature_label(f)) for f in top.index]
+    colors = [C.ACCENT if v > 0 else C.NPHCDA_GREEN for v in top.values]
+    m = float(top.abs().max()) if len(top) else 1.0
     fig = go.Figure(go.Bar(
-        x=top.values, y=names, orientation="h",
-        marker=dict(color=color, line=dict(color="white", width=0.5)),
-        text=[f"{v:.3f}" for v in top.values], textposition="outside",
-    ))
-    fig.update_layout(title=f"{label} dropout - LASSO drivers",
-                      xaxis_title="|LASSO coefficient|", yaxis_title="")
-    return style_fig(fig, height=420)
+        x=top.values, y=names, orientation="h", marker=dict(color=colors, line=dict(color="white", width=0.5)),
+        text=[f"{v:+.2f}" for v in top.values], textposition="outside", cliponaxis=False,
+        hovertemplate="%{y}: %{x:+.3f}<extra></extra>"))
+    fig.add_vline(x=0, line=dict(color="#64748B", width=1))
+    fig.update_layout(title=clean(f"{label} dropout"), xaxis_title="Standardized LASSO coefficient",
+                      yaxis_title="", xaxis=dict(range=[-1.45 * m, 1.45 * m], zeroline=False),
+                      yaxis=dict(automargin=True), margin=dict(l=10, r=20))
+    return style_fig(fig, height=120 + 34 * max(len(top), 3))
 
 
 # --------------------------------------------------------------------------------------

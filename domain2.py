@@ -11,7 +11,8 @@ import ai
 from theme import section, kpi_row, clean, domain_banner
 from data_io import prep_dhis2, national_monthly, state_monthly, df_hash
 from models.d2_dropout import (dropout_forecasts, lasso_drivers, lasso_drivers_inference,
-                               state_dropout_forecasts, state_year_observed, state_year_with_forecast)
+                               state_dropout_forecasts, state_year_observed, state_year_with_forecast,
+                               lga_lasso)
 
 
 def _download(df, label, fname):
@@ -142,11 +143,16 @@ def render(data: dict):
             for i, (target, coefs) in enumerate(drivers.items()):
                 with cols[i]:
                     if coefs.empty:
-                        st.caption(clean(f"{C.DROPOUT_TARGETS[target]}: no non-zero LASSO coefficients."))
+                        st.info(clean(f"{C.DROPOUT_TARGETS[target]} dropout: the cross-validated LASSO retains no state "
+                                      "covariate - no stable state-level association in 2024. See the LGA "
+                                      "covariates tab for local drivers."))
                     else:
                         st.plotly_chart(viz.lasso_bars_fig(coefs, C.DROPOUT_TARGETS[target],
                                         C.DROPOUT_COLORS[target]), use_container_width=True)
-            drivers_summary = {C.DROPOUT_TARGETS[t]: {k.replace("pct_", "").replace("_", " "): round(float(v), 3)
+            st.caption(clean("Bars show the standardized LASSO coefficient: red = associated with higher "
+                             "dropout, green = lower dropout; longer bars mean a stronger association. "
+                             "State-level (37 states), ecological and not causal."))
+            drivers_summary = {C.DROPOUT_TARGETS[t]: {C.feature_label(k): round(float(v), 3)
                                for k, v in c.head(6).items()} for t, c in drivers.items()}
             ai.ai_block("d2_drivers", "Dropout & Completion - dropout drivers (LASSO)",
                         "Cross-validated LASSO coefficients (absolute) linking state equity and "
@@ -183,16 +189,18 @@ def render(data: dict):
 
     with tabs[2]:
         section("Dropout by state and year",
-                "Observed annual means; gaps where a state reported late are interpolated across years "
-                "for display. Extend with per-state Prophet forecasts on demand.")
+                "Observed annual means. Blank cells are years with no DHIS2 data for that state. Extend "
+                "with per-state Prophet forecasts on demand.")
         metric = st.selectbox("Dropout pair", list(C.DROPOUT_TARGETS),
                               format_func=lambda k: C.DROPOUT_TARGETS[k])
         add_fc = st.toggle("Add Prophet forecast columns to 2027 (slower)", value=False)
         last_obs = int(agg["year"].max())
         piv = (state_year_with_forecast(agg, metric, key=kd) if add_fc
                else state_year_observed(agg, metric))
-        # Fill late-reporting gaps so the heatmap has no blank cells.
-        piv = piv.astype(float).interpolate(axis=1, limit_direction="both").round(1)
+        piv = piv.astype(float).round(1)
+        _late = sorted(piv.index[piv.iloc[:, 0].isna()].tolist())
+        if _late:
+            st.caption(clean("No DHIS2 data before 2023 for: " + ", ".join(_late) + " (shown blank)."))
         st.plotly_chart(viz.dropout_heatmap_fig(piv, f"{C.DROPOUT_TARGETS[metric]} dropout by state and year",
                         last_obs), use_container_width=True)
         ly = max(piv.columns)
@@ -223,49 +231,42 @@ def render(data: dict):
                 "Cross-validated LASSO on the 15 local-government archetype covariates (IHME, DHS, Meta "
                 "Relative Wealth Index, Weiss travel time, ACLED political violence), replacing the state "
                 "equity set with local-government predictors for each dropout transition.")
+        master = None
         try:
-            _lc = pd.read_csv(C.DATA_DIR / "domain2_lasso_coefficients_lga.csv", index_col=0)
+            master = pd.read_csv(C.DATA_DIR / "lga_archetype_master.csv")
         except Exception:
-            _lc = None
-        if _lc is None:
-            st.info("LGA LASSO coefficients file not found.")
+            pass
+        if master is None:
+            st.info("The LGA archetype covariate file is not available.")
         else:
-            _tmap = {"dropout_p1p3": ("Penta1 to Penta3", "#C8902A"),
-                     "dropout_p1m1": ("Penta1 to Measles1", "#8E44AD"),
-                     "dropout_m1m2": ("Measles1 to Measles2", "#1F3B57")}
-            _labels = {"edu_mean_years_women_15_49": "Maternal education (yrs)", "stunting_prev_u5": "Stunting",
-                       "wasting_prev_u5": "Wasting", "underweight_prev_u5": "Underweight",
-                       "dpt1_3_dropout": "DPT1-3 dropout (IHME)", "poverty_rate": "Poverty",
-                       "exclusive_breastfeeding": "Exclusive breastfeeding", "ors_coverage": "ORS coverage",
-                       "anc4plus": "ANC 4+", "delivery_hf": "Facility delivery",
-                       "improved_water": "Improved water", "travel_time_hc": "Travel time to care",
-                       "relative_wealth_index": "Relative Wealth Index", "conflict_events": "Conflict events",
-                       "conflict_fatalities": "Conflict fatalities"}
+            lres = lga_lasso(data["dhis2"], master, key=kd)
+            _tmap = {"dropout_p1p3": "Penta1 to Penta3", "dropout_p1m1": "Penta1 to Measles1",
+                     "dropout_m1m2": "Measles1 to Measles2"}
             _cols = st.columns(3)
-            for _i, (_tk, (_title, _c)) in enumerate(_tmap.items()):
+            for _i, (_tk, _title) in enumerate(_tmap.items()):
                 with _cols[_i]:
-                    if _tk not in _lc.columns:
-                        st.caption(f"{_title}: not available."); continue
-                    _s = _lc[_tk][_lc[_tk].abs() > 1e-6]
-                    _s = _s.reindex(_s.abs().sort_values(ascending=False).index).head(10)
-                    _s.index = [_labels.get(x, x) for x in _s.index]
-                    if _s.empty:
-                        st.caption(clean(f"{_title}: no non-zero LASSO coefficients."))
-                    else:
-                        st.plotly_chart(viz.lasso_bars_fig(_s, _title, _c), use_container_width=True)
+                    r = lres.get(_tk)
+                    if r is None or r["coef"].empty:
+                        st.caption(clean(f"{_title}: no covariate retained by the LASSO."))
+                        continue
+                    st.plotly_chart(viz.lasso_bars_fig(r["coef"], _title), use_container_width=True)
+                    st.caption(clean(f"{r['n']} LGAs; median dropout {r['median_dropout']:.1f}%; "
+                                     f"in-sample R-squared {r['r2']:.2f}."))
+            _n = max(r["n"] for r in lres.values())
             st.caption(clean(
-                "Cross-validated LASSO on the local-government archetype master (about 739 local "
-                "governments). Larger magnitude means a stronger association; the sign shows direction. "
-                "Covariate vintages 2014-2021. These are ecological, directional associations to "
-                "prioritize hypotheses, not causal effects. Source: consortium LGA archetype covariate "
-                "master."))
-            ai.ai_block("d2_drivers_lga", "Dropout drivers - LGA archetype covariates (LASSO)",
-                        "LGA-level LASSO coefficients linking archetype covariates (education, nutrition, "
-                        "wealth, access, conflict) to each dropout transition. Name the leading LGA-level "
-                        "drivers per pair and contrast them with the state-level drivers.",
-                        {_t: {_labels.get(k, k): round(float(v), 3)
-                              for k, v in _lc[_c2][_lc[_c2].abs() > 1e-6].head(6).items()}
-                         for _c2, (_t, _) in _tmap.items() if _c2 in _lc.columns})
+                f"Per-LGA dropout from DHIS2 2021-2024 totals for {_n} LGAs with complete covariates, "
+                "regressed on 15 LGA covariates (standardized) with 5-fold cross-validated LASSO. Red = "
+                "associated with higher dropout, green = lower. Covariate vintages 2014-2021. These are "
+                "ecological, directional associations to prioritize hypotheses, not causal effects."))
+            ai.ai_block("d2_drivers_lga", "Dropout drivers - LGA covariates (LASSO)",
+                        "LGA-level LASSO coefficients (signed; positive = higher dropout) linking local "
+                        "covariates (education, nutrition, wealth, access, conflict) to each dropout "
+                        "transition, with the model fit. Name the leading LGA-level drivers per pair and "
+                        "contrast them with the state-level drivers.",
+                        {_tmap[t]: {"n_lgas": r["n"], "r2": round(r["r2"], 2),
+                                    "coefficients": {C.feature_label(k): round(float(v), 3)
+                                                     for k, v in r["coef"].head(8).items()}}
+                         for t, r in lres.items()})
 
     # Per-state dropout (observed) so the chat can answer "which states have the highest dropout".
     state_dropout = {}

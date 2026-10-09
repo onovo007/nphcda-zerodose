@@ -156,14 +156,16 @@ Ensure the **latest harmonized datasets** are present, in particular for the Dom
 ---
 
 ## 7. Reproducibility and methods (brief)
-- **Domain 1:** Prophet forecasting per antigen; at-risk-of-decline early-warning at 80% of the 2024 level.
-- **Domain 2:** Prophet dropout forecasting across antigen pairs; LASSO driver selection.
+- **Domain 1:** Prophet forecasting per antigen, nationally and for every LGA (773 LGAs, precomputed by `precompute_d1.py`); at-risk-of-decline early-warning at 80% of the 2024 level in months 6-12.
+- **Domain 2:** Prophet dropout forecasting across antigen pairs; LASSO driver selection at state and LGA level.
 - **Domain 3:** LGA composite equity-deprivation index (four quartile tiers) and MGWR (multiscale geographically weighted regression).
 - **Domain 4:** Composite Hesitancy Index from the ACSM register, tested against zero-dose.
-- **Domain 5:** Bayesian hierarchical Beta regression (PyMC) of state zero-dose, distributed to LGAs by Penta1 throughput and population; Getis-Ord Gi* hotspots; agglomerative (Ward) clustering for archetypes.
+- **Domain 5:** two methods, shown side by side. Method 1: Bayesian hierarchical model with DHIS2-calibrated LGA allocation (773 LGAs). Method 2: Bayesian small-area estimation (SAE) with an aggregation likelihood, six LGA covariates and a BYM2 spatial effect (774 LGAs). Bundled results live in `data/sample/two_methods/`; uploaded data runs Method 1 live. Getis-Ord Gi* hotspots; agglomerative (Ward) clustering for archetypes.
 - **Domain 6:** Bernoulli spatial scan on the AFP line list; three-year certification survival view.
 - **Domain 7:** Pre-specified, false-discovery-rate-corrected coverage-to-mortality tests against IHME GBD.
-- **Validation:** six-month hold-out back-tests (2.7-4.3% error); NmDHS 2025-26 out-of-sample check (state rho = 0.88); IHME DTP1 admin-2 surface (LGA rho = 0.60).
+- **Validation:** six-month hold-out back-tests (MAPE 5.5-12.7%); NmDHS 2025-26 out-of-sample check (state rho 0.89 Method 1, 0.87 Method 2); IHME DTP1 admin-2 (LGA rho 0.65 Method 1, 0.89 Method 2).
+- **Data preparation:** DHIS2 counts written with a thousands separator are parsed in full (`data_io.to_count`).
+- **Regenerating bundled results:** `python precompute_d1.py` (LGA Prophet) and `python precompute_d5.py` (Domain 5 live-path results and the two-method hotspot statistics) after any change to the bundled data or methods.
 
 Boundary geometry is GRID3 (NPHCDA vaccination boundaries), shipped as simplified GeoJSON. LGA population denominator: National Population Commission (2006 Census, 2022 projection), via City Population.
 

@@ -61,9 +61,56 @@ def lasso_drivers(agg: pd.DataFrame, model_dataset: pd.DataFrame) -> dict:
         y = merged[target].fillna(merged[target].median()).values
         lasso = LassoCV(cv=5, random_state=42, max_iter=5000)
         lasso.fit(X_sc, y)
-        coefs = pd.Series(np.abs(lasso.coef_), index=feats).sort_values(ascending=False)
-        results[target] = coefs[coefs > 0]
+        coefs = pd.Series(lasso.coef_, index=feats)
+        coefs = coefs[coefs.abs() > 1e-9]
+        results[target] = coefs.reindex(coefs.abs().sort_values(ascending=False).index)
     return results
+
+
+LGA_COVARIATES = ["edu_mean_years_women_15_49", "stunting_prev_u5", "wasting_prev_u5", "underweight_prev_u5",
+                  "dpt1_3_dropout", "poverty_rate", "exclusive_breastfeeding", "ors_coverage", "anc4plus",
+                  "delivery_hf", "improved_water", "travel_time_hc", "relative_wealth_index",
+                  "conflict_events", "conflict_fatalities"]
+
+
+@st.cache_data(show_spinner="Fitting LGA-level dropout drivers (LASSO)...")
+def lga_lasso(_dhis2, _master, key: str) -> dict:
+    """LGA-level dropout drivers: per-LGA dropout from DHIS2 2021-2024 totals (clipped to -20..100)
+    regressed on the 15 LGA archetype covariates (standardized) with 5-fold LassoCV."""
+    import re
+    from sklearn.preprocessing import StandardScaler
+    from sklearn.linear_model import LassoCV
+    from data_io import prep_dhis2
+    import names as N
+
+    d = prep_dhis2(_dhis2)
+    d = d[d["year"].between(2021, 2024)].copy()
+    d["lga"] = d["lga"].astype(str).map(N.clean_lga_name)
+    ant = ["penta_1_count", "penta_3_count", "measles_1_count", "measles_2_count"]
+    g = d.groupby(["state", "lga"])[ant].sum().reset_index()
+    g["dropout_p1p3"] = ((g["penta_1_count"] - g["penta_3_count"]) / g["penta_1_count"] * 100).clip(-20, 100)
+    g["dropout_p1m1"] = ((g["penta_1_count"] - g["measles_1_count"]) / g["penta_1_count"] * 100).clip(-20, 100)
+    g["dropout_m1m2"] = ((g["measles_1_count"] - g["measles_2_count"]) / g["measles_1_count"] * 100).clip(-20, 100)
+
+    def norm(s):
+        return re.sub(r"[^a-z0-9]", "", re.sub(r"local government area|lga|state", "", str(s).lower().strip()))
+    cov = _master.copy()
+    g["_k"] = g["state"].map(norm) + "|" + g["lga"].map(norm)
+    cov["_k"] = cov["platform_State"].map(norm) + "|" + cov["platform_LGA"].map(norm)
+    pred = [c for c in LGA_COVARIATES if c in cov.columns]
+    m = g.merge(cov[["_k"] + pred], on="_k", how="inner").dropna(subset=pred)
+    out = {}
+    for tgt in C.DROPOUT_TARGETS:
+        y = pd.to_numeric(m[tgt], errors="coerce").replace([np.inf, -np.inf], np.nan)
+        ok = y.notna().values
+        Xz = StandardScaler().fit_transform(m.loc[ok, pred])
+        las = LassoCV(cv=5, random_state=0, max_iter=20000).fit(Xz, y[ok].values)
+        coef = pd.Series(las.coef_, index=pred)
+        coef = coef[coef.abs() > 1e-6]
+        out[tgt] = {"coef": coef.reindex(coef.abs().sort_values(ascending=False).index),
+                    "alpha": float(las.alpha_), "r2": float(las.score(Xz, y[ok].values)),
+                    "n": int(ok.sum()), "median_dropout": float(y.median())}
+    return out
 
 
 def _driver_design(agg: pd.DataFrame, model_dataset: pd.DataFrame):

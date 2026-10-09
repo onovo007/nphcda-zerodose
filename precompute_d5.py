@@ -55,3 +55,25 @@ for yr in C.FORECAST_YEARS:
 (_PRECOMP / "gi_meta.json").write_text(json.dumps(gi_meta))
 print(f"  gi: LGA hotspots {gi['gi_class'].value_counts().to_dict()} | state years {list(gi_meta['state'].values())}")
 print("Saved precomputed results to", _PRECOMP)
+
+# ---------------------------------------------------------------------------------------------
+# Two-method hotspots (bundled Method 1 and Method 2 estimates, data/sample/two_methods)
+# ---------------------------------------------------------------------------------------------
+print("Computing Getis-Ord Gi* for the two-method estimates...")
+from models import d5_two_methods as TM
+tm = TM.load()
+for meth in (TM.M1, TM.M2):
+    p = TM._p(meth)
+    mf = TM.map_frame(tm, meth)
+    g = spatial.gi_keyed("lga", mf, "zd_rate")
+    g.to_parquet(TM.TM_DIR / f"gi_lga_{p}.parquet")
+    print(f"  {p} LGA: {g['gi_class'].value_counts().to_dict()}")
+    sres = TM.state_res(tm, meth, data["ndhs_long"])
+    sres["state_key"] = sres["state"].map(N.nstate)
+    for yr in C.FORECAST_YEARS:
+        vcol = f"zd_pred_{yr}_mean"
+        if vcol not in sres.columns or sres[vcol].isna().all():
+            continue
+        sg = spatial.gi_keyed("state", sres.rename(columns={vcol: "value"}), "value")
+        sg.to_parquet(TM.TM_DIR / f"gi_state_{p}_{yr}.parquet")
+        print(f"  {p} state {yr}: hot = {sorted(sg.loc[sg['gi_class'].str.contains('Hot'), 'state'])}")

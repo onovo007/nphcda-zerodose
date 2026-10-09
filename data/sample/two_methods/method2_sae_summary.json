@@ -1,0 +1,18 @@
+{
+  "national_children_2026": 2149561.4821967743,
+  "national_lo95": 1856458.732817857,
+  "national_hi95": 2455410.692673631,
+  "pareto": {
+    "50": 138,
+    "60": 181,
+    "80": 319
+  },
+  "diagnostics": {
+    "parameters": 1649,
+    "max_rhat": 1.0030429791019833,
+    "min_ess_bulk": 2549.1825925677817,
+    "min_ess_tail": 2523.8439651533513,
+    "divergences": 0
+  },
+  "survey_ppc_coverage95": 0.9797297297297297
+}

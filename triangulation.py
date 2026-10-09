@@ -135,8 +135,9 @@ def lga_crosscheck(clean_df: pd.DataFrame, ihme: pd.DataFrame) -> dict:
     o["sk"] = o["State"].map(N.nstate)
     o["lk"] = o["LGA"].map(N.nlga)
     o["our_dtp1"] = 100.0 - pd.to_numeric(o["ZD proxy (%)"], errors="coerce")
-    match = _match_ihme(ihme)
-    o["ihme_dtp1"] = [match(s, l) for s, l in zip(o["sk"], o["lk"])]
+    if "ihme_dtp1" not in o.columns:          # else: IHME values already joined upstream
+        match = _match_ihme(ihme)
+        o["ihme_dtp1"] = [match(s, l) for s, l in zip(o["sk"], o["lk"])]
     m = o.dropna(subset=["ihme_dtp1", "our_dtp1"]).copy()
 
     rho, p = spearmanr(m["our_dtp1"], m["ihme_dtp1"])

@@ -30,7 +30,7 @@ def _lga_workbook_bytes(all_df, top20, top80, n20, n80, n_all):
     notes = pd.DataFrame({"NPHCDA zero-dose LGA priority lists": [
         "Contents:",
         f"  Sheet 1 - All ranked LGAs: all {n_all} reporting LGAs, ranked by estimated zero-dose children.",
-        f"  Sheet 2 - Top 20% ({n20} LGAs): the highest-burden fifth; about 62% of all zero-dose children.",
+        f"  Sheet 2 - Top 20% ({n20} LGAs): the highest-burden fifth of LGAs.",
         f"  Sheet 3 - Top {n80} LGAs: about 80% of all zero-dose children.",
         "",
         "How to read:",
@@ -40,7 +40,7 @@ def _lga_workbook_bytes(all_df, top20, top80, n20, n80, n_all):
         "  Cumulative % of burden - running share of the national total down to that LGA.",
         "  Priority band - A drives the first 50% of the burden, B is 50-80%, C is the long tail.",
         "",
-        f"Note: {n_all} of Nigeria's 774 LGAs are shown; the rest were excluded in data-quality cleaning.",
+        f"Note: {n_all} of Nigeria's 774 LGAs have a 2026 estimate.",
         "Figures are model estimates, best used as a relative priority ranking.",
     ]})
     buf = BytesIO()
@@ -53,16 +53,27 @@ def _lga_workbook_bytes(all_df, top20, top80, n20, n80, n_all):
 
 
 def render(data: dict):
-    domain_banner("_banner_d5.jpg", "Zero-Dose & Hotspots",
-                  "Where are zero-dose children most concentrated, and what local factors contribute? "
-                  "Bayesian hierarchical Beta regression of state rates, distributed to LGA burden by "
-                  "population, with Getis-Ord Gi* hotspots.")
 
     needed = {"ndhs_long", "under5", "dhis2", "lga_population"}
     if not data or any(data.get(k) is None for k in needed):
+        domain_banner("_banner_d5.jpg", "Zero-Dose & Hotspots", "")
         st.warning("Zero-Dose & Hotspots needs the NDHS longitudinal, under-five population, DHIS2 and LGA "
                    "population files. Load the bundled sample data or upload them on the Data page.")
         return
+
+    from models import d5_two_methods as TM
+    if TM.is_bundled(data):
+        import domain5_two
+        domain5_two.render(data)
+        return
+    domain_banner("_banner_d5.jpg", "Zero-Dose & Hotspots",
+                  "Where are zero-dose children most concentrated, and what local factors contribute? "
+                  "Method 1 (Bayesian hierarchical model with DHIS2-calibrated LGA "
+                  "allocation) run live on the uploaded data, with Getis-Ord Gi* hotspots.")
+    st.info(clean(
+        "Uploaded data: Method 1 (Bayesian hierarchical model with DHIS2-calibrated LGA allocation) runs "
+        "live on your files. Method 2 (Bayesian small-area estimation) needs the LGA covariate and "
+        "adjacency inputs and is shown for the bundled project data."))
 
     full = st.toggle("Full posterior (3000 draws, slower)", value=False,
                      help="Off uses 1000 draws for a fast live run. On matches the notebook exactly.")

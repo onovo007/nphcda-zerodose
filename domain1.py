@@ -12,7 +12,8 @@ from data_io import (prep_dhis2, national_monthly, df_hash, prep_under5,
                      national_live_births, survey_national_coverage)
 from models.d1_forecast import (national_forecasts, lga_at_risk_screen,
                                 lga_estimated_coverage_screen,
-                                state_antigen_forecasts, lga_antigen_projections, backtest_national)
+                                state_antigen_forecasts, lga_antigen_projections, backtest_national,
+                                load_lga_prophet, additional_forecasts)
 
 
 def _download(df, label, fname):
@@ -83,10 +84,84 @@ def _values_at_month(series: dict, target: pd.Timestamp):
     return endpoint_label, out
 
 
+
+SEV_ORDER = ["Unstable forecast (<0%)", "Critical (0-40%)", "Severe (40-70%)", "Warning (70-80%)"]
+SEV_CELL = {
+    "Unstable forecast (<0%)": "background-color:#EDE9FE;color:#4C1D95;font-weight:700",
+    "Critical (0-40%)": "background-color:#FDE2E0;color:#7F1D1D;font-weight:700",
+    "Severe (40-70%)": "background-color:#FDEBD9;color:#7A3E00;font-weight:600",
+    "Warning (70-80%)": "background-color:#FEF6D6;color:#6B5300",
+}
+
+
+def _render_lga_prophet(pre: dict):
+    """Per-LGA Prophet early-warning (precomputed for the bundled data)."""
+    from theme import highlight_classes
+    summ, meta = pre["summary"], pre["meta"]
+    flags = summ[summ["Early-warning flag"]].copy()
+    section("LGA early-warning (Prophet, every LGA)",
+            "The national Prophet model fitted to each LGA and tracer antigen (yearly + semi-annual "
+            "seasonality, 18-month horizon). An LGA-antigen is flagged when its forecast falls below 80 "
+            "percent of its own 2024 level in months 6 to 12 after the last observed month "
+            f"({meta['last_observed']}).")
+    kpi_row([
+        {"label": "LGAs forecast", "value": f"{meta['lgas_key']} of 774",
+         "sub": clean(f"{meta['forecasts']:,} LGA-antigen forecasts"), "color": C.NAVY},
+        {"label": "Early-warning flags", "value": f"{meta['alerts']:,}",
+         "sub": clean(f"{meta['alerts'] / meta['forecasts'] * 100:.0f}% of forecasts"), "color": C.ACCENT},
+        {"label": "LGAs with a flag", "value": f"{meta['lgas_with_alert']}",
+         "sub": "at least one antigen", "color": C.GOLD},
+        {"label": "Most-flagged antigen", "value": max(meta["alerts_by_antigen"], key=meta["alerts_by_antigen"].get),
+         "sub": clean("; ".join(f"{a} {n}" for a, n in meta["alerts_by_antigen"].items())), "color": C.STEEL},
+    ])
+    st.caption(clean(
+        "Severity bands: Warning 70-80 percent, Severe 40-70, Critical 0-40. 'Unstable forecast' means the "
+        "trend projects below zero - usually a reporting break or a short or erratic series - so verify the "
+        "LGA's DHIS2 reporting before acting. Guzamala (Borno) has no 2024 data and is not forecast."))
+    f1, f2, f3 = st.columns(3)
+    sel = f1.selectbox("State", ["All"] + sorted(flags["State"].unique()), key="d1_pf_state")
+    ant = f2.multiselect("Antigen", list(C.ANTIGEN_TS), default=list(C.ANTIGEN_TS), key="d1_pf_ant")
+    sev = f3.multiselect("Severity band", SEV_ORDER, default=SEV_ORDER, key="d1_pf_sev")
+    v = flags[flags["Antigen"].isin(ant) & flags["Severity band"].isin(sev)]
+    if sel != "All":
+        v = v[v["State"] == sel]
+    _order = {"Critical (0-40%)": 0, "Severe (40-70%)": 1, "Warning (70-80%)": 2, "Unstable forecast (<0%)": 3}
+    v = v.assign(_o=v["Severity band"].map(_order)).sort_values(
+        ["_o", "Lowest forecast, months 6-12 (% of 2024)"]).drop(columns="_o")
+    cols = ["State", "LGA", "Zone", "Antigen", "2024 baseline (doses/month)",
+            "Lowest forecast, months 6-12 (% of 2024)", "Month of lowest forecast", "First month below 80%",
+            "Severity band", "Months observed"]
+    st.write(clean(f"{len(v):,} flagged LGA-antigen forecasts shown."))
+    st.dataframe(highlight_classes(v[cols], "Severity band", SEV_CELL), use_container_width=True, height=460)
+    d1, d2 = st.columns(2)
+    with d1:
+        _download(flags[cols], "Download all early-warning flags (CSV)", "D1_lga_early_warning_flags.csv")
+    with d2:
+        _download(summ, "Download all LGA forecasts (CSV)", "D1_lga_prophet_forecasts_all.csv")
+    by_state = (flags.groupby("State").agg(Flags=("LGA", "size"), LGAs=("LGA", "nunique"))
+                .sort_values("Flags", ascending=False).reset_index())
+    with st.expander("Flags by state"):
+        st.dataframe(by_state, use_container_width=True)
+    ai.ai_block("d1_atrisk_prophet", "Coverage Forecasting - LGA early-warning (Prophet)",
+                "LGA-antigen Prophet forecasts flagged below 80 percent of their 2024 level in months 6-12, "
+                "with severity bands. Name the states with the most flags and the antigens most affected, "
+                "note that unstable forecasts need a DHIS2 reporting check, and give a prioritized action.",
+                {"summary": {k: meta[k] for k in ("lgas_key", "forecasts", "alerts", "lgas_with_alert",
+                                                   "alerts_by_antigen", "severity")},
+                 "flags_by_state_top15": by_state.head(15).to_dict(orient="records"),
+                 "worst_40": v[cols].head(40).to_dict(orient="records")})
+    st.divider()
+    ai.chat_panel("d1_lga_chat", "LGA early-warning (Prophet)",
+                  "Flagged LGA-antigen forecasts with state, zone, 2024 baseline, lowest forecast in months "
+                  "6-12 (% of 2024), timing and severity.",
+                  flags[cols].sort_values("Lowest forecast, months 6-12 (% of 2024)").head(200).to_dict(orient="records"),
+                  suggestions=["Which state has the most flagged LGAs?",
+                               "Which LGAs are flagged for all four antigens?"])
+
 def render(data: dict):
     domain_banner("_banner_d1.jpg", "Coverage Forecasting",
-                  "Which routine antigens are projected to fall below the 80 percent coverage target "
-                  "in the next 6 to 12 months?")
+                  "Which routine antigens are projected to fall below 80 percent of their 2024 level in "
+                  "the next 6 to 12 months? An early-warning of decline, nationally and for every LGA.")
 
     if not data or data.get("dhis2") is None:
         st.warning("Coverage Forecasting needs the DHIS2 export. Load the bundled sample data or upload it.")
@@ -187,16 +262,18 @@ def render(data: dict):
         H = {"3 months": 3, "6 months": 6, "12 months": 12, "Full forecast": 999}[hlabel]
         endpoint, hv = _horizon_values(series, H)  # endpoint month + antigen -> (pct, at_risk)
 
+    thr_txt = ("80 percent of their 2024 level" if metric == "baseline"
+               else "80 percent estimated coverage")
     at_risk = [a for a, (v, r) in hv.items() if r]
     low_antigen = min(hv, key=lambda a: hv[a][0]) if hv else None
 
     if at_risk:
         st.error(clean(f"Headline (by {endpoint}): {len(at_risk)} of {len(series)} tracer antigens are "
-                       f"projected to be below the 80 percent target: {', '.join(at_risk)}."))
+                       f"projected to be below {thr_txt}: {', '.join(at_risk)}."))
     elif low_antigen:
         st.success(clean(
             f"Headline (by {endpoint}): all {len(series)} tracer antigens are projected to be at or "
-            f"above the 80 percent target nationally. Lowest is {low_antigen} at "
+            f"above {thr_txt} nationally. Lowest is {low_antigen} at "
             f"{hv[low_antigen][0]:.0f} {unit_label}."))
 
     cards = [{"label": "Horizon", "value": hlabel, "sub": clean(f"projected value by {endpoint}"),
@@ -204,7 +281,7 @@ def render(data: dict):
     for antigen in series:
         v, risk = hv[antigen]
         cards.append({"label": antigen, "value": f"{v:.0f}%",
-                      "sub": clean(("at risk - by " if risk else "on target - by ") + endpoint),
+                      "sub": clean(("early-warning - by " if risk else "on track - by ") + endpoint),
                       "color": C.ACCENT if risk else C.NPHCDA_GREEN})
     kpi_row(cards)
     st.caption(clean(
@@ -215,7 +292,7 @@ def render(data: dict):
     fmonths = pd.to_datetime(next(iter(series.values()))["fore_x"])
     period = f"{fmonths.min():%b %Y} to {fmonths.max():%b %Y}"
 
-    tabs = st.tabs(["National forecast", "LGA at-risk screen", "Microplanning downloads",
+    tabs = st.tabs(["National forecast", "LGA early-warning", "Microplanning downloads",
                     "Additional antigens"])
 
     with tabs[3]:
@@ -225,8 +302,12 @@ def render(data: dict):
                 "Rotavirus) are still scaling up, so they are monitored for uptake rather than decline.")
         st.markdown(clean("**Established additional antigens (OPV3, IPV1, PCV3, Yellow Fever, Men A)** "
                           "- at-risk-of-decline early-warning"))
-        est = national_forecasts(nat, key=f"{kd}-extra", metric="baseline",
-                                 end_year=end_year, _antigens=C.ANTIGEN_TS_EXTRA)
+        est = additional_forecasts(nat, key=f"{kd}-extra30", _antigens=C.ANTIGEN_TS_EXTRA,
+                                   established=True)
+        st.caption(clean("Method for the additional antigens: national monthly doses (months with no doses "
+                         "reported dropped), Prophet with yearly seasonality and a 95% interval, a 30-month "
+                         "horizon, and the lowest forecast value over the horizon as a percent of the "
+                         "antigen's 2024 mean monthly doses."))
         ecols = st.columns(2)
         for i, (a, s) in enumerate(est["series"].items()):
             with ecols[i % 2]:
@@ -246,8 +327,8 @@ def render(data: dict):
                          "2022; second IPV dose), so no 80% at-risk-of-decline flag is applied - the "
                          "curves show uptake. A value above 100% means volume is still growing past the "
                          "2024 level."))
-        newf = national_forecasts(nat, key=f"{kd}-new", metric="baseline",
-                                  end_year=end_year, _antigens=C.ANTIGEN_TS_NEW)
+        newf = additional_forecasts(nat, key=f"{kd}-new30", _antigens=C.ANTIGEN_TS_NEW,
+                                    established=False)
         ncols = st.columns(2)
         for i, (a, s) in enumerate(newf["series"].items()):
             with ncols[i % 2]:
@@ -255,9 +336,10 @@ def render(data: dict):
                     s, C.ANTIGEN_PAL.get(a, C.STEEL), f"{a} - national uptake ({newf['unit_label']})",
                     newf["unit_label"], threshold=None, mark_below=False),
                     use_container_width=True)
+        st.dataframe(newf["summary"], use_container_width=True)
 
         st.divider()
-        section("LGA at-risk screen - established additional antigens",
+        section("LGA at-risk screen - established additional antigens (fast trend screen)",
                 "Each LGA-and-antigen projected 12 months ahead, flagged below 80% of its own 2024 "
                 "level. Worst (lowest projection) first.")
         with st.spinner("Screening LGAs for the additional antigens..."):
@@ -294,7 +376,7 @@ def render(data: dict):
     with tabs[0]:
         section(f"National coverage forecasts ({unit_label})",
                 f"Forecast period {period}. Solid line fitted, dashed forecast, shaded 80/95 percent "
-                "prediction intervals, red 80 percent target line.")
+                "prediction intervals, red line at 80 percent.")
         if survey_cov:
             st.caption(clean(
                 f"Dotted purple line = NDHS survey coverage for all four antigens ({survey_src}). A large "
@@ -348,17 +430,27 @@ def render(data: dict):
                 "actuals. MAPE (mean absolute percentage error, lower is better) is rated on the "
                 "standard Lewis (1982) scale: under 10% = highly accurate, 10-20% = good, 20-50% = "
                 "reasonable, over 50% = inaccurate. 95% PI coverage is the share of actuals that fell "
-                "inside the model's 95% prediction interval (ideal near 95%; 100% means the intervals "
-                "are well-calibrated, if slightly wide)."))
+                "inside the model's 95% prediction interval (ideal near 95%)."))
             bt = backtest_national(nat, key=kd, holdout=6)
             if bt.empty:
                 st.info("Not enough history to back-test on this dataset.")
             else:
                 st.dataframe(bt, use_container_width=True, hide_index=True)
                 n_exc = int((bt["MAPE (%)"] < 10).sum())
-                st.success(clean(f"{n_exc} of {len(bt)} antigens are 'highly accurate' (MAPE < 10%) on "
-                                 "the Lewis scale, with 95% prediction-interval coverage at or near "
-                                 "100% - the forecasts are accurate and well-calibrated out-of-sample."))
+                n_good = int(((bt["MAPE (%)"] >= 10) & (bt["MAPE (%)"] < 20)).sum())
+                cov_lo, cov_hi = int(bt["95% PI coverage (%)"].min()), int(bt["95% PI coverage (%)"].max())
+                msg = (f"{n_exc} of {len(bt)} antigens are 'highly accurate' (MAPE under 10%)"
+                       + (f" and {n_good} 'good' (10-20%)" if n_good else "")
+                       + f" on the Lewis scale. 95% prediction-interval coverage on the hold-out is "
+                       f"{cov_lo}-{cov_hi}%")
+                if cov_lo < 90:
+                    msg += (" - below the nominal 95%, so the intervals are narrower than ideal over short "
+                            "horizons; month-to-month swings (for example campaign months) fall outside "
+                            "them. Read the central forecast as the early-warning signal and the band as a "
+                            "lower bound on uncertainty.")
+                else:
+                    msg += " - close to nominal, so the intervals are well calibrated."
+                st.info(clean(msg))
                 ai.ai_block("d1_backtest", "Coverage Forecasting - hold-out back-test",
                             "Out-of-sample accuracy of the national forecasts: MAPE and 95% prediction-"
                             "interval coverage per antigen on a 6-month hold-out. Comment on whether "
@@ -382,23 +474,27 @@ def render(data: dict):
                  "(2024 under-five / 5, apportioned by LGA population).")
 
         if lga_metric.startswith("Early"):
-            section("LGA at-risk screen (fast trend projection)",
-                    "Runs automatically on the loaded data: a linear-trend projection 12 months ahead per "
-                    "LGA and antigen, flagged below 80 percent of the LGA's 2024 baseline. The 'Projection "
-                    "month' column shows the period of performance.")
-            screen = lga_at_risk_screen(data["dhis2"], key=kd)
-            if screen.empty:
-                st.success("No LGAs projected below the 80 percent target on the fast screen.")
+            pre = load_lga_prophet(data["dhis2"], key=kd)
+            if pre is not None:
+                _render_lga_prophet(pre)
             else:
-                st.write(clean(f"{len(screen)} LGA-and-antigen combinations project below 80 percent "
-                               "(all flagged in red)."))
-                st.dataframe(highlight_below(screen, "Projected % of baseline (12m)"),
-                             use_container_width=True, height=460)
-                _download(screen, "Download LGA at-risk screen (CSV)", "D1_lga_at_risk_screen.csv")
-                ai.ai_block("d1_atrisk", "Coverage Forecasting - LGA at-risk screen",
-                            "LGAs whose linear-trend projection 12 months ahead falls below 80 percent of "
-                            "their 2024 baseline, by antigen. Name the worst-hit states/LGAs and antigens "
-                            "and give a prioritized catch-up action.", screen.head(60))
+                section("LGA at-risk screen (fast trend screen)",
+                        "Uploaded data: a linear-trend projection 12 months ahead per LGA and antigen, "
+                        "flagged below 80 percent of the LGA's 2024 level. The full per-LGA Prophet "
+                        "early-warning (as for the bundled data) is run offline with precompute_d1.py.")
+                screen = lga_at_risk_screen(data["dhis2"], key=kd)
+                if screen.empty:
+                    st.success("No LGAs projected below 80 percent of their 2024 level on the fast screen.")
+                else:
+                    st.write(clean(f"{len(screen)} LGA-and-antigen combinations project below 80 percent "
+                                   "of their 2024 level (flagged in red)."))
+                    st.dataframe(highlight_below(screen, "Projected % of baseline (12m)"),
+                                 use_container_width=True, height=460)
+                    _download(screen, "Download LGA at-risk screen (CSV)", "D1_lga_at_risk_screen.csv")
+                    ai.ai_block("d1_atrisk", "Coverage Forecasting - LGA at-risk screen",
+                                "LGAs whose linear-trend projection 12 months ahead falls below 80 percent "
+                                "of their 2024 level, by antigen. Name the worst-hit states/LGAs and "
+                                "antigens and give a prioritized catch-up action.", screen.head(60))
         else:
             if data.get("under5") is None or data.get("lga_population") is None:
                 st.warning("The estimated-coverage LGA screen needs the under-five population and LGA "
@@ -472,15 +568,26 @@ def render(data: dict):
                 _download(sdf, "Download state-level forecasts (CSV)",
                           "D1_state_antigen_forecast_2026_2027.csv")
         with c2:
-            st.markdown("**LGA-level projections (trend)**")
-            st.caption(clean("Fast trend projection for every LGA and antigen, monthly for 2026 and "
-                             "2027. All 774 LGAs return in seconds (full per-LGA Prophet is impractical live)."))
-            if st.button("Generate LGA-level projections", key="d1_lga_btn"):
-                st.session_state["d1_lga_df"] = lga_antigen_projections(data["dhis2"], key=kd)
-            ldf = st.session_state.get("d1_lga_df")
-            if ldf is not None and not ldf.empty:
-                st.success(clean(f"{len(ldf):,} rows. Below-80% values in red."))
-                st.dataframe(highlight_below(ldf.head(30), "pct_of_2024_baseline"),
+            pre = load_lga_prophet(data["dhis2"], key=kd)
+            if pre is not None:
+                st.markdown("**LGA-level forecasts (Prophet)**")
+                lm = pre["monthly"]
+                st.caption(clean(f"Per-LGA Prophet forecast for each tracer antigen, monthly for 2026 and "
+                                 f"2027, with 95% prediction intervals: {lm.groupby(['state', 'lga']).ngroups} "
+                                 f"LGAs, {len(lm):,} rows. Below-80% values in red."))
+                st.dataframe(highlight_below(lm.head(30), "pct_of_2024_baseline"),
                              use_container_width=True, height=260)
-                _download(ldf, "Download LGA-level projections (CSV)",
-                          "D1_lga_antigen_projections_2026_2027.csv")
+                _download(lm, "Download LGA-level forecasts (CSV)", "D1_lga_antigen_forecast_2026_2027.csv")
+            else:
+                st.markdown("**LGA-level projections (trend)**")
+                st.caption(clean("Fast trend projection for every LGA and antigen, monthly for 2026 and "
+                                 "2027 (uploaded data)."))
+                if st.button("Generate LGA-level projections", key="d1_lga_btn"):
+                    st.session_state["d1_lga_df"] = lga_antigen_projections(data["dhis2"], key=kd)
+                ldf = st.session_state.get("d1_lga_df")
+                if ldf is not None and not ldf.empty:
+                    st.success(clean(f"{len(ldf):,} rows. Below-80% values in red."))
+                    st.dataframe(highlight_below(ldf.head(30), "pct_of_2024_baseline"),
+                                 use_container_width=True, height=260)
+                    _download(ldf, "Download LGA-level projections (CSV)",
+                              "D1_lga_antigen_projections_2026_2027.csv")

@@ -19,7 +19,9 @@ def clean_lga_name(s) -> str:
     s = str(s).strip()
     s = re.sub(r"^[a-z]{2}\s+", "", s, flags=re.IGNORECASE)
     s = re.sub(r"\s*local\s+government\s+area\s*$", "", s, flags=re.IGNORECASE)
-    return s.strip().title()
+    # title case without capitalising after an apostrophe (Jema'a, not Jema'A)
+    return re.sub(r"[A-Za-z]+('[A-Za-z]+)?", lambda m: m.group(0)[0].upper() + m.group(0)[1:].lower(),
+                  s.strip())
 
 
 def nstate(s) -> str:

@@ -31,6 +31,15 @@ def clean(text) -> str:
     return s
 
 
+def _fmt_counts(sty, df):
+    """Thousands separators on count columns (children, cohort, doses, population) of a Styler."""
+    import re
+    cols = [c for c in df.columns if isinstance(c, str)
+            and re.search(r"children|cohort|doses|population|burden \(|ZD count|baseline \(doses", c, re.I)
+            and pd.api.types.is_numeric_dtype(df[c])]
+    return sty.format("{:,.0f}", subset=cols, na_rep="") if cols else sty
+
+
 def highlight_below(df: pd.DataFrame, col: str, thresh: float = 80.0):
     """Return a Styler that flags values below the threshold in red (for at-risk projections)."""
     if df is None or df.empty or col not in df.columns:
@@ -40,7 +49,7 @@ def highlight_below(df: pd.DataFrame, col: str, thresh: float = 80.0):
         return ["color:#C0392B; font-weight:700" if (pd.notna(v) and v < thresh) else "" for v in s]
 
     try:
-        return df.style.apply(_row, subset=[col]).format(precision=2)
+        return df.style.apply(_row, subset=[col]).format(precision=2).pipe(_fmt_counts, df)
     except Exception:
         return df
 
@@ -56,7 +65,7 @@ def highlight_severity(df: pd.DataFrame, col: str = "Severity"):
         return [cmap.get(str(v), "") for v in s]
 
     try:
-        return df.style.apply(_row, subset=[col]).format(precision=2)
+        return df.style.apply(_row, subset=[col]).format(precision=2).pipe(_fmt_counts, df)
     except Exception:
         return df
 
@@ -70,7 +79,7 @@ def highlight_classes(df: pd.DataFrame, col: str, cmap: dict):
         return [cmap.get(str(v), "") for v in s]
 
     try:
-        return df.style.apply(_row, subset=[col]).format(precision=2)
+        return df.style.apply(_row, subset=[col]).format(precision=2).pipe(_fmt_counts, df)
     except Exception:
         return df
 
@@ -142,7 +151,48 @@ def style_fig(fig: go.Figure, height: int | None = None, title: str | None = Non
 # --------------------------------------------------------------------------------------
 # Global CSS (premium, tech-grade)
 # --------------------------------------------------------------------------------------
+def _patch_streamlit() -> None:
+    """App-wide display defaults, applied once:
+    - charts do not capture the mouse wheel (scrolling over a map scrolls the page; zoom with the
+      chart's own +/- buttons or by dragging);
+    - tables hide a meaningless 0..n row index (an index that carries labels is kept)."""
+    if getattr(st, "_nphcda_patched", False):
+        return
+    _plot, _df = st.plotly_chart, st.dataframe
+
+    def plotly_chart(fig, *args, **kwargs):
+        cfg = dict(kwargs.pop("config", None) or {})
+        cfg.setdefault("scrollZoom", False)
+        cfg.setdefault("displaylogo", False)
+        return _plot(fig, *args, config=cfg, **kwargs)
+
+    import re
+    count_name = re.compile(r"children|cohort|doses|population|burden \(|ZD count|baseline \(doses", re.I)
+
+    def dataframe(data=None, *args, **kwargs):
+        base = getattr(data, "data", data)  # pandas Styler -> its DataFrame
+        if "hide_index" not in kwargs:
+            idx = getattr(base, "index", None)
+            if idx is not None and idx.name is None and not isinstance(idx, pd.MultiIndex) \
+                    and pd.api.types.is_integer_dtype(idx.dtype):
+                kwargs["hide_index"] = True
+        if isinstance(base, pd.DataFrame) and base is data:
+            # thousands separators for count columns (children, cohort, doses, population)
+            cfg = dict(kwargs.get("column_config") or {})
+            for c in base.columns:
+                if isinstance(c, str) and c not in cfg and count_name.search(c) \
+                        and pd.api.types.is_numeric_dtype(base[c]):
+                    cfg[c] = st.column_config.NumberColumn(c, format="localized")
+            if cfg:
+                kwargs["column_config"] = cfg
+        return _df(data, *args, **kwargs)
+
+    st.plotly_chart, st.dataframe = plotly_chart, dataframe
+    st._nphcda_patched = True
+
+
 def inject_theme() -> None:
+    _patch_streamlit()
     st.markdown(
         f"""
         <style>

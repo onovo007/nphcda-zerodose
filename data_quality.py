@@ -1,7 +1,7 @@
 """
 Data-quality assessment for the uploaded DHIS2 export and NDHS file:
 completeness, DHIS2 state-month reporting rate, missingness, freshness, outliers, and the
-730-of-774 LGA reporting-coverage headline. Returns numbers + Plotly figures for the view.
+LGA reporting-coverage headline (of Nigeria's 774 LGAs). Returns numbers + Plotly figures for the view.
 """
 from __future__ import annotations
 
@@ -11,6 +11,7 @@ import plotly.graph_objects as go
 import streamlit as st
 
 import config as C
+import names as N
 from theme import style_fig, clean
 
 TOTAL_LGAS = 774
@@ -92,6 +93,7 @@ def missingness_by_lga(dhis2_prepped: pd.DataFrame, state: str, start=None, end=
     """LGA-level reporting heatmap within one state; returns (figure, present-matrix)."""
     sub = dhis2_prepped[dhis2_prepped["state"] == state]
     present = present_matrix(sub, "lga", start, end)
+    present.index = [N.clean_lga_name(x) for x in present.index]
     height = int(max(280, min(1000, 70 + 20 * len(present.index))))
     fig = _heatmap(present, f"DHIS2 reporting by LGA and month - {clean(state)} (filled vs missing)", height)
     return fig, present
@@ -126,3 +128,23 @@ def outliers(national_monthly_df: pd.DataFrame) -> pd.DataFrame:
     if not df.empty:
         df = df.reindex(df["Z-score"].abs().sort_values(ascending=False).index).reset_index(drop=True)
     return df
+
+
+def coverage_gaps(dhis2_prepped: pd.DataFrame) -> dict:
+    """States whose DHIS2 rows start after the first month in the file, and LGAs with two or more
+    years without a non-zero Penta1 (counted from the year their state starts reporting) - real
+    reporting gaps to verify at source."""
+    d = dhis2_prepped.dropna(subset=["ds"])
+    first = d["ds"].min()
+    starts = d.groupby("state")["ds"].min()
+    late = {s: pd.Timestamp(t).strftime("%b %Y") for s, t in starts[starts > first].sort_values().items()}
+    yr = d.groupby(["state", "lga", "year"])["penta_1_count"].sum().unstack("year")
+    gaps = []
+    start_year = starts.dt.year.to_dict()
+    for (s, l), row in yr.iterrows():
+        zero_years = [int(y) for y, v in row.items()
+                      if y >= start_year.get(s, 0) and not (pd.notna(v) and v > 0)]
+        if len(zero_years) >= 2:
+            gaps.append({"State": s, "LGA": N.clean_lga_name(l),
+                         "Years with no Penta1 reported": ", ".join(map(str, zero_years))})
+    return {"late_start_states": late, "lga_gaps": pd.DataFrame(gaps)}

@@ -85,6 +85,10 @@ PROVENANCE = [
     ("Under-five population", "City Population (NPC 2022 projection)", "2024", "Under-5 by state; birth cohort = /5"),
     ("DHIS2 live births", "NPHCDA DHIS2 export", "2021-2025 monthly", "Facility-reported live births by LGA"),
     ("LGA population", "City Population / NPC 2022 projection", "2022", "Population by LGA for burden weighting"),
+    ("NmDHS 2025-26", "NmDHS survey report, Penta1 by state and zone", "2025-26", "Independent validation of both Domain 5 methods"),
+    ("IHME LGA DTP1 coverage", "IHME Local Burden of Disease", "2018", "LGA cross-check; Method 2 covariate"),
+    ("LGA covariates (15)", "DHS spatial surfaces, Meta RWI, Weiss travel time, ACLED, poverty", "2014-2024", "Archetypes, Method 2 (SAE), LGA drivers"),
+    ("GRID3 boundaries", "GRID3 Nigeria admin-1 and admin-2", "current", "Maps, adjacency (BYM2), Gi* hotspots"),
 ]
 
 ANTIGEN_TS = {
@@ -133,6 +137,40 @@ LASSO_FEATURES = [
     "pct_women_with_mobile_phone", "pct_media_at_least_once_week",
     "pct_women_curr_employed", "pct_women_say_wife_beating_justified",
 ]
+FEATURE_LABELS = {
+    # state equity dataset (NDHS 2023-24 indicators)
+    "zero_dose_2024": "Zero-dose 2024 (%)", "anc_4plus": "ANC 4+ visits (%)",
+    "delivered_in_hf": "Delivered in a health facility (%)",
+    "pct_c12to23_vax_card_seen": "Vaccination card seen, 12-23 m (%)",
+    "pct_cu5_birth_registered": "Birth registered, under-5 (%)",
+    "pct_using_improved_water_source": "Improved water source (%)",
+    "pct_cu5_slept_under_itn": "Slept under a bed net, under-5 (%)",
+    "pct_cu5_diarrhea_treated_ors": "Diarrhoea treated with ORS (%)",
+    "pct_problem_accessing_hfdistance": "Distance a problem for care (%)",
+    "pct_cu5_stunted": "Stunted, under-5 (%)", "pct_women_no_education": "Women with no education (%)",
+    "pct_lowest_wealth_quintile": "Lowest wealth quintile (%)",
+    "pct_severely_food_insecure": "Severely food insecure (%)", "total_fertility_rate": "Total fertility rate",
+    "pct_urban": "Urban (%)", "pct_muslim": "Muslim (%)", "pct_women_with_mobile_phone": "Women with a mobile phone (%)",
+    "pct_media_at_least_once_week": "Media exposure weekly (%)", "pct_women_curr_employed": "Women employed (%)",
+    "pct_women_participate_decision_own_health": "Women decide on own health care (%)",
+    "pct_women_say_wife_beating_justified": "Women who say wife-beating is justified (%)",
+    "pct_women_moved_current_res_past5yrs": "Women moved residence in past 5 years (%)",
+    # LGA archetype covariates
+    "edu_mean_years_women_15_49": "Women's mean years of education", "stunting_prev_u5": "Stunting, under-5",
+    "wasting_prev_u5": "Wasting, under-5", "underweight_prev_u5": "Underweight, under-5",
+    "dpt1_3_dropout": "DTP1-3 dropout (IHME)", "poverty_rate": "Poverty rate",
+    "exclusive_breastfeeding": "Exclusive breastfeeding", "ors_coverage": "ORS coverage", "anc4plus": "ANC 4+ visits",
+    "delivery_hf": "Facility delivery", "improved_water": "Improved water source",
+    "travel_time_hc": "Travel time to a health facility", "relative_wealth_index": "Relative Wealth Index",
+    "conflict_events": "Conflict events", "conflict_fatalities": "Conflict fatalities",
+}
+
+
+def feature_label(name: str) -> str:
+    """Readable label for a covariate column."""
+    return FEATURE_LABELS.get(name, str(name).replace("pct_", "").replace("_", " ").strip().capitalize())
+
+
 DROPOUT_TARGETS = {
     "dropout_p1p3": "Penta1 to Penta3",
     "dropout_p1m1": "Penta1 to Measles1",

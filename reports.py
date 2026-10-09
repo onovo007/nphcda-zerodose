@@ -28,6 +28,48 @@ from models.d5_zerodose import run_state_model, run_lga_burden
 # --------------------------------------------------------------------------------------
 # Findings assembly (reuses cached model results)
 # --------------------------------------------------------------------------------------
+def _n_share(pareto: pd.DataFrame, share: float) -> int:
+    """Fewest top-ranked LGAs holding the given share of the burden."""
+    import numpy as np
+    c = pd.to_numeric(pareto["Zero-dose children (est)"], errors="coerce").fillna(0).values
+    if not c.sum():
+        return 0
+    return int(np.searchsorted(np.cumsum(c) / c.sum() * 100, share) + 1)
+
+
+def _d5_two_methods(TM, data) -> dict:
+    """Domain 5 findings for the bundled data: Method 1 as the headline, Method 2 (SAE) alongside."""
+    tm = TM.load()
+    S = tm["summary"]
+    nat = tm["national_zone"].iloc[0]
+    res = TM.state_res(tm, TM.M1, data["ndhs_long"])
+    r1, r2 = TM.lga_ranked(tm, TM.M1), TM.lga_ranked(tm, TM.M2)
+    tier1 = res[res["priority_tier"].astype(str) == "Tier 1: Critical"]["state"].tolist()
+    zone = tm["national_zone"].iloc[1:]
+    return {
+        "method": TM.M1,
+        "national_zd_count_2026": int(nat["m1_children"]),
+        "lga_total": int(nat["m1_children"]), "lga_count": int(S["m1"]["lgas"]),
+        "lga_lo95": int(nat["m1_lo95"]), "lga_hi95": int(nat["m1_hi95"]),
+        "n50": TM.n_for_share(r1, 50), "n60": TM.n_for_share(r1, 60), "n80": TM.n_for_share(r1, 80),
+        "top20_pct": float(r1.loc[r1["Burden rank"] == 155, "Cumulative % of burden"].iloc[0]),
+        "tier1_states": tier1, "max_rhat": round(S["m1"]["diagnostics"]["max_rhat"], 3),
+        "m2": {"method": TM.M2, "total": int(nat["m2_children"]), "lgas": int(S["m2"]["lgas"]),
+               "lo95": int(nat["m2_lo95"]), "hi95": int(nat["m2_hi95"]),
+               "n50": TM.n_for_share(r2, 50), "n60": TM.n_for_share(r2, 60), "n80": TM.n_for_share(r2, 80),
+               "top_lgas": [{"lga": r["LGA"], "state": r["State"], "zd_count": int(r["Zero-dose children (est)"]),
+                             "zd_rate_pct": float(r["Zero-dose rate (%)"])} for _, r in r2.head(10).iterrows()]},
+        "overlap_top155": int(S["overlap_top155"]), "rank_corr": round(float(S["rank_corr"]), 2),
+        "top_states": [
+            {"state": r["state"], "zone": r["zone"], "zd_2026_pct": round(float(r["zd_pred_2026_mean"]), 1),
+             "zd_2026_count": int(r["zd_count_2026"]), "tier": str(r["priority_tier"])}
+            for _, r in res.sort_values("state_rank").head(8).iterrows()],
+        "top_lgas": [{"lga": r["LGA"], "state": r["State"], "zone": r["Zone"],
+                      "zd_count": int(r["Zero-dose children (est)"]), "zd_rate_pct": float(r["Zero-dose rate (%)"])}
+                     for _, r in r1.head(10).iterrows()],
+        "zone_burden": [{"zone": str(z), "count": int(c)} for z, c in
+                        zone.set_index("area")["m1_children"].sort_values(ascending=False).items()],
+    }
 def build_findings(data: dict) -> dict:
     f: dict = {"generated": datetime.now().strftime("%d %B %Y"),
                "consortium": "CIDRE and Quantium Insights LLC, in technical support of NPHCDA",
@@ -35,7 +77,11 @@ def build_findings(data: dict) -> dict:
     kd = dio.df_hash(data.get("dhis2"))
 
     # Domain 5 (centerpiece)
-    if all(data.get(k) is not None for k in ("ndhs_long", "under5", "dhis2", "lga_population")):
+    from models import d5_two_methods as TM
+    if all(data.get(k) is not None for k in ("ndhs_long", "under5", "dhis2", "lga_population")) \
+            and TM.is_bundled(data):
+        f["d5"] = _d5_two_methods(TM, data)
+    elif all(data.get(k) is not None for k in ("ndhs_long", "under5", "dhis2", "lga_population")):
         kn, ku, kp = (dio.df_hash(data["ndhs_long"]), dio.df_hash(data["under5"]),
                       dio.df_hash(data["lga_population"]))
         mkey = f"{kn}-{ku}-{kd}-{C.MCMC_DRAWS_LIVE}-{C.MCMC_TUNE_LIVE}"
@@ -48,6 +94,8 @@ def build_findings(data: dict) -> dict:
             "national_zd_count_2026": int(res["zd_count_2026"].sum()),
             "lga_total": lga["national_total"], "lga_count": lga["n_lgas"],
             "top20_pct": lga["top20_pct"], "n80": lga["n80"],
+            "n50": _n_share(lga["pareto"], 50), "n60": _n_share(lga["pareto"], 60),
+            "method": "Method 1: Bayesian hierarchical model with DHIS2-calibrated LGA allocation",
             "tier1_states": tier1, "max_rhat": out["max_rhat"],
             "top_states": [
                 {"state": r["state"], "zone": r["zone"],
@@ -75,6 +123,18 @@ def build_findings(data: dict) -> dict:
             "at_risk_antigens": sm[sm["Crosses 80% in 6-12m"] == "Yes"]["Antigen"].tolist(),
             "summary": sm.to_dict(orient="records"),
         }
+        try:
+            from models.d1_forecast import load_lga_prophet
+            pre = load_lga_prophet(data["dhis2"], key=kd)
+            if pre is not None:
+                m = pre["meta"]
+                fl = pre["summary"][pre["summary"]["Early-warning flag"]]
+                f["d1"]["lga_early_warning"] = {
+                    "lgas_forecast": m["lgas_key"], "flags": m["alerts"], "lgas_with_flag": m["lgas_with_alert"],
+                    "flags_by_antigen": m["alerts_by_antigen"], "severity": m["severity"],
+                    "states_with_most_flags": fl["State"].value_counts().head(8).to_dict()}
+        except Exception:
+            pass
         # Domain 2
         d2 = dropout_forecasts(nat, key=kd)
         f["d2"] = {"latest_dropout": {s["label"]: round(s["obs_y"][-1], 1) for s in d2.values()}}
@@ -82,7 +142,7 @@ def build_findings(data: dict) -> dict:
             agg = dio.state_monthly(dio.prep_dhis2(data["dhis2"]))
             drv = lasso_drivers(agg, data["model_dataset"])
             f["d2"]["top_drivers"] = {
-                C.DROPOUT_TARGETS[t]: [k.replace("pct_", "").replace("_", " ") for k in c.head(4).index]
+                C.DROPOUT_TARGETS[t]: [C.feature_label(k).lower() for k in c.head(4).index]
                 for t, c in drv.items()}
     if data.get("ndhs_antigens") is not None:
         try:
@@ -105,21 +165,30 @@ def template_narrative(f: dict, kind: str) -> str:
     parts.append(
         f"Modelling of Nigeria routine immunization data projects about "
         f"{d5.get('lga_total', 0):,} zero-dose children across {d5.get('lga_count', 0)} LGAs in 2026. "
-        f"Burden is concentrated: the top 20 percent of LGAs carry about {d5.get('top20_pct', 0):.0f} "
-        f"percent of the total, and the highest-risk states are "
+        f"Burden is concentrated: half of these children live in {d5.get('n50', 0)} LGAs and 80 percent "
+        f"in {d5.get('n80', 0)}"
+        + (f" (Method 1; Method 2, small-area estimation: {d5['m2']['total']:,} children, half in "
+           f"{d5['m2']['n50']} LGAs)" if d5.get("m2") else "")
+        + f". The highest-risk states are "
         f"{', '.join(d5.get('tier1_states', [])[:3]) or 'in the North-West'}.")
     if kind == "policy":
         parts.append("## Situation analysis")
         parts.append(
-            "Zero-dose rates remain highest in the North-West. Antigen coverage is forecast near or "
-            "above the 80 percent target nationally, but dropout between antigen doses and spatial "
+            "Zero-dose rates remain highest in the North-West. Tracer antigen doses are forecast at or "
+            "above 80 percent of their 2024 level nationally, but dropout between antigen doses and spatial "
             "clustering of unvaccinated children sustain the burden in specific LGAs.")
     parts.append("## Key findings" if kind == "policy" else "### Key findings")
     kf = []
     if d5:
         kf.append(f"About {d5.get('lga_total', 0):,} zero-dose children in 2026 across "
-                  f"{d5.get('lga_count', 0)} LGAs; 80 percent of the burden sits in the top "
-                  f"{d5.get('n80', 0)} LGAs.")
+                  f"{d5.get('lga_count', 0)} LGAs; 50, 60 and 80 percent of the burden sit in the top "
+                  f"{d5.get('n50', 0)}, {d5.get('n60', 0)} and {d5.get('n80', 0)} LGAs.")
+        if d5.get("m2"):
+            m2 = d5["m2"]
+            kf.append(f"Method 2 (Bayesian small-area estimation) gives {m2['total']:,} children across "
+                      f"{m2['lgas']} LGAs (50/60/80 percent in {m2['n50']}, {m2['n60']} and {m2['n80']} LGAs); "
+                      f"{d5.get('overlap_top155', 0)} of the 155 highest-burden LGAs are the same under both "
+                      "methods.")
         kf.append("Tier-1 critical states: " + (", ".join(d5.get("tier1_states", [])) or "North-West states") + ".")
         if d5.get("top_lgas"):
             t = d5["top_lgas"][0]
@@ -127,11 +196,13 @@ def template_narrative(f: dict, kind: str) -> str:
                       f"zero-dose children at {t['zd_rate_pct']:.0f} percent.")
     if d1:
         ar = d1.get("at_risk_antigens")
-        kf.append(("Antigens at risk of falling below 80 percent in 6 to 12 months: " + ", ".join(ar))
-                  if ar else "All tracer antigens are forecast at or above the 80 percent target nationally.")
-    if d2.get("top_drivers"):
-        first = next(iter(d2["top_drivers"].items()))
-        kf.append(f"Leading drivers of {first[0]} dropout: {', '.join(first[1])}.")
+        kf.append(("Antigens projected below 80 percent of their 2024 level in 6 to 12 months: " + ", ".join(ar))
+                  if ar else "All tracer antigens are forecast at or above 80 percent of their 2024 level "
+                             "nationally (early-warning index).")
+    for pair, drv in (d2.get("top_drivers") or {}).items():
+        if drv:
+            kf.append(f"Leading state-level drivers of {pair} dropout: {', '.join(drv)}.")
+            break
     parts.append("\n".join(f"- {x}" for x in kf))
     parts.append("## Recommendations" if kind == "policy" else "### Priority actions")
     recs = [
@@ -256,9 +327,9 @@ def factsheet_html(f: dict, narrative_md: str) -> str:
         ("children", _bignum(d5.get("lga_total", 0)), RED,
          "zero-dose children projected in 2026",
          f"across {d5.get('lga_count', 0)} reporting LGAs"),
-        ("target", f"{d5.get('top20_pct', 0):.0f}%", NAVY,
-         "of the burden in the top 20% of LGAs",
-         f"80% of the burden sits in just {d5.get('n80', 0)} LGAs"),
+        ("target", f"{d5.get('n50', 0)}", NAVY,
+         "LGAs hold half of all zero-dose children",
+         f"60% in {d5.get('n60', 0)} and 80% in {d5.get('n80', 0)} LGAs"),
         ("pin", str(len(d5.get("tier1_states", []))), GREEN,
          "Tier-1 critical states",
          clean(", ".join(d5.get("tier1_states", [])) or "concentrated in the North-West")),
@@ -562,7 +633,7 @@ def policy_pptx(f: dict, narrative_md: str) -> bytes:
     nums = []
     if d5:
         nums = [(f"{d5.get('lga_total', 0):,}", "zero-dose children, 2026"),
-                (f"{d5.get('top20_pct', 0):.0f}%", "of burden in the top 20% of LGAs"),
+                (f"{d5.get('n50', 0)}", "LGAs hold half of the burden"),
                 (str(len(d5.get('tier1_states', []))), "Tier-1 critical states")]
     for i, (big, lab) in enumerate(nums):
         x = Inches(0.6 + i * 4.2)
@@ -684,7 +755,7 @@ def sop_docx() -> bytes:
         "Sign in: enter your name and email (and access code if required). Your sign-in is recorded for usage tracking.",
         "Load the data: on Home, click Use bundled project sample data, or Upload your own data on the Data and Quality page.",
         "Check data quality and anomalies: review completeness, reporting rates, the missing-value heatmap and the Anomaly detection tab.",
-        "Run the models: Coverage Forecasting (80% target; forecast end-year to 2032; 3/6/12-month scorecard horizon; Estimated-coverage mode (doses / estimated eligible cohort) with a selectable denominator and NDHS survey reference lines; LGA at-risk screen); Dropout & Completion (forecasts, LASSO drivers, heatmap); Zero-Dose & Hotspots (Bayesian model, LGA burden, Pareto, Gi* maps).",
+        "Run the models: Coverage Forecasting (80%-of-2024 early-warning; forecast end-year to 2032; 3/6/12-month scorecard horizon; Estimated-coverage mode with a selectable denominator and NDHS survey reference lines; Prophet early-warning for every LGA; additional antigens); Dropout & Completion (forecasts, state and LGA LASSO drivers, heatmap); Zero-Dose & Hotspots (Method 1: Bayesian hierarchical model with DHIS2-calibrated LGA allocation, or Method 2: Bayesian small-area estimation (SAE), or both side by side; 50/60/80% Pareto lists; Gi* maps; external validation); LGA Priority & Archetypes; Triangulation & Cross-Checks.",
         "Explore and test (Implementation Science): correlation with multicollinearity flags, distributions, scatter, zone violins, and the Hypothesis tests tab (t-test, ANOVA, chi-square).",
         "Ask the Analyst: add your OpenAI key in the sidebar, then ask grounded cross-domain questions.",
         "Generate reports: on Reports & Briefs, produce the factsheet, the Word policy brief and the PowerPoint deck.",
@@ -695,10 +766,11 @@ def sop_docx() -> bytes:
 
     h("How to read the outputs")
     table(["Signal", "Meaning"], [
-        ["Coverage / at-risk", "Red = below the 80% target; green = on target"],
+        ["Early-warning (Coverage)", "Red = projected below 80% of the 2024 level; green = on track"],
         ["Anomaly severity", "High (|z| >= 3) vs Moderate; spike or drop flagged"],
-        ["Priority tier (LGA)", "Tier 1 Critical (red) to Tier 4 (blue), by burden"],
-        ["Pareto severity", "Critical/High/Moderate/Lower within state; band A/B/C of burden"],
+        ["Early-warning severity (LGA)", "Warning 70-80%, Severe 40-70%, Critical 0-40%; Unstable = check DHIS2 reporting"],
+        ["Priority band (Pareto)", "A = LGAs holding the first 50% of zero-dose children, B = 50-60%, C = 60-80%, D = long tail"],
+        ["Equity tier (LGA)", "Critical/High/Moderate/Low = quartiles of the deprivation index"],
         ["Gi* hotspot", "Hot Spot (red) = significant high-burden cluster; p<0.01 most confident"],
         ["Survey line (Coverage)", "Dotted purple = NDHS survey coverage; a large gap vs admin flags denominator/reporting issues"],
         ["Credible / prediction interval", "The plausible range; wider = more uncertainty"],
@@ -738,98 +810,117 @@ def methods_sections() -> list:
     return [
         ("Purpose", "para",
          ["This summary documents the methods and validation behind the NPHCDA Zero-Dose Predictive "
-          "Modelling Platform for technical reviewers (GAVI, UNICEF, NPHCDA). Every model runs live on "
-          "the loaded data and reproduces the project report. Figures are model estimates for decision "
-          "support, to be reviewed before official use."]),
+          "Modelling Platform for technical reviewers (GAVI, UNICEF, NPHCDA). Models run on the loaded "
+          "data; for the bundled project data the heavy fits (per-LGA Prophet, both Domain 5 Bayesian "
+          "methods and their hotspot statistics) are precomputed with the same code and served. Figures "
+          "are model estimates for decision support, to be reviewed before official use."]),
         ("Data sources and vintage", "table",
          (["Source", "Vintage", "Used for"],
           [[clean(a), clean(c), clean(d_)] for a, b, c, d_ in C.PROVENANCE])),
-        ("Antigen coverage forecasting", "bullets",
+        ("Data preparation", "bullets",
+         ["DHIS2 dose counts of 1,000 or more are exported with a thousands separator (for example "
+          "\"1,234\"); the separator is removed before conversion so every count is read.",
+          "Katsina, Kogi, Kwara, Lagos and Niger have no DHIS2 rows before January 2023; these months are "
+          "treated as missing, not zero, and shown as gaps.",
+          "Guzamala (Borno) has no data for any antigen from January 2021 to January 2025, so it has no "
+          "2024 baseline (no Domain 1 forecast) and no Method 1 estimate; Method 2 (SAE) estimates it."]),
+        ("Antigen early-warning forecasting (Domain 1)", "bullets",
          ["Model: Prophet additive time series per antigen (BCG, Penta1, Penta3, Measles1) - "
           "piecewise-linear trend with automatic changepoints, yearly plus an added semi-annual "
-          "seasonality; 95% and 80% prediction intervals.",
-          "Two reporting modes: a denominator-free index (percent of the 2024 baseline; the 80% line is "
-          "an at-risk-of-decline early-warning) and estimated coverage of the eligible cohort (doses divided by an eligible "
-          "infant denominator: under-five/5 demographic proxy by default, or DHIS2 live births).",
-          "Admin-vs-survey triangulation: NDHS 2024 survey coverage is overlaid per antigen so a large "
-          "admin-vs-survey gap flags a denominator or reporting-completeness issue.",
-          "User-set forecast horizon (to 2032) and a 3/6/12-month scorecard window; an LGA at-risk "
-          "trend screen flags LGA-antigen series projected below 80%."]),
-        ("Validation - coverage forecasts", "bullets",
-         ["Out-of-sample hold-out back-test: refit on all but the last 6 months and score the forecast "
-          "against the held-out actuals. On the project data MAPE is about 2.7-4.3% per antigen - "
-          "'highly accurate' on the Lewis (1982) scale (under 10% = highly accurate, 10-20% = good, "
-          "20-50% = reasonable, over 50% = inaccurate).",
-          "95% prediction-interval coverage is at or near 100% (the share of held-out actuals that fell "
-          "inside the model's 95% interval; ideal near 95%), so the intervals are well-calibrated. All "
-          "four tracer antigens fall in the 'highly accurate' band."]),
-        ("Dropout and completion", "bullets",
+          "seasonality (period 182.5 days, Fourier order 3); 95% and 80% prediction intervals.",
+          "Metric: each series as a percent of its own 2024 mean monthly doses. The 80% line is an "
+          "at-risk-of-decline early-warning, flagged when the central forecast falls below 80% in months "
+          "6 to 12 after the last observed month. An optional mode divides doses by an eligible-infant "
+          "denominator (under-five/5 or DHIS2 live births) with NDHS survey reference lines.",
+          "LGA level: the same Prophet model fitted to every LGA and tracer antigen (at least 18 monthly "
+          "rows, a non-zero total and a positive 2024 baseline): 3,092 forecasts for 773 LGAs; 1,302 "
+          "early-warning flags in 513 LGAs, banded Warning (70-80%), Severe (40-70%), Critical (0-40%) and "
+          "Unstable (below 0%, a reporting check).",
+          "Additional antigens: national monthly doses (months with no doses dropped), Prophet with yearly "
+          "seasonality and a 30-month horizon; established antigens (OPV3, IPV1, PCV3, Yellow Fever, Men A) "
+          "carry the 80% flag, recently introduced antigens (IPV2, Rotavirus 1-3) are read as uptake."]),
+        ("Validation - Domain 1 forecasts", "bullets",
+         ["Hold-out back-test: refit on all but the last 6 months and score the forecast against the "
+          "held-out actuals. MAPE is 5.5-7.0% for BCG, Penta1 and Penta3 ('highly accurate' on the Lewis "
+          "1982 scale: under 10%) and 12.7% for Measles1 ('good': 10-20%).",
+          "95% prediction-interval coverage on the 6-month hold-out is 50-83%, below the nominal 95%: the "
+          "intervals are narrower than ideal over short horizons (month-to-month swings such as campaign "
+          "months fall outside them). The central forecast is the early-warning signal."]),
+        ("Dropout and completion (Domain 2)", "bullets",
          ["Prophet forecasts of three dropout transitions (Penta1-Penta3, Penta1-Measles1, "
           "Measles1-Measles2), nationally and by state, with prediction intervals.",
-          "Drivers: cross-validated LASSO selection with 200-resample bootstrap stability, then a "
-          "parsimonious model on the top stably-selected drivers per pair reporting the standardized "
-          "coefficient, direction and 95% CI. Because dropout can be negative, a linear model with HC3 "
-          "robust standard errors is used (Beta applies only to the bounded zero-dose outcome)."]),
-        ("Zero-dose and hotspots", "bullets",
-         ["Model: Bayesian hierarchical Beta regression in PyMC on the NDHS 2008-2024 panel - partially "
-          "pooled intercepts and time slopes at national, zone and state levels; a Beta likelihood whose "
-          "precision scales with each survey's sample size; non-centred parameterization; sampled with "
-          "NUTS (nutpie). Convergence reported via R-hat and ESS.",
-          "Forecasts to 2026-2028 are posterior-predictive (mean with 95% credible intervals).",
-          "LGA burden: each LGA's DHIS2-derived rate is calibrated to its state's 2026 posterior and the "
-          "state cohort is distributed across LGAs by population (NPC 2022); the state credible interval "
-          "is allocated down to each LGA (ZD count low/high 95%).",
-          "Spatial: Getis-Ord Gi* hotspots (k=5 nearest neighbours, row-standardized, permutation "
-          "inference) on the LGA zero-dose surface."]),
-        ("Validation - zero-dose model (leave-one-wave-out)", "bullets",
-         ["Each NDHS survey wave is held out in turn, the model refit, and that wave predicted and "
-          "compared to observed (MAE/RMSE in percentage points and 95% CI coverage), in the Diagnostics "
-          "tab.",
-          "On the project data, out-of-sample MAE is about 8-10 percentage points against a zero-dose "
-          "outcome that ranges 3-86% (mean ~30%, SD ~23 pp) over only four survey waves - i.e. the "
-          "error is well below the natural spread of the outcome. As a practical guide, MAE under ~5 pp "
-          "is excellent and 5-10 pp is good for a four-point survey series; MAPE-style benchmarks "
-          "(Lewis 1982) are not applied to the rate directly because percentage error is unstable for "
-          "small proportions.",
-          "95% credible-interval coverage is roughly 60-85%, so the intervals are somewhat over-"
-          "confident out of sample - forecasts should be read as central estimates with intervals "
-          "likely a touch narrow (disclosed, not hidden)."]),
-        ("Drivers and inference (Implementation Science)", "bullets",
-         ["Exploratory analysis of the state zero-dose dataset: correlation matrix with "
-          "multicollinearity flags, distributions, scatter (Pearson r), zone violins (Kruskal-Wallis), "
-          "burden-band bars and a Bland-Altman agreement plot.",
-          "A parsimonious Beta regression of the zero-dose rate on the top LASSO-selected drivers reports "
-          "the coefficient, direction and 95% CI; a build-your-own hypothesis-test tab supports t-test, "
-          "paired t-test, ANOVA and chi-square.",
-          "All driver results are cross-sectional, ecological state-level associations (n=37), framed as "
-          "directional and uncertainty-quantified - not causal effects."]),
+          "State drivers: cross-validated LASSO on 17 state equity indicators, with 200-resample bootstrap "
+          "selection stability and a parsimonious model on the top stably selected drivers reporting the "
+          "standardized coefficient, direction and 95% CI (linear model with HC3 robust standard errors, "
+          "since dropout can be negative).",
+          "LGA drivers: per-LGA dropout from DHIS2 2021-2024 totals regressed on 15 LGA covariates with "
+          "5-fold cross-validated LASSO (743 LGAs with complete covariates)."]),
+        ("Zero-dose estimation (Domain 5): two methods", "bullets",
+         ["Both methods use the NDHS 2008-2024 state zero-dose series and the same denominator: the "
+          "12-23-month cohort = state under-five (2024 projection) / 5, shared to LGAs by NPC 2022 "
+          "population (7.02 million children nationally).",
+          "Method 1: Bayesian hierarchical model with DHIS2-calibrated LGA allocation. A hierarchical Beta "
+          "regression in PyMC with partially pooled national, zone and state intercepts and time slopes, a "
+          "state DHIS2 Penta1 trend covariate and a Beta likelihood whose precision scales with survey "
+          "sample size, forecast to 2026-2028. Each state's 2026 burden is allocated to its LGAs by the "
+          "LGA's DHIS2 Penta1 share (calibrated to the state posterior) and population share; the state "
+          "credible interval is carried to each LGA. 773 LGAs; 2,099,204 zero-dose children in 2026 (95% "
+          "CrI 1.90-2.31 million).",
+          "Method 2: Bayesian small-area estimation (SAE). An LGA-level model fitted to the NDHS state "
+          "observations through an aggregation likelihood (the population-weighted mean of a state's LGA "
+          "rates must agree with its survey result, with design effect 2), six local-condition covariates "
+          "(maternal-care index, improved water, Relative Wealth Index, travel time, conflict events, "
+          "poverty) and a BYM2 spatial effect on the GRID3 LGA adjacency. 774 LGAs; 2,149,561 children "
+          "(95% CrI 1.86-2.46 million), each LGA with its own credible interval.",
+          "Concentration: 50, 60 and 80 percent of zero-dose children are in 151, 199 and 342 LGAs "
+          "(Method 1) and 138, 181 and 319 LGAs (Method 2). 107 of the 155 highest-burden LGAs are the "
+          "same under both methods (LGA rank correlation 0.75).",
+          "Spatial: Getis-Ord Gi* hotspots on each method's LGA rate (k=5 nearest neighbours, "
+          "row-standardized, 999 permutations) and on the state forecasts (Queen contiguity)."]),
+        ("Validation - Domain 5", "bullets",
+         ["Convergence: Method 1 max R-hat 1.006, min bulk ESS 1,168; Method 2 max R-hat 1.003, min bulk "
+          "ESS 2,549 over 1,649 parameters; no divergent transitions in either.",
+          "Independent survey: against NmDHS 2025-26 state zero-dose (100 minus Penta1), Spearman rho is "
+          "0.89 for Method 1 (MAE 6.3 pp) and 0.87 for Method 2 (MAE 5.9 pp) across 37 states. Method 2's "
+          "posterior predictive interval contains 98% of the NDHS state observations.",
+          "IHME 2018 LGA DTP1: overall rho 0.65 (Method 1) and 0.89 (Method 2); within states 0.08 and "
+          "0.54 - Method 2 places children inside a state far more consistently with an independent LGA "
+          "model.",
+          "Leave-one-wave-out (Method 1 state model, live in the app): MAE 8.5-10.2 pp with 95% interval "
+          "coverage of 62-84%, so state intervals are somewhat narrow out of sample."]),
+        ("Drivers and inference (Exploratory Data Analysis)", "bullets",
+         ["State dataset (37 states): correlation matrix with multicollinearity flags, distributions, "
+          "scatter (Pearson r), zone violins (Kruskal-Wallis), burden-band bars, a Bland-Altman agreement "
+          "plot, hypothesis tests and a parsimonious Beta regression of the zero-dose rate.",
+          "LGA dataset (774 LGAs): the 15 covariates, archetypes and both methods' 2026 estimates.",
+          "All driver results are cross-sectional, ecological associations - directional and "
+          "uncertainty-quantified, not causal effects."]),
         ("Key parameters", "table",
          (["Component", "Setting"],
-          [["Prophet", "yearly + semi-annual seasonality; changepoint_prior_scale 0.05; 95% PI (80% PI = 0.654x half-width)"],
-           ["Bayesian Beta", "hierarchical national-zone-state; precision scaled by survey n; nutpie NUTS, 2 chains, target_accept 0.92; live 1000 draws (full 3000)"],
-           ["Getis-Ord Gi*", "k=5 nearest neighbours; row-standardized; permutation p (0.01/0.05/0.10)"],
-           ["LASSO drivers", "standardized; 5-fold CV; 200-bootstrap stability; parsimonious top-4 with HC3 robust SE or Beta + 95% CI"]])),
+          [["Prophet (national and LGA)", "yearly + semi-annual seasonality; changepoint_prior_scale 0.05; seasonality_prior_scale 10; 18-month horizon; 95% PI (80% PI = 0.654x half-width)"],
+           ["Prophet (additional antigens)", "yearly seasonality; 30-month horizon; zero-dose months dropped"],
+           ["Method 1 (Bayesian hierarchical)", "national-zone-state Beta regression; precision scaled by survey n; nutpie NUTS; 3,000 draws (live runs on uploaded data: 1,000)"],
+           ["Method 2 (SAE)", "aggregation likelihood, design effect 2; six standardized covariates; BYM2 spatial effect; full posterior draws"],
+           ["Getis-Ord Gi*", "LGA: k=5 nearest neighbours; state: Queen contiguity; row-standardized; 999 permutations; p 0.01/0.05/0.10"],
+           ["LASSO drivers", "standardized; 5-fold CV; state: 200-bootstrap stability, parsimonious top-4 with HC3 robust SE"]])),
         ("Limitations and honest caveats", "bullets",
-         ["DHIS2 is administrative data; reporting completeness affects counts. The coverage index is "
-          "relative to 2024 unless a proper denominator is supplied. DHIS2-reported live births "
-          "under-count true births, so using them as a denominator can push coverage above 100%.",
-          "Driver associations are ecological (state-level, n=37), not causal; read direction and CI "
-          "width, not a significance verdict.",
-          "The LGA burden is a population-share allocation of the state posterior (carrying the state "
-          "credible interval), not an independently fitted LGA model.",
-          "Out-of-sample credible-interval coverage is below nominal, so forecast intervals are likely "
-          "slightly narrow; the zero-dose model extrapolates a linear-in-logit time trend from four NDHS "
-          "waves.",
-          "Unmatched geographies in the Gi* step are median-imputed; the LGA reporting drill-down and "
-          "anomaly tab help surface data-quality issues before modelling."]),
+         ["DHIS2 is administrative data; reporting completeness affects counts. The early-warning index is "
+          "relative to 2024, and routine administrative coverage exceeds 100% in most LGAs against the "
+          "demographic denominator, so it is not used as literal coverage.",
+          "Method 1 places children within a state by DHIS2 reporting share, so LGAs that under-report "
+          "receive lower estimates; Method 2 relies on modelled covariate surfaces (2014-2021) and spatial "
+          "smoothing, and its LGA intervals are wide. The two are complementary, and both are reported.",
+          "Driver associations are ecological, not causal; read direction and CI width.",
+          "Forecast intervals are narrower than nominal out of sample (Domain 1 back-test, Domain 5 "
+          "leave-one-wave-out); read central estimates with that in mind.",
+          "The LGA reporting drill-down and anomaly tab surface data-quality issues before modelling."]),
         ("Reproducibility and governance", "bullets",
-         ["Content-hashed caching means re-runs are instant but genuinely recomputed when data changes; "
-          "dependencies are version-pinned and the container is reproducible.",
+         ["Precomputed results are fingerprinted to the bundled data; uploaded data runs live. "
+          "Dependencies are version-pinned and the container is reproducible.",
           "Uploaded data is processed only in the session and not written to disk; any OpenAI key is "
-          "session-only and never stored; login PII is used solely for DIH usage tracking.",
+          "session-only and never stored; login details are used solely for usage tracking.",
           "Every output is labelled as a model estimate; cite the data vintage when sharing."]),
     ]
-
 
 def methods_docx() -> bytes:
     """Reviewer-facing Methods & Validation summary as a branded Word document."""

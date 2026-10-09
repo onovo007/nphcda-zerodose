@@ -42,7 +42,7 @@ def numeric_cols(df: pd.DataFrame) -> list[str]:
 
 
 def pretty(name: str) -> str:
-    return clean(name.replace("pct_", "").replace("_", " ").title())
+    return clean(C.feature_label(name))
 
 
 # --------------------------------------------------------------------------------------
