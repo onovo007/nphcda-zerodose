@@ -1,0 +1,24 @@
+{
+  "parse": "corrected",
+  "lga_antigen_series": 3096,
+  "forecasts_fitted": 3092,
+  "lgas_with_any_forecast": 773,
+  "lgas_with_all_four": 773,
+  "alerts": 1302,
+  "lgas_with_any_alert": 513,
+  "share_forecasts_flagged": 42.1,
+  "alerts_by_antigen": {
+    "Measles1": 393,
+    "Penta1": 320,
+    "Penta3": 312,
+    "BCG": 277
+  },
+  "severity": {
+    "Severe (40-70%)": 653,
+    "Warning (70-80%)": 464,
+    "Critical (0-40%)": 148,
+    "Collapsed (<0%)": 37
+  },
+  "forecasts_below_zero": 37,
+  "seconds": 89
+}

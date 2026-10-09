@@ -1,0 +1,5 @@
+antigen,base_2024_doses_per_month,min_forecast_pct,min_when,crosses_80_in_6_12m,min_pct_in_window
+BCG,687698,99.9,Dec 2026,False,99.9
+Penta1,733663,106.5,Sep 2026,False,106.5
+Penta3,682622,107.4,Dec 2026,False,107.4
+Measles1,640314,106.5,Sep 2026,False,106.5

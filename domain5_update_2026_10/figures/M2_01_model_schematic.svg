@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="850.32pt" height="404.038594pt" viewBox="0 0 850.32 404.038594" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-09T01:43:18.333728</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.11.2, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 404.038594 
+L 850.32 404.038594 
+L 850.32 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 126.324 132.071569 
+L 323.856 132.071569 
+Q 330.552 132.071569 330.552 125.418769 
+L 330.552 40.041169 
+Q 330.552 33.388369 323.856 33.388369 
+L 126.324 33.388369 
+Q 119.628 33.388369 119.628 40.041169 
+L 119.628 125.418769 
+Q 119.628 132.071569 126.324 132.071569 
+z
+" clip-path="url(#p79aace1211)" style="fill: #dcebf5"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 126.324 231.863569 
+L 323.856 231.863569 
+Q 330.552 231.863569 330.552 225.210769 
+L 330.552 145.377169 
+Q 330.552 138.724369 323.856 138.724369 
+L 126.324 138.724369 
+Q 119.628 138.724369 119.628 145.377169 
+L 119.628 225.210769 
+Q 119.628 231.863569 126.324 231.863569 
+z
+" clip-path="url(#p79aace1211)" style="fill: #e8eef3"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 126.324 328.883569 
+L 323.856 328.883569 
+Q 330.552 328.883569 330.552 322.230769 
+L 330.552 242.397169 
+Q 330.552 235.744369 323.856 235.744369 
+L 126.324 235.744369 
+Q 119.628 235.744369 119.628 242.397169 
+L 119.628 322.230769 
+Q 119.628 328.883569 126.324 328.883569 
+z
+" clip-path="url(#p79aace1211)" style="fill: #e8eef3"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 383.004 254.039569 
+L 591.696 254.039569 
+Q 598.392 254.039569 598.392 247.386769 
+L 598.392 112.113169 
+Q 598.392 105.460369 591.696 105.460369 
+L 383.004 105.460369 
+Q 376.308 105.460369 376.308 112.113169 
+L 376.308 247.386769 
+Q 376.308 254.039569 383.004 254.039569 
+z
+" clip-path="url(#p79aace1211)" style="fill: #d9ead3"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 645.264 159.791569 
+L 831.636 159.791569 
+Q 838.332 159.791569 838.332 153.138769 
+L 838.332 40.041169 
+Q 838.332 33.388369 831.636 33.388369 
+L 645.264 33.388369 
+Q 638.568 33.388369 638.568 40.041169 
+L 638.568 153.138769 
+Q 638.568 159.791569 645.264 159.791569 
+z
+" clip-path="url(#p79aace1211)" style="fill: #fbe9dd"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 645.264 303.935569 
+L 831.636 303.935569 
+Q 838.332 303.935569 838.332 297.282769 
+L 838.332 184.185169 
+Q 838.332 177.532369 831.636 177.532369 
+L 645.264 177.532369 
+Q 638.568 177.532369 638.568 184.185169 
+L 638.568 297.282769 
+Q 638.568 303.935569 645.264 303.935569 
+z
+" clip-path="url(#p79aace1211)" style="fill: #f2f2f2"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 329.739181 86.911994 
+Q 353.429203 110.449176 375.850226 132.725548 
+" clip-path="url(#p79aace1211)" style="fill: none; stroke: #1f3b57; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 373.565528 125.944682 
+L 375.850226 132.725548 
+L 369.054714 130.484787 
+z
+" clip-path="url(#p79aace1211)" style="fill: #1f3b57; stroke: #1f3b57; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 330.309305 185.074361 
+Q 353.431131 182.521844 374.774904 180.165614 
+" clip-path="url(#p79aace1211)" style="fill: none; stroke: #1f3b57; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 368.062421 177.687193 
+L 374.774904 180.165614 
+L 368.764678 184.048548 
+z
+" clip-path="url(#p79aace1211)" style="fill: #1f3b57; stroke: #1f3b57; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 329.628834 280.796847 
+Q 353.432129 253.205501 376.066913 226.968623 
+" clip-path="url(#p79aace1211)" style="fill: none; stroke: #1f3b57; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 369.463376 229.724217 
+L 376.066913 226.968623 
+L 374.309266 233.904809 
+z
+" clip-path="url(#p79aace1211)" style="fill: #1f3b57; stroke: #1f3b57; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 597.492334 161.628763 
+Q 618.478736 138.171381 638.272396 116.047178 
+" clip-path="url(#p79aace1211)" style="fill: none; stroke: #1f3b57; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 631.620248 118.683259 
+L 638.272396 116.047178 
+L 636.389972 122.950545 
+z
+" clip-path="url(#p79aace1211)" style="fill: #1f3b57; stroke: #1f3b57; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 597.666709 203.235833 
+Q 618.479101 221.329187 637.941473 238.248895 
+" clip-path="url(#p79aace1211)" style="fill: none; stroke: #1f3b57; stroke-width: 1.6; stroke-linecap: round"/>
+    <path d="M 635.210977 231.63494 
+L 637.941473 238.248895 
+L 631.012012 236.464919 
+z
+" clip-path="url(#p79aace1211)" style="fill: #1f3b57; stroke: #1f3b57; stroke-width: 1.6; stroke-linecap: round"/>
+   </g>
+   <g id="text_1">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #1f3b57" x="131.904" y="60.59625" transform="rotate(-0 131.904 60.59625)">1  Household surveys</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(131.904 86.527687)">NDHS 2008, 2013, 2018, 2023-24</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(131.904 99.244406)">148 state results with sampling error</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(131.904 112.294406)">Sets the level in every state</text>
+   </g>
+   <g id="text_3">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #1f3b57" x="131.904" y="165.93225" transform="rotate(-0 131.904 165.93225)">2  Local context (covariates)</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(131.904 191.943141)">Maternal care, water, wealth,</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(131.904 204.580406)">travel time, conflict, poverty</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(131.904 217.630406)">for every LGA</text>
+   </g>
+   <g id="text_5">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #1f3b57" x="131.904" y="262.95225" transform="rotate(-0 131.904 262.95225)">3  Neighbours (spatial)</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(131.904 288.550406)">GRID3 boundaries: 2,165 pairs of</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(131.904 301.600406)">neighbouring LGAs share information</text>
+   </g>
+   <g id="text_7">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #1c5e33" x="388.584" y="132.66825" transform="rotate(-0 388.584 132.66825)">Bayesian small-area model</text>
+   </g>
+   <g id="text_8">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(388.584 159.138281)">Each LGA has its own zero-dose rate.</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(388.584 171.316406)">The population-weighted average of an</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(388.584 184.366406)">state's LGA rates must match its survey</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(388.584 197.416406)">results, within sampling error.</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(388.584 210.466406)">Covariates and neighbours explain</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(388.584 224.388281)">how rates differ inside each state.</text>
+   </g>
+   <g id="text_9">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #8a3a0f" x="650.844" y="60.59625" transform="rotate(-0 650.844 60.59625)">Outputs for every LGA</text>
+   </g>
+   <g id="text_10">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(650.844 87.066281)">Zero-dose rate and number of</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(650.844 99.657141)">children, 2026-2028</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(650.844 113.166281)">95% credible intervals</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(650.844 125.344406)">Priority probability (top 20%)</text>
+   </g>
+   <g id="text_11">
+    <text style="font-weight: 700; font-size: 11px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #1f3b57" x="650.844" y="204.74025" transform="rotate(-0 650.844 204.74025)">Built-in checks</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(650.844 230.338406)">Fit to all survey rounds</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(650.844 243.388406)">Independent survey (NmDHS 2025-26)</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(650.844 256.438406)">Independent LGA map (IHME 2018)</text>
+    <text style="font-size: 9px; font-family: 'DejaVu Sans'; fill: #27343d" transform="translate(650.844 269.488406)">Convergence diagnostics</text>
+   </g>
+   <g id="text_13">
+    <text style="font-weight: 700; font-size: 13px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #1f3b57" x="116.28" y="18.517969" transform="rotate(-0 116.28 18.517969)">How the Bayesian small-area model combines surveys, local context and neighbours</text>
+   </g>
+  </g>
+  <g id="text_14">
+   <text style="font-style: italic; font-size: 8px; font-family: 'DejaVu Sans'; text-anchor: start; fill: #5b6b79" x="8.64" y="393.476719" transform="rotate(-0 8.64 393.476719)">All 774 LGAs. Inference by Markov chain Monte Carlo (4 chains x 8,000 draws).</text>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p79aace1211">
+   <rect x="116.28" y="24.517969" width="725.4" height="310.464"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -1,0 +1,775 @@
+lga_uid,state,lga,state_key,geo_lga_key
+NG-ABI-000,Abia,Aba North,abia,aba north
+NG-ABI-001,Abia,Aba South,abia,aba south
+NG-ABI-002,Abia,Arochukwu,abia,arochukwu
+NG-ABI-003,Abia,Bende,abia,bende
+NG-ABI-004,Abia,Ikwuano,abia,ikwuano
+NG-ABI-005,Abia,Isiala-Ngwa North,abia,isiala ngwa north
+NG-ABI-006,Abia,Isiala-Ngwa South,abia,isiala ngwa south
+NG-ABI-007,Abia,Isuikwuato,abia,isuikwuato
+NG-ABI-008,Abia,Obi Nwga,abia,obi nwga
+NG-ABI-009,Abia,Ohafia,abia,ohafia
+NG-ABI-010,Abia,Osisioma Ngwa,abia,osisioma ngwa
+NG-ABI-011,Abia,Ugwunagbo,abia,ugwunagbo
+NG-ABI-012,Abia,Ukwa East,abia,ukwa east
+NG-ABI-013,Abia,Ukwa West,abia,ukwa west
+NG-ABI-014,Abia,Umuahia North,abia,umuahia north
+NG-ABI-015,Abia,Umuahia South,abia,umuahia south
+NG-ABI-016,Abia,Umunneochi,abia,umu nneochi
+NG-ADA-017,Adamawa,Demsa,adamawa,demsa
+NG-ADA-018,Adamawa,Fufore,adamawa,fufore
+NG-ADA-019,Adamawa,Ganye,adamawa,ganye
+NG-ADA-020,Adamawa,Girei,adamawa,girei
+NG-ADA-021,Adamawa,Gombi,adamawa,gombi
+NG-ADA-022,Adamawa,Guyuk,adamawa,guyuk
+NG-ADA-023,Adamawa,Hong,adamawa,hong
+NG-ADA-024,Adamawa,Jada,adamawa,jada
+NG-ADA-025,Adamawa,Lamurde,adamawa,lamurde
+NG-ADA-026,Adamawa,Madagali,adamawa,madagali
+NG-ADA-027,Adamawa,Maiha,adamawa,maiha
+NG-ADA-028,Adamawa,Mayo-Belwa,adamawa,mayo belwa
+NG-ADA-029,Adamawa,Michika,adamawa,michika
+NG-ADA-030,Adamawa,Mubi North,adamawa,mubi north
+NG-ADA-031,Adamawa,Mubi South,adamawa,mubi south
+NG-ADA-032,Adamawa,Numan,adamawa,numan
+NG-ADA-033,Adamawa,Shelleng,adamawa,shelleng
+NG-ADA-034,Adamawa,Song,adamawa,song
+NG-ADA-035,Adamawa,Toungo,adamawa,toungo
+NG-ADA-036,Adamawa,Yola North,adamawa,yola north
+NG-ADA-037,Adamawa,Yola South,adamawa,yola south
+NG-AKW-038,Akwa Ibom,Abak,akwa ibom,abak
+NG-AKW-039,Akwa Ibom,Eastern Obolo,akwa ibom,eastern obolo
+NG-AKW-040,Akwa Ibom,Eket,akwa ibom,eket
+NG-AKW-041,Akwa Ibom,Esit Eket,akwa ibom,esit eket
+NG-AKW-042,Akwa Ibom,Essien Udim,akwa ibom,essien udim
+NG-AKW-043,Akwa Ibom,Etim Ekpo,akwa ibom,etim ekpo
+NG-AKW-044,Akwa Ibom,Etinan,akwa ibom,etinan
+NG-AKW-045,Akwa Ibom,Ibeno,akwa ibom,ibeno
+NG-AKW-046,Akwa Ibom,Ibesikpo Asutan,akwa ibom,ibesikpo asutan
+NG-AKW-047,Akwa Ibom,Ibiono Ibom,akwa ibom,ibiono ibom
+NG-AKW-048,Akwa Ibom,Ika,akwa ibom,ika
+NG-AKW-049,Akwa Ibom,Ikono,akwa ibom,ikono
+NG-AKW-050,Akwa Ibom,Ikot Abasi,akwa ibom,ikot abasi
+NG-AKW-051,Akwa Ibom,Ikot Ekpene,akwa ibom,ikot ekpene
+NG-AKW-052,Akwa Ibom,Ini,akwa ibom,ini
+NG-AKW-053,Akwa Ibom,Itu,akwa ibom,itu
+NG-AKW-054,Akwa Ibom,Mbo,akwa ibom,mbo
+NG-AKW-055,Akwa Ibom,Mkpat Enin,akwa ibom,mkpat enin
+NG-AKW-056,Akwa Ibom,Nsit Atai,akwa ibom,nsit atai
+NG-AKW-057,Akwa Ibom,Nsit Ibom,akwa ibom,nsit ibom
+NG-AKW-058,Akwa Ibom,Nsit Ubium,akwa ibom,nsit ubium
+NG-AKW-059,Akwa Ibom,Obot Akara,akwa ibom,obot akara
+NG-AKW-060,Akwa Ibom,Okobo,akwa ibom,okobo
+NG-AKW-061,Akwa Ibom,Onna,akwa ibom,onna
+NG-AKW-062,Akwa Ibom,Oron,akwa ibom,oron
+NG-AKW-063,Akwa Ibom,Oruk Anam,akwa ibom,oruk anam
+NG-AKW-064,Akwa Ibom,Udung Uko,akwa ibom,udung uko
+NG-AKW-065,Akwa Ibom,Ukanafun,akwa ibom,ukanafun
+NG-AKW-066,Akwa Ibom,Uruan,akwa ibom,uruan
+NG-AKW-067,Akwa Ibom,Urue-Offong/Oruko,akwa ibom,urue offong oruko
+NG-AKW-068,Akwa Ibom,Uyo,akwa ibom,uyo
+NG-ANA-069,Anambra,Aguata,anambra,aguata
+NG-ANA-070,Anambra,Anambra East,anambra,anambra east
+NG-ANA-071,Anambra,Anambra West,anambra,anambra west
+NG-ANA-072,Anambra,Anaocha,anambra,anaocha
+NG-ANA-073,Anambra,Awka North,anambra,awka north
+NG-ANA-074,Anambra,Awka South,anambra,awka south
+NG-ANA-075,Anambra,Ayamelum,anambra,ayamelum
+NG-ANA-076,Anambra,Dunukofia,anambra,dunukofia
+NG-ANA-077,Anambra,Ekwusigo,anambra,ekwusigo
+NG-ANA-078,Anambra,Idemili North,anambra,idemili north
+NG-ANA-079,Anambra,Idemili South,anambra,idemili south
+NG-ANA-080,Anambra,Ihiala,anambra,ihiala
+NG-ANA-081,Anambra,Njikoka,anambra,njikoka
+NG-ANA-082,Anambra,Nnewi North,anambra,nnewi north
+NG-ANA-083,Anambra,Nnewi South,anambra,nnewi south
+NG-ANA-084,Anambra,Ogbaru,anambra,ogbaru
+NG-ANA-085,Anambra,Onitsha North,anambra,onitsha north
+NG-ANA-086,Anambra,Onitsha South,anambra,onitsha south
+NG-ANA-087,Anambra,Orumba North,anambra,orumba north
+NG-ANA-088,Anambra,Orumba South,anambra,orumba south
+NG-ANA-089,Anambra,Oyi,anambra,oyi
+NG-BAU-090,Bauchi,Alkaleri,bauchi,alkaleri
+NG-BAU-091,Bauchi,Bauchi,bauchi,bauchi
+NG-BAU-092,Bauchi,Bogoro,bauchi,bogoro
+NG-BAU-093,Bauchi,Dambam,bauchi,dambam
+NG-BAU-094,Bauchi,Darazo,bauchi,darazo
+NG-BAU-095,Bauchi,Dass,bauchi,dass
+NG-BAU-096,Bauchi,Gamawa,bauchi,gamawa
+NG-BAU-097,Bauchi,Ganjuwa,bauchi,ganjuwa
+NG-BAU-098,Bauchi,Giade,bauchi,giade
+NG-BAU-099,Bauchi,Itas/Gadau,bauchi,itas gadau
+NG-BAU-100,Bauchi,Jama'Are,bauchi,jamaare
+NG-BAU-101,Bauchi,Katagum,bauchi,katagum
+NG-BAU-102,Bauchi,Kirfi,bauchi,kirfi
+NG-BAU-103,Bauchi,Misau,bauchi,misau
+NG-BAU-104,Bauchi,Ningi,bauchi,ningi
+NG-BAU-105,Bauchi,Shira,bauchi,shira
+NG-BAU-106,Bauchi,Tafawa-Balewa,bauchi,tafawa balewa
+NG-BAU-107,Bauchi,Toro,bauchi,toro
+NG-BAU-108,Bauchi,Warji,bauchi,warji
+NG-BAU-109,Bauchi,Zaki,bauchi,zaki
+NG-BAY-110,Bayelsa,Brass,bayelsa,brass
+NG-BAY-111,Bayelsa,Ekeremor,bayelsa,ekeremor
+NG-BAY-112,Bayelsa,Kolokuma/Opokuma,bayelsa,kolokuma opokuma
+NG-BAY-113,Bayelsa,Nembe,bayelsa,nembe
+NG-BAY-114,Bayelsa,Ogbia,bayelsa,ogbia
+NG-BAY-115,Bayelsa,Sagbama,bayelsa,sagbama
+NG-BAY-116,Bayelsa,Southern Ijaw,bayelsa,southern ijaw
+NG-BAY-117,Bayelsa,Yenagoa,bayelsa,yenegoa
+NG-BEN-118,Benue,Ado,benue,ado
+NG-BEN-119,Benue,Agatu,benue,agatu
+NG-BEN-120,Benue,Apa,benue,apa
+NG-BEN-121,Benue,Buruku,benue,buruku
+NG-BEN-122,Benue,Gboko,benue,gboko
+NG-BEN-123,Benue,Guma,benue,guma
+NG-BEN-124,Benue,Gwer East,benue,gwer east
+NG-BEN-125,Benue,Gwer West,benue,gwer west
+NG-BEN-126,Benue,Katsina-Ala,benue,katsina ala
+NG-BEN-127,Benue,Konshisha,benue,konshisha
+NG-BEN-128,Benue,Kwande,benue,kwande
+NG-BEN-129,Benue,Logo,benue,logo
+NG-BEN-130,Benue,Makurdi,benue,makurdi
+NG-BEN-131,Benue,Obi,benue,obi
+NG-BEN-132,Benue,Ogbadibo,benue,ogbadibo
+NG-BEN-133,Benue,Ohimini,benue,ohimini
+NG-BEN-134,Benue,Oju,benue,oju
+NG-BEN-135,Benue,Okpokwu,benue,okpokwu
+NG-BEN-136,Benue,Otukpo,benue,oturkpo
+NG-BEN-137,Benue,Tarka,benue,tarka
+NG-BEN-138,Benue,Ukum,benue,ukum
+NG-BEN-139,Benue,Ushongo,benue,ushongo
+NG-BEN-140,Benue,Vandeikya,benue,vandeikya
+NG-BOR-141,Borno,Abadam,borno,abadam
+NG-BOR-142,Borno,Askira/Uba,borno,askira uba
+NG-BOR-143,Borno,Bama,borno,bama
+NG-BOR-144,Borno,Bayo,borno,bayo
+NG-BOR-145,Borno,Biu,borno,biu
+NG-BOR-146,Borno,Chibok,borno,chibok
+NG-BOR-147,Borno,Damboa,borno,damboa
+NG-BOR-148,Borno,Dikwa,borno,dikwa
+NG-BOR-149,Borno,Gubio,borno,gubio
+NG-BOR-150,Borno,Guzamala,borno,guzamala
+NG-BOR-151,Borno,Gwoza,borno,gwoza
+NG-BOR-152,Borno,Hawul,borno,hawul
+NG-BOR-153,Borno,Jere,borno,jere
+NG-BOR-154,Borno,Kaga,borno,kaga
+NG-BOR-155,Borno,Kala/Balge,borno,kala balge
+NG-BOR-156,Borno,Konduga,borno,konduga
+NG-BOR-157,Borno,Kukawa,borno,kukawa
+NG-BOR-158,Borno,Kwaya Kusar,borno,kwaya kusar
+NG-BOR-159,Borno,Mafa,borno,mafa
+NG-BOR-160,Borno,Magumeri,borno,magumeri
+NG-BOR-161,Borno,Maiduguri,borno,maiduguri
+NG-BOR-162,Borno,Marte,borno,marte
+NG-BOR-163,Borno,Mobbar,borno,mobbar
+NG-BOR-164,Borno,Monguno,borno,monguno
+NG-BOR-165,Borno,Ngala,borno,ngala
+NG-BOR-166,Borno,Nganzai,borno,nganzai
+NG-BOR-167,Borno,Shani,borno,shani
+NG-CRO-168,Cross River,Abi,cross river,abi
+NG-CRO-169,Cross River,Akamkpa,cross river,akamkpa
+NG-CRO-170,Cross River,Akpabuyo,cross river,akpabuyo
+NG-CRO-171,Cross River,Bakassi,cross river,bakassi
+NG-CRO-172,Cross River,Bekwarra,cross river,bekwarra
+NG-CRO-173,Cross River,Biase,cross river,biase
+NG-CRO-174,Cross River,Boki,cross river,boki
+NG-CRO-175,Cross River,Calabar Municipal,cross river,calabar municipal
+NG-CRO-176,Cross River,Calabar South,cross river,calabar south
+NG-CRO-177,Cross River,Etung,cross river,etung
+NG-CRO-178,Cross River,Ikom,cross river,ikom
+NG-CRO-179,Cross River,Obanliku,cross river,obanliku
+NG-CRO-180,Cross River,Obubra,cross river,obubra
+NG-CRO-181,Cross River,Obudu,cross river,obudu
+NG-CRO-182,Cross River,Odukpani,cross river,odukpani
+NG-CRO-183,Cross River,Ogoja,cross river,ogoja
+NG-CRO-184,Cross River,Yakurr,cross river,yakurr
+NG-CRO-185,Cross River,Yala,cross river,yala
+NG-DEL-186,Delta,Aniocha North,delta,aniocha north
+NG-DEL-187,Delta,Aniocha South,delta,aniocha south
+NG-DEL-188,Delta,Bomadi,delta,bomadi
+NG-DEL-189,Delta,Burutu,delta,burutu
+NG-DEL-190,Delta,Ethiope East,delta,ethiope east
+NG-DEL-191,Delta,Ethiope West,delta,ethiope west
+NG-DEL-192,Delta,Ika North East,delta,ika north east
+NG-DEL-193,Delta,Ika South,delta,ika south
+NG-DEL-194,Delta,Isoko North,delta,isoko north
+NG-DEL-195,Delta,Isoko South,delta,isoko south
+NG-DEL-196,Delta,Ndokwa East,delta,ndokwa east
+NG-DEL-197,Delta,Ndokwa West,delta,ndokwa west
+NG-DEL-198,Delta,Okpe,delta,okpe
+NG-DEL-199,Delta,Oshimili North,delta,oshimili north
+NG-DEL-200,Delta,Oshimili South,delta,oshimili south
+NG-DEL-201,Delta,Patani,delta,patani
+NG-DEL-202,Delta,Sapele,delta,sapele
+NG-DEL-203,Delta,Udu,delta,udu
+NG-DEL-204,Delta,Ughelli North,delta,ughelli north
+NG-DEL-205,Delta,Ughelli South,delta,ughelli south
+NG-DEL-206,Delta,Ukwuani,delta,ukwuani
+NG-DEL-207,Delta,Uvwie,delta,uvwie
+NG-DEL-208,Delta,Warri North,delta,warri north
+NG-DEL-209,Delta,Warri South,delta,warri south
+NG-DEL-210,Delta,Warri South West,delta,warri south west
+NG-EBO-211,Ebonyi,Abakaliki,ebonyi,abakaliki
+NG-EBO-212,Ebonyi,Afikpo North,ebonyi,afikpo north
+NG-EBO-213,Ebonyi,Afikpo South,ebonyi,afikpo south
+NG-EBO-214,Ebonyi,Ebonyi,ebonyi,ebonyi
+NG-EBO-215,Ebonyi,Ezza North,ebonyi,ezza north
+NG-EBO-216,Ebonyi,Ezza South,ebonyi,ezza south
+NG-EBO-217,Ebonyi,Ikwo,ebonyi,ikwo
+NG-EBO-218,Ebonyi,Ishielu,ebonyi,ishielu
+NG-EBO-219,Ebonyi,Ivo,ebonyi,ivo
+NG-EBO-220,Ebonyi,Izzi,ebonyi,izzi
+NG-EBO-221,Ebonyi,Ohaozara,ebonyi,ohaozara
+NG-EBO-222,Ebonyi,Ohaukwu,ebonyi,ohaukwu
+NG-EBO-223,Ebonyi,Onicha,ebonyi,onicha
+NG-EDO-224,Edo,Akoko-Edo,edo,akoko edo
+NG-EDO-225,Edo,Egor,edo,egor
+NG-EDO-226,Edo,Esan Central,edo,esan central
+NG-EDO-227,Edo,Esan North-East,edo,esan north east
+NG-EDO-228,Edo,Esan South-East,edo,esan south east
+NG-EDO-229,Edo,Esan West,edo,esan west
+NG-EDO-230,Edo,Etsako Central,edo,etsako central
+NG-EDO-231,Edo,Etsako East,edo,etsako east
+NG-EDO-232,Edo,Etsako West,edo,etsako west
+NG-EDO-233,Edo,Igueben,edo,iguegben
+NG-EDO-234,Edo,Ikpoba-Okha,edo,ikpoba okha
+NG-EDO-235,Edo,Oredo,edo,oredo
+NG-EDO-236,Edo,Orhionmwon,edo,orhionmwon
+NG-EDO-237,Edo,Ovia North-East,edo,ovia north east
+NG-EDO-238,Edo,Ovia South-West,edo,ovia south west
+NG-EDO-239,Edo,Owan East,edo,owan east
+NG-EDO-240,Edo,Owan West,edo,owan west
+NG-EDO-241,Edo,Uhunmwonde,edo,uhunmwonde
+NG-EKI-242,Ekiti,Ado Ekiti,ekiti,ado ekiti
+NG-EKI-243,Ekiti,Aiyekire (Gbonyin),ekiti,gbonyin
+NG-EKI-244,Ekiti,Efon,ekiti,efon
+NG-EKI-245,Ekiti,Ekiti East,ekiti,ekiti east
+NG-EKI-246,Ekiti,Ekiti South West,ekiti,ekiti south west
+NG-EKI-247,Ekiti,Ekiti West,ekiti,ekiti west
+NG-EKI-248,Ekiti,Emure,ekiti,emure
+NG-EKI-249,Ekiti,Ido-Osi,ekiti,ido osi
+NG-EKI-250,Ekiti,Ijero,ekiti,ijero
+NG-EKI-251,Ekiti,Ikere,ekiti,ikere
+NG-EKI-252,Ekiti,Ikole,ekiti,ikole
+NG-EKI-253,Ekiti,Ilejemeje,ekiti,ilejemeje
+NG-EKI-254,Ekiti,Irepodun/Ifelodun,ekiti,irepodun ifelodun
+NG-EKI-255,Ekiti,Ise/Orun,ekiti,ise orun
+NG-EKI-256,Ekiti,Moba,ekiti,moba
+NG-EKI-257,Ekiti,Oye,ekiti,oye
+NG-ENU-258,Enugu,Aninri,enugu,aninri
+NG-ENU-259,Enugu,Awgu,enugu,awgu
+NG-ENU-260,Enugu,Enugu East,enugu,enugu east
+NG-ENU-261,Enugu,Enugu North,enugu,enugu north
+NG-ENU-262,Enugu,Enugu South,enugu,enugu south
+NG-ENU-263,Enugu,Ezeagu,enugu,ezeagu
+NG-ENU-264,Enugu,Igbo-Etiti,enugu,igbo etiti
+NG-ENU-265,Enugu,Igbo-Eze North,enugu,igbo eze north
+NG-ENU-266,Enugu,Igbo-Eze South,enugu,igbo eze south
+NG-ENU-267,Enugu,Isi-Uzo,enugu,isi uzo
+NG-ENU-268,Enugu,Nkanu East,enugu,nkanu east
+NG-ENU-269,Enugu,Nkanu West,enugu,nkanu west
+NG-ENU-270,Enugu,Nsukka,enugu,nsukka
+NG-ENU-271,Enugu,Oji River,enugu,oji river
+NG-ENU-272,Enugu,Udenu,enugu,udenu
+NG-ENU-273,Enugu,Udi,enugu,udi
+NG-ENU-274,Enugu,Uzo-Uwani,enugu,uzo uwani
+NG-FCT-275,FCT,Abaji,fct,abaji
+NG-FCT-276,FCT,Abuja Municipal Area Council,fct,municipal area council
+NG-FCT-277,FCT,Bwari,fct,bwari
+NG-FCT-278,FCT,Gwagwalada,fct,gwagwalada
+NG-FCT-279,FCT,Kuje,fct,kuje
+NG-FCT-280,FCT,Kwali,fct,kwali
+NG-GOM-281,Gombe,Akko,gombe,akko
+NG-GOM-282,Gombe,Balanga,gombe,balanga
+NG-GOM-283,Gombe,Billiri,gombe,billiri
+NG-GOM-284,Gombe,Dukku,gombe,dukku
+NG-GOM-285,Gombe,Funakaye,gombe,funakaye
+NG-GOM-286,Gombe,Gombe,gombe,gombe
+NG-GOM-287,Gombe,Kaltungo,gombe,kaltungo
+NG-GOM-288,Gombe,Kwami,gombe,kwami
+NG-GOM-289,Gombe,Nafada,gombe,nafada
+NG-GOM-290,Gombe,Shongom,gombe,shomgom
+NG-GOM-291,Gombe,Yamaltu/Deba,gombe,yamaltu deba
+NG-IMO-292,Imo,Aboh-Mbaise,imo,aboh mbaise
+NG-IMO-293,Imo,Ahiazu-Mbaise,imo,ahiazu mbaise
+NG-IMO-294,Imo,Ehime-Mbano,imo,ehime mbano
+NG-IMO-295,Imo,Ezinihitte-Mbaise,imo,ezinihitte
+NG-IMO-296,Imo,Ideato North,imo,ideato north
+NG-IMO-297,Imo,Ideato South,imo,ideato south
+NG-IMO-298,Imo,Ihitte/Uboma,imo,ihitte uboma
+NG-IMO-299,Imo,Ikeduru,imo,ikeduru
+NG-IMO-300,Imo,Isiala Mbano,imo,isiala mbano
+NG-IMO-301,Imo,Isu,imo,isu
+NG-IMO-302,Imo,Mbaitoli,imo,mbatoli
+NG-IMO-303,Imo,Ngor-Okpala,imo,ngor okpala
+NG-IMO-304,Imo,Njaba,imo,njaba
+NG-IMO-305,Imo,Nkwerre,imo,nkwerre
+NG-IMO-306,Imo,Nwangele,imo,nwangele
+NG-IMO-307,Imo,Obowo,imo,obowo
+NG-IMO-308,Imo,Oguta,imo,oguta
+NG-IMO-309,Imo,Ohaji/Egbema,imo,ohaji egbema
+NG-IMO-310,Imo,Okigwe,imo,okigwe
+NG-IMO-311,Imo,Onuimo,imo,onuimo
+NG-IMO-312,Imo,Orlu,imo,orlu
+NG-IMO-313,Imo,Orsu,imo,orsu
+NG-IMO-314,Imo,Oru East,imo,oru east
+NG-IMO-315,Imo,Oru West,imo,oru west
+NG-IMO-316,Imo,Owerri Municipal,imo,owerri municipal
+NG-IMO-317,Imo,Owerri North,imo,owerri north
+NG-IMO-318,Imo,Owerri West,imo,owerri west
+NG-JIG-319,Jigawa,Auyo,jigawa,auyo
+NG-JIG-320,Jigawa,Babura,jigawa,babura
+NG-JIG-321,Jigawa,Birnin Kudu,jigawa,birnin kudu
+NG-JIG-322,Jigawa,Birniwa,jigawa,biriniwa
+NG-JIG-323,Jigawa,Buji,jigawa,buji
+NG-JIG-324,Jigawa,Dutse,jigawa,dutse
+NG-JIG-325,Jigawa,Gagarawa,jigawa,gagarawa
+NG-JIG-326,Jigawa,Garki,jigawa,garki
+NG-JIG-327,Jigawa,Gumel,jigawa,gumel
+NG-JIG-328,Jigawa,Guri,jigawa,guri
+NG-JIG-329,Jigawa,Gwaram,jigawa,gwaram
+NG-JIG-330,Jigawa,Gwiwa,jigawa,gwiwa
+NG-JIG-331,Jigawa,Hadejia,jigawa,hadejia
+NG-JIG-332,Jigawa,Jahun,jigawa,jahun
+NG-JIG-333,Jigawa,Kafin Hausa,jigawa,kafin hausa
+NG-JIG-334,Jigawa,Kaugama,jigawa,kaugama
+NG-JIG-335,Jigawa,Kazaure,jigawa,kazaure
+NG-JIG-336,Jigawa,Kiri Kasamma,jigawa,kiri kasama
+NG-JIG-337,Jigawa,Kiyawa,jigawa,kiyawa
+NG-JIG-338,Jigawa,Maigatari,jigawa,maigatari
+NG-JIG-339,Jigawa,Malam Madori,jigawa,malam madori
+NG-JIG-340,Jigawa,Miga,jigawa,miga
+NG-JIG-341,Jigawa,Ringim,jigawa,ringim
+NG-JIG-342,Jigawa,Roni,jigawa,roni
+NG-JIG-343,Jigawa,Sule-Tankarkar,jigawa,sule tankarkar
+NG-JIG-344,Jigawa,Taura,jigawa,taura
+NG-JIG-345,Jigawa,Yankwashi,jigawa,yankwashi
+NG-KAD-346,Kaduna,Birnin Gwari,kaduna,birnin gwari
+NG-KAD-347,Kaduna,Chikun,kaduna,chikun
+NG-KAD-348,Kaduna,Giwa,kaduna,giwa
+NG-KAD-349,Kaduna,Igabi,kaduna,igabi
+NG-KAD-350,Kaduna,Ikara,kaduna,ikara
+NG-KAD-351,Kaduna,Jaba,kaduna,jaba
+NG-KAD-352,Kaduna,Jema'A,kaduna,jemaa
+NG-KAD-353,Kaduna,Kachia,kaduna,kachia
+NG-KAD-354,Kaduna,Kaduna North,kaduna,kaduna north
+NG-KAD-355,Kaduna,Kaduna South,kaduna,kaduna south
+NG-KAD-356,Kaduna,Kagarko,kaduna,kagarko
+NG-KAD-357,Kaduna,Kajuru,kaduna,kajuru
+NG-KAD-358,Kaduna,Kaura,kaduna,kaura
+NG-KAD-359,Kaduna,Kauru,kaduna,kauru
+NG-KAD-360,Kaduna,Kubau,kaduna,kubau
+NG-KAD-361,Kaduna,Kudan,kaduna,kudan
+NG-KAD-362,Kaduna,Lere,kaduna,lere
+NG-KAD-363,Kaduna,Makarfi,kaduna,makarfi
+NG-KAD-364,Kaduna,Sabon Gari,kaduna,sabon gari
+NG-KAD-365,Kaduna,Sanga,kaduna,sanga
+NG-KAD-366,Kaduna,Soba,kaduna,soba
+NG-KAD-367,Kaduna,Zangon Kataf,kaduna,zangon kataf
+NG-KAD-368,Kaduna,Zaria,kaduna,zaria
+NG-KAN-369,Kano,Ajingi,kano,ajingi
+NG-KAN-370,Kano,Albasu,kano,albasu
+NG-KAN-371,Kano,Bagwai,kano,bagwai
+NG-KAN-372,Kano,Bebeji,kano,bebeji
+NG-KAN-373,Kano,Bichi,kano,bichi
+NG-KAN-374,Kano,Bunkure,kano,bunkure
+NG-KAN-375,Kano,Dala,kano,dala
+NG-KAN-376,Kano,Danbatta,kano,dambatta
+NG-KAN-377,Kano,Dawakin Kudu,kano,dawakin kudu
+NG-KAN-378,Kano,Dawakin Tofa,kano,dawakin tofa
+NG-KAN-379,Kano,Doguwa,kano,doguwa
+NG-KAN-380,Kano,Fagge,kano,fagge
+NG-KAN-381,Kano,Gabasawa,kano,gabasawa
+NG-KAN-382,Kano,Garko,kano,garko
+NG-KAN-383,Kano,Garum Mallam,kano,garun malam
+NG-KAN-384,Kano,Gaya,kano,gaya
+NG-KAN-385,Kano,Gezawa,kano,gezawa
+NG-KAN-386,Kano,Gwale,kano,gwale
+NG-KAN-387,Kano,Gwarzo,kano,gwarzo
+NG-KAN-388,Kano,Kabo,kano,kabo
+NG-KAN-389,Kano,Kano Municipal,kano,kano municipal
+NG-KAN-390,Kano,Karaye,kano,karaye
+NG-KAN-391,Kano,Kibiya,kano,kibiya
+NG-KAN-392,Kano,Kiru,kano,kiru
+NG-KAN-393,Kano,Kumbotso,kano,kumbotso
+NG-KAN-394,Kano,Kunchi,kano,kunchi
+NG-KAN-395,Kano,Kura,kano,kura
+NG-KAN-396,Kano,Madobi,kano,madobi
+NG-KAN-397,Kano,Makoda,kano,makoda
+NG-KAN-398,Kano,Minjibir,kano,minjibir
+NG-KAN-399,Kano,Nasarawa,kano,nassarawa
+NG-KAN-400,Kano,Rano,kano,rano
+NG-KAN-401,Kano,Rimin Gado,kano,rimin gado
+NG-KAN-402,Kano,Rogo,kano,rogo
+NG-KAN-403,Kano,Shanono,kano,shanono
+NG-KAN-404,Kano,Sumaila,kano,sumaila
+NG-KAN-405,Kano,Takai,kano,takai
+NG-KAN-406,Kano,Tarauni,kano,tarauni
+NG-KAN-407,Kano,Tofa,kano,tofa
+NG-KAN-408,Kano,Tsanyawa,kano,tsanyawa
+NG-KAN-409,Kano,Tudun Wada,kano,tudun wada
+NG-KAN-410,Kano,Ungogo,kano,ungogo
+NG-KAN-411,Kano,Warawa,kano,warawa
+NG-KAN-412,Kano,Wudil,kano,wudil
+NG-KAT-413,Katsina,Bakori,katsina,bakori
+NG-KAT-414,Katsina,Batagarawa,katsina,batagarawa
+NG-KAT-415,Katsina,Batsari,katsina,batsari
+NG-KAT-416,Katsina,Baure,katsina,baure
+NG-KAT-417,Katsina,Bindawa,katsina,bindawa
+NG-KAT-418,Katsina,Charanchi,katsina,charanchi
+NG-KAT-419,Katsina,Dan Musa,katsina,dan musa
+NG-KAT-420,Katsina,Dandume,katsina,dandume
+NG-KAT-421,Katsina,Danja,katsina,danja
+NG-KAT-422,Katsina,Daura,katsina,daura
+NG-KAT-423,Katsina,Dutsi,katsina,dutsi
+NG-KAT-424,Katsina,Dutsin-Ma,katsina,dutsin ma
+NG-KAT-425,Katsina,Faskari,katsina,faskari
+NG-KAT-426,Katsina,Funtua,katsina,funtua
+NG-KAT-427,Katsina,Ingawa,katsina,ingawa
+NG-KAT-428,Katsina,Jibia,katsina,jibia
+NG-KAT-429,Katsina,Kafur,katsina,kafur
+NG-KAT-430,Katsina,Kaita,katsina,kaita
+NG-KAT-431,Katsina,Kankara,katsina,kankara
+NG-KAT-432,Katsina,Kankia,katsina,kankia
+NG-KAT-433,Katsina,Katsina,katsina,katsina
+NG-KAT-434,Katsina,Kurfi,katsina,kurfi
+NG-KAT-435,Katsina,Kusada,katsina,kusada
+NG-KAT-436,Katsina,Mai'Adua,katsina,maiadua
+NG-KAT-437,Katsina,Malumfashi,katsina,malumfashi
+NG-KAT-438,Katsina,Mani,katsina,mani
+NG-KAT-439,Katsina,Mashi,katsina,mashi
+NG-KAT-440,Katsina,Matazu,katsina,matazu
+NG-KAT-441,Katsina,Musawa,katsina,musawa
+NG-KAT-442,Katsina,Rimi,katsina,rimi
+NG-KAT-443,Katsina,Sabuwa,katsina,sabuwa
+NG-KAT-444,Katsina,Safana,katsina,safana
+NG-KAT-445,Katsina,Sandamu,katsina,sandamu
+NG-KAT-446,Katsina,Zango,katsina,zango
+NG-KEB-447,Kebbi,Aleiro,kebbi,aleiro
+NG-KEB-448,Kebbi,Arewa,kebbi,arewa dandi
+NG-KEB-449,Kebbi,Argungu,kebbi,argungu
+NG-KEB-450,Kebbi,Augie,kebbi,augie
+NG-KEB-451,Kebbi,Bagudo,kebbi,bagudu
+NG-KEB-452,Kebbi,Birnin Kebbi,kebbi,birnin kebbi
+NG-KEB-453,Kebbi,Bunza,kebbi,bunza
+NG-KEB-454,Kebbi,Dandi,kebbi,dandi
+NG-KEB-455,Kebbi,Danko/Wasagu,kebbi,wasagu danko
+NG-KEB-456,Kebbi,Fakai,kebbi,fakai
+NG-KEB-457,Kebbi,Gwandu,kebbi,gwandu
+NG-KEB-458,Kebbi,Jega,kebbi,jega
+NG-KEB-459,Kebbi,Kalgo,kebbi,kalgo
+NG-KEB-460,Kebbi,Koko/Besse,kebbi,koko besse
+NG-KEB-461,Kebbi,Maiyama,kebbi,maiyama
+NG-KEB-462,Kebbi,Ngaski,kebbi,ngaski
+NG-KEB-463,Kebbi,Sakaba,kebbi,sakaba
+NG-KEB-464,Kebbi,Shanga,kebbi,shanga
+NG-KEB-465,Kebbi,Suru,kebbi,suru
+NG-KEB-466,Kebbi,Yauri,kebbi,yauri
+NG-KEB-467,Kebbi,Zuru,kebbi,zuru
+NG-KOG-468,Kogi,Adavi,kogi,adavi
+NG-KOG-469,Kogi,Ajaokuta,kogi,ajaokuta
+NG-KOG-470,Kogi,Ankpa,kogi,ankpa
+NG-KOG-471,Kogi,Bassa,kogi,bassa
+NG-KOG-472,Kogi,Dekina,kogi,dekina
+NG-KOG-473,Kogi,Ibaji,kogi,ibaji
+NG-KOG-474,Kogi,Idah,kogi,idah
+NG-KOG-475,Kogi,Igalamela-Odolu,kogi,igalamela odolu
+NG-KOG-476,Kogi,Ijumu,kogi,ijumu
+NG-KOG-477,Kogi,Kabba/Bunu,kogi,kabba bunu
+NG-KOG-478,Kogi,Kogi,kogi,kogi
+NG-KOG-479,Kogi,Lokoja,kogi,lokoja
+NG-KOG-480,Kogi,Mopa-Muro,kogi,mopa muro
+NG-KOG-481,Kogi,Ofu,kogi,ofu
+NG-KOG-482,Kogi,Ogori/Magongo,kogi,ogori magongo
+NG-KOG-483,Kogi,Okehi,kogi,okehi
+NG-KOG-484,Kogi,Okene,kogi,okene
+NG-KOG-485,Kogi,Olamaboro,kogi,olamaboro
+NG-KOG-486,Kogi,Omala,kogi,omala
+NG-KOG-487,Kogi,Yagba East,kogi,yagba east
+NG-KOG-488,Kogi,Yagba West,kogi,yagba west
+NG-KWA-489,Kwara,Asa,kwara,asa
+NG-KWA-490,Kwara,Baruten,kwara,baruten
+NG-KWA-491,Kwara,Edu,kwara,edu
+NG-KWA-492,Kwara,Ekiti,kwara,ekiti
+NG-KWA-493,Kwara,Ifelodun,kwara,ifelodun
+NG-KWA-494,Kwara,Ilorin East,kwara,ilorin east
+NG-KWA-495,Kwara,Ilorin South,kwara,ilorin south
+NG-KWA-496,Kwara,Ilorin West,kwara,ilorin west
+NG-KWA-497,Kwara,Irepodun,kwara,irepodun
+NG-KWA-498,Kwara,Isin,kwara,isin
+NG-KWA-499,Kwara,Kaiama,kwara,kaiama
+NG-KWA-500,Kwara,Moro,kwara,moro
+NG-KWA-501,Kwara,Offa,kwara,offa
+NG-KWA-502,Kwara,Oke-Ero,kwara,oke ero
+NG-KWA-503,Kwara,Oyun,kwara,oyun
+NG-KWA-504,Kwara,Pategi,kwara,pategi
+NG-LAG-505,Lagos,Agege,lagos,agege
+NG-LAG-506,Lagos,Ajeromi/Ifelodun,lagos,ajeromi ifelodun
+NG-LAG-507,Lagos,Alimosho,lagos,alimosho
+NG-LAG-508,Lagos,Amuwo Odofin,lagos,amuwo odofin
+NG-LAG-509,Lagos,Apapa,lagos,apapa
+NG-LAG-510,Lagos,Badagry,lagos,badagry
+NG-LAG-511,Lagos,Epe,lagos,epe
+NG-LAG-512,Lagos,Eti-Osa,lagos,eti osa
+NG-LAG-513,Lagos,Ibeju/Lekki,lagos,ibeju lekki
+NG-LAG-514,Lagos,Ifako/Ijaye,lagos,ifako ijaye
+NG-LAG-515,Lagos,Ikeja,lagos,ikeja
+NG-LAG-516,Lagos,Ikorodu,lagos,ikorodu
+NG-LAG-517,Lagos,Kosofe,lagos,kosofe
+NG-LAG-518,Lagos,Lagos Island,lagos,lagos island
+NG-LAG-519,Lagos,Lagos Mainland,lagos,lagos mainland
+NG-LAG-520,Lagos,Mushin,lagos,mushin
+NG-LAG-521,Lagos,Ojo,lagos,ojo
+NG-LAG-522,Lagos,Oshodi/Isolo,lagos,oshodi isolo
+NG-LAG-523,Lagos,Shomolu,lagos,shomolu
+NG-LAG-524,Lagos,Surulere,lagos,surulere
+NG-NAS-525,Nasarawa,Akwanga,nasarawa,akwanga
+NG-NAS-526,Nasarawa,Awe,nasarawa,awe
+NG-NAS-527,Nasarawa,Doma,nasarawa,doma
+NG-NAS-528,Nasarawa,Karu,nasarawa,karu
+NG-NAS-529,Nasarawa,Keana,nasarawa,keana
+NG-NAS-530,Nasarawa,Keffi,nasarawa,keffi
+NG-NAS-531,Nasarawa,Kokona,nasarawa,kokona
+NG-NAS-532,Nasarawa,Lafia,nasarawa,lafia
+NG-NAS-533,Nasarawa,Nasarawa Eggon,nasarawa,nasarawa egon
+NG-NAS-534,Nasarawa,Nasarawa,nasarawa,nasarawa
+NG-NAS-535,Nasarawa,Obi,nasarawa,obi
+NG-NAS-536,Nasarawa,Toto,nasarawa,toto
+NG-NAS-537,Nasarawa,Wamba,nasarawa,wamba
+NG-NIG-538,Niger,Agaie,niger,agaie
+NG-NIG-539,Niger,Agwara,niger,agwara
+NG-NIG-540,Niger,Bida,niger,bida
+NG-NIG-541,Niger,Borgu,niger,borgu
+NG-NIG-542,Niger,Bosso,niger,bosso
+NG-NIG-543,Niger,Chanchaga,niger,chanchaga
+NG-NIG-544,Niger,Edati,niger,edati
+NG-NIG-545,Niger,Gbako,niger,gbako
+NG-NIG-546,Niger,Gurara,niger,gurara
+NG-NIG-547,Niger,Katcha,niger,katcha
+NG-NIG-548,Niger,Kontagora,niger,kontagora
+NG-NIG-549,Niger,Lapai,niger,lapai
+NG-NIG-550,Niger,Lavun,niger,lavun
+NG-NIG-551,Niger,Magama,niger,magama
+NG-NIG-552,Niger,Mariga,niger,mariga
+NG-NIG-553,Niger,Mashegu,niger,mashegu
+NG-NIG-554,Niger,Mokwa,niger,mokwa
+NG-NIG-555,Niger,Muya,niger,munya
+NG-NIG-556,Niger,Paikoro,niger,paikoro
+NG-NIG-557,Niger,Rafi,niger,rafi
+NG-NIG-558,Niger,Rijau,niger,rijau
+NG-NIG-559,Niger,Shiroro,niger,shiroro
+NG-NIG-560,Niger,Suleja,niger,suleja
+NG-NIG-561,Niger,Tafa,niger,tafa
+NG-NIG-562,Niger,Wushishi,niger,wushishi
+NG-OGU-563,Ogun,Abeokuta North,ogun,abeokuta north
+NG-OGU-564,Ogun,Abeokuta South,ogun,abeokuta south
+NG-OGU-565,Ogun,Ado Odo/Ota,ogun,ado odo ota
+NG-OGU-566,Ogun,Ewekoro,ogun,ewekoro
+NG-OGU-567,Ogun,Ifo,ogun,ifo
+NG-OGU-568,Ogun,Ijebu East,ogun,ijebu east
+NG-OGU-569,Ogun,Ijebu North East,ogun,ijebu north east
+NG-OGU-570,Ogun,Ijebu North,ogun,ijebu north
+NG-OGU-571,Ogun,Ijebu Ode,ogun,ijebu ode
+NG-OGU-572,Ogun,Ikenne,ogun,ikenne
+NG-OGU-573,Ogun,Imeko Afon,ogun,imeko afon
+NG-OGU-574,Ogun,Ipokia,ogun,ipokia
+NG-OGU-575,Ogun,Obafemi Owode,ogun,obafemi owode
+NG-OGU-576,Ogun,Odeda,ogun,odeda
+NG-OGU-577,Ogun,Odogbolu,ogun,odogbolu
+NG-OGU-578,Ogun,Ogun Waterside,ogun,ogun waterside
+NG-OGU-579,Ogun,Remo North,ogun,remo north
+NG-OGU-580,Ogun,Sagamu,ogun,shagamu
+NG-OGU-581,Ogun,Yewa North,ogun,yewa north
+NG-OGU-582,Ogun,Yewa South,ogun,yewa south
+NG-OND-583,Ondo,Akoko North East,ondo,akoko north east
+NG-OND-584,Ondo,Akoko North West,ondo,akoko north west
+NG-OND-585,Ondo,Akoko South East,ondo,akoko south east
+NG-OND-586,Ondo,Akoko South West,ondo,akoko south west
+NG-OND-587,Ondo,Akure North,ondo,akure north
+NG-OND-588,Ondo,Akure South,ondo,akure south
+NG-OND-589,Ondo,Ese Odo,ondo,ese odo
+NG-OND-590,Ondo,Idanre,ondo,idanre
+NG-OND-591,Ondo,Ifedore,ondo,ifedore
+NG-OND-592,Ondo,Ilaje,ondo,ilaje
+NG-OND-593,Ondo,Ile-Oluji/Okeigbo,ondo,ile oluji okeigbo
+NG-OND-594,Ondo,Irele,ondo,irele
+NG-OND-595,Ondo,Odigbo,ondo,odigbo
+NG-OND-596,Ondo,Okitipupa,ondo,okitipupa
+NG-OND-597,Ondo,Ondo East,ondo,ondo east
+NG-OND-598,Ondo,Ondo West,ondo,ondo west
+NG-OND-599,Ondo,Ose,ondo,ose
+NG-OND-600,Ondo,Owo,ondo,owo
+NG-OSU-601,Osun,Atakumosa East,osun,atakunmosa east
+NG-OSU-602,Osun,Atakumosa West,osun,atakunmosa west
+NG-OSU-603,Osun,Ayedaade,osun,ayedade
+NG-OSU-604,Osun,Ayedire,osun,ayedire
+NG-OSU-605,Osun,Boluwaduro,osun,boluwaduro
+NG-OSU-606,Osun,Boripe,osun,boripe
+NG-OSU-607,Osun,Ede North,osun,ede north
+NG-OSU-608,Osun,Ede South,osun,ede south
+NG-OSU-609,Osun,Egbedore,osun,egbedore
+NG-OSU-610,Osun,Ejigbo,osun,ejigbo
+NG-OSU-611,Osun,Ife Central,osun,ife central
+NG-OSU-612,Osun,Ife East,osun,ife east
+NG-OSU-613,Osun,Ife North,osun,ife north
+NG-OSU-614,Osun,Ife South,osun,ife south
+NG-OSU-615,Osun,Ifedayo,osun,ifedayo
+NG-OSU-616,Osun,Ifelodun,osun,ifelodun
+NG-OSU-617,Osun,Ila,osun,ila
+NG-OSU-618,Osun,Ilesa East,osun,ilesha east
+NG-OSU-619,Osun,Ilesa West,osun,ilesha west
+NG-OSU-620,Osun,Irepodun,osun,irepodun
+NG-OSU-621,Osun,Irewole,osun,irewole
+NG-OSU-622,Osun,Isokan,osun,isokan
+NG-OSU-623,Osun,Iwo,osun,iwo
+NG-OSU-624,Osun,Obokun,osun,obokun
+NG-OSU-625,Osun,Odo Otin,osun,odo otin
+NG-OSU-626,Osun,Ola-Oluwa,osun,ola oluwa
+NG-OSU-627,Osun,Olorunda,osun,olorunda
+NG-OSU-628,Osun,Oriade,osun,oriade
+NG-OSU-629,Osun,Orolu,osun,orolu
+NG-OSU-630,Osun,Osogbo,osun,osogbo
+NG-OYO-631,Oyo,Afijio,oyo,afijio
+NG-OYO-632,Oyo,Akinyele,oyo,akinyele
+NG-OYO-633,Oyo,Atiba,oyo,atiba
+NG-OYO-634,Oyo,Atisbo,oyo,atisbo
+NG-OYO-635,Oyo,Egbeda,oyo,egbeda
+NG-OYO-636,Oyo,Ibadan North East,oyo,ibadan north east
+NG-OYO-637,Oyo,Ibadan North,oyo,ibadan north
+NG-OYO-638,Oyo,Ibadan North West,oyo,ibadan north west
+NG-OYO-639,Oyo,Ibadan South East,oyo,ibadan south east
+NG-OYO-640,Oyo,Ibadan South West,oyo,ibadan south west
+NG-OYO-641,Oyo,Ibarapa Central,oyo,ibarapa central
+NG-OYO-642,Oyo,Ibarapa East,oyo,ibarapa east
+NG-OYO-643,Oyo,Ibarapa North,oyo,ibarapa north
+NG-OYO-644,Oyo,Ido,oyo,ido
+NG-OYO-645,Oyo,Irepo,oyo,irepo
+NG-OYO-646,Oyo,Iseyin,oyo,iseyin
+NG-OYO-647,Oyo,Itesiwaju,oyo,itesiwaju
+NG-OYO-648,Oyo,Iwajowa,oyo,iwajowa
+NG-OYO-649,Oyo,Kajola,oyo,kajola
+NG-OYO-650,Oyo,Lagelu,oyo,lagelu
+NG-OYO-651,Oyo,Ogbomosho North,oyo,ogbomosho north
+NG-OYO-652,Oyo,Ogbomosho South,oyo,ogbomosho south
+NG-OYO-653,Oyo,Ogo Oluwa,oyo,ogo oluwa
+NG-OYO-654,Oyo,Olorunsogo,oyo,olorunsogo
+NG-OYO-655,Oyo,Oluyole,oyo,oluyole
+NG-OYO-656,Oyo,Ona Ara,oyo,ona ara
+NG-OYO-657,Oyo,Orelope,oyo,orelope
+NG-OYO-658,Oyo,Ori Ire,oyo,ori ire
+NG-OYO-659,Oyo,Oyo East,oyo,oyo east
+NG-OYO-660,Oyo,Oyo West,oyo,oyo west
+NG-OYO-661,Oyo,Saki East,oyo,saki east
+NG-OYO-662,Oyo,Saki West,oyo,saki west
+NG-OYO-663,Oyo,Surulere,oyo,surulere
+NG-PLA-664,Plateau,Barkin Ladi,plateau,barkin ladi
+NG-PLA-665,Plateau,Bassa,plateau,bassa
+NG-PLA-666,Plateau,Bokkos,plateau,bokkos
+NG-PLA-667,Plateau,Jos East,plateau,jos east
+NG-PLA-668,Plateau,Jos North,plateau,jos north
+NG-PLA-669,Plateau,Jos South,plateau,jos south
+NG-PLA-670,Plateau,Kanam,plateau,kanam
+NG-PLA-671,Plateau,Kanke,plateau,kanke
+NG-PLA-672,Plateau,Langtang North,plateau,langtang north
+NG-PLA-673,Plateau,Langtang South,plateau,langtang south
+NG-PLA-674,Plateau,Mangu,plateau,mangu
+NG-PLA-675,Plateau,Mikang,plateau,mikang
+NG-PLA-676,Plateau,Pankshin,plateau,pankshin
+NG-PLA-677,Plateau,Qua'An Pan,plateau,quaan pan
+NG-PLA-678,Plateau,Riyom,plateau,riyom
+NG-PLA-679,Plateau,Shendam,plateau,shendam
+NG-PLA-680,Plateau,Wase,plateau,wase
+NG-RIV-681,Rivers,Abua/Odual,rivers,abua odual
+NG-RIV-682,Rivers,Ahoada East,rivers,ahoada east
+NG-RIV-683,Rivers,Ahoada West,rivers,ahoada west
+NG-RIV-684,Rivers,Akuku Toru,rivers,akuku toru
+NG-RIV-685,Rivers,Andoni,rivers,andoni
+NG-RIV-686,Rivers,Asari-Toru,rivers,asari toru
+NG-RIV-687,Rivers,Bonny,rivers,bonny
+NG-RIV-688,Rivers,Degema,rivers,degema
+NG-RIV-689,Rivers,Eleme,rivers,eleme
+NG-RIV-690,Rivers,Emohua,rivers,emuoha
+NG-RIV-691,Rivers,Etche,rivers,etche
+NG-RIV-692,Rivers,Gokana,rivers,gokana
+NG-RIV-693,Rivers,Ikwerre,rivers,ikwerre
+NG-RIV-694,Rivers,Khana,rivers,khana
+NG-RIV-695,Rivers,Obio/Akpor,rivers,obio akpor
+NG-RIV-696,Rivers,Ogba/Egbema/Ndoni,rivers,ogba egbema ndoni
+NG-RIV-697,Rivers,Ogu/Bolo,rivers,ogu bolo
+NG-RIV-698,Rivers,Okrika,rivers,okrika
+NG-RIV-699,Rivers,Omumma,rivers,omumma
+NG-RIV-700,Rivers,Opobo/Nkoro,rivers,opobo nkoro
+NG-RIV-701,Rivers,Oyigbo,rivers,oyigbo
+NG-RIV-702,Rivers,Port-Harcourt,rivers,port harcourt
+NG-RIV-703,Rivers,Tai,rivers,tai
+NG-SOK-704,Sokoto,Binji,sokoto,binji
+NG-SOK-705,Sokoto,Bodinga,sokoto,bodinga
+NG-SOK-706,Sokoto,Dange-Shuni,sokoto,dange shuni
+NG-SOK-707,Sokoto,Gada,sokoto,gada
+NG-SOK-708,Sokoto,Goronyo,sokoto,goronyo
+NG-SOK-709,Sokoto,Gudu,sokoto,gudu
+NG-SOK-710,Sokoto,Gwadabawa,sokoto,gwadabawa
+NG-SOK-711,Sokoto,Illela,sokoto,illela
+NG-SOK-712,Sokoto,Isa,sokoto,isa
+NG-SOK-713,Sokoto,Kebbe,sokoto,kebbe
+NG-SOK-714,Sokoto,Kware,sokoto,kware
+NG-SOK-715,Sokoto,Rabah,sokoto,rabah
+NG-SOK-716,Sokoto,Sabon Birni,sokoto,sabon birni
+NG-SOK-717,Sokoto,Shagari,sokoto,shagari
+NG-SOK-718,Sokoto,Silame,sokoto,silame
+NG-SOK-719,Sokoto,Sokoto North,sokoto,sokoto north
+NG-SOK-720,Sokoto,Sokoto South,sokoto,sokoto south
+NG-SOK-721,Sokoto,Tambuwal,sokoto,tambuwal
+NG-SOK-722,Sokoto,Tangaza,sokoto,tangaza
+NG-SOK-723,Sokoto,Tureta,sokoto,tureta
+NG-SOK-724,Sokoto,Wamako,sokoto,wamakko
+NG-SOK-725,Sokoto,Wurno,sokoto,wurno
+NG-SOK-726,Sokoto,Yabo,sokoto,yabo
+NG-TAR-727,Taraba,Ardo-Kola,taraba,ardo kola
+NG-TAR-728,Taraba,Bali,taraba,bali
+NG-TAR-729,Taraba,Donga,taraba,donga
+NG-TAR-730,Taraba,Gashaka,taraba,gashaka
+NG-TAR-731,Taraba,Gassol,taraba,gassol
+NG-TAR-732,Taraba,Ibi,taraba,ibi
+NG-TAR-733,Taraba,Jalingo,taraba,jalingo
+NG-TAR-734,Taraba,Karim-Lamido,taraba,karim lamido
+NG-TAR-735,Taraba,Kurmi,taraba,kurmi
+NG-TAR-736,Taraba,Lau,taraba,lau
+NG-TAR-737,Taraba,Sardauna,taraba,sardauna
+NG-TAR-738,Taraba,Takum,taraba,takum
+NG-TAR-739,Taraba,Ussa,taraba,ussa
+NG-TAR-740,Taraba,Wukari,taraba,wukari
+NG-TAR-741,Taraba,Yorro,taraba,yorro
+NG-TAR-742,Taraba,Zing,taraba,zing
+NG-YOB-743,Yobe,Bade,yobe,bade
+NG-YOB-744,Yobe,Busari,yobe,bursari
+NG-YOB-745,Yobe,Damaturu,yobe,damaturu
+NG-YOB-746,Yobe,Fika,yobe,fika
+NG-YOB-747,Yobe,Fune,yobe,fune
+NG-YOB-748,Yobe,Geidam,yobe,geidam
+NG-YOB-749,Yobe,Gujba,yobe,gujba
+NG-YOB-750,Yobe,Gulani,yobe,gulani
+NG-YOB-751,Yobe,Jakusko,yobe,jakusko
+NG-YOB-752,Yobe,Karasuwa,yobe,karasuwa
+NG-YOB-753,Yobe,Machina,yobe,machina
+NG-YOB-754,Yobe,Nangere,yobe,nangere
+NG-YOB-755,Yobe,Nguru,yobe,nguru
+NG-YOB-756,Yobe,Potiskum,yobe,potiskum
+NG-YOB-757,Yobe,Tarmuwa,yobe,tarmuwa
+NG-YOB-758,Yobe,Yunusari,yobe,yunusari
+NG-YOB-759,Yobe,Yusufari,yobe,yusufari
+NG-ZAM-760,Zamfara,Anka,zamfara,anka
+NG-ZAM-761,Zamfara,Bakura,zamfara,bakura
+NG-ZAM-762,Zamfara,Birnin Magaji,zamfara,birnin magaji kiyaw
+NG-ZAM-763,Zamfara,Bukkuyum,zamfara,bukkuyum
+NG-ZAM-764,Zamfara,Bungudu,zamfara,bungudu
+NG-ZAM-765,Zamfara,Gummi,zamfara,gummi
+NG-ZAM-766,Zamfara,Gusau,zamfara,gusau
+NG-ZAM-767,Zamfara,Kaura Namoda,zamfara,kaura namoda
+NG-ZAM-768,Zamfara,Maradun,zamfara,maradun
+NG-ZAM-769,Zamfara,Maru,zamfara,maru
+NG-ZAM-770,Zamfara,Shinkafi,zamfara,shinkafi
+NG-ZAM-771,Zamfara,Talata Mafara,zamfara,talata mafara
+NG-ZAM-772,Zamfara,Tsafe,zamfara,tsafe
+NG-ZAM-773,Zamfara,Zurmi,zamfara,zurmi

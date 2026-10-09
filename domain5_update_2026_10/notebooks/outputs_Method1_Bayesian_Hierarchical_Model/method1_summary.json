@@ -1,0 +1,15 @@
+{
+  "national_children_2026": 2099204.0,
+  "lgas": 773,
+  "pareto": {
+    "50": 151,
+    "60": 199,
+    "80": 342
+  },
+  "diagnostics": {
+    "max_rhat": 1.0055916620433418,
+    "min_ess_bulk": 1168.340323584543,
+    "min_ess_tail": 1695.678744192744,
+    "divergences": 0
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "D1_F1_national_tracer_forecasts": "National monthly doses of the four tracer antigens as % of their 2024 level, with Prophet forecasts to mid-2027.",
+  "D1_F2_cohort_coverage_vs_ndhs": "2026 administrative coverage of the eligible cohort (forecast monthly doses / (12-23-month cohort / 12)) against NDHS 2024 survey coverage.",
+  "D1_F3_lga_early_warning_composite": "LGA early-warning flags by antigen: severity, states with most flagged LGAs, and illustrative LGAs.",
+  "D1_F4_lga_flag_map": "Number of the four tracer antigens (BCG, Penta1, Penta3, Measles1) projected below 80% of the LGA's 2024 level within 6-12 months.",
+  "_map_unmatched": 1,
+  "D1_F5_additional_antigens": "Forecasts for nine additional antigens (DHIS2 2021-2025, projected 30 months).",
+  "D1_F6_opv3_worked_example": "Worked example: the dotted line is 80% of OPV3's own 2024 monthly doses; the forecast stays above it."
+}

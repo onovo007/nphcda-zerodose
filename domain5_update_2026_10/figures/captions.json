@@ -1,0 +1,67 @@
+{
+  "M1_01_lga_rate_and_hotspots": "Method 1 LGA zero-dose rate for 2026 and Getis-Ord Gi* hotspot clusters, 773 modelled LGAs; Guzamala (Borno) not estimated.",
+  "M1_02_state_hotspots_2026_2028": "Forecast state zero-dose hotspots 2026-2028 (Getis-Ord Gi*, Queen contiguity) from the Method 1 Bayesian state model.",
+  "M1_03_pareto": "Pareto concentration of modelled 2026 zero-dose burden across 773 LGAs (Method 1), with the number of LGAs needed to reach 50%, 60% and 80%.",
+  "M1_04_nmdhs_validation": "Method 1 state forecasts for 2026 against the Nigeria mini Demographic and Health Survey 2025-26 (not used in fitting).",
+  "M1_05_ihme_concordance": "Method 1 LGA estimates (2026) against the IHME Local Burden of Disease DTP1 surface (2018).",
+  "_m1_ihme_opposite": 36,
+  "M2_01_model_schematic": "Structure of the Bayesian small-area model (Method 2).",
+  "M2_02_rate_and_uncertainty_maps": "Method 2 LGA zero-dose rate for 2026 and the width of its 95% credible interval, all 774 LGAs.",
+  "M2_03_burden_and_priority_maps": "Method 2 modelled zero-dose children per LGA and the posterior probability of being among the 155 highest-burden LGAs.",
+  "M2_04_top20_lgas": "Twenty highest-burden LGAs under Method 2 with 95% credible intervals and probability of top-20% membership (P).",
+  "M2_05_diagnostics": "Method 2 model performance: posterior predictive fit to all NDHS rounds, independent NmDHS 2025-26 check, and MCMC diagnostics.",
+  "M2_06_covariate_effects": "Posterior covariate effects in the Bayesian small-area model (log-odds of zero-dose per standard deviation).",
+  "M2_07_admin_vs_survey": "Routine administrative coverage compared with survey-anchored small-area estimates.",
+  "_admin_gt100": 0.8074935400516796,
+  "_admin_rho": 0.1825160499507944,
+  "_admin_mae": 26.507084164841864,
+  "C_01_zone_comparison": "Modelled zero-dose children by zone, 2026, under Method 1 and Method 2, with 95% intervals.",
+  "C_02_state_comparison": "Modelled zero-dose children by state, 2026, under both methods.",
+  "C_03_agreement_independent_data": "Spearman rank correlation of each method with independent data: NmDHS 2025-26 (states) and IHME 2018 (LGAs, overall and within state).",
+  "C_04_pareto_both_methods": "Cumulative share of modelled zero-dose children by number of LGAs targeted, both methods (Method 2 band = 95% credible interval).",
+  "C_05_lga_scatter": "LGA-level agreement between Method 1 and Method 2, 773 LGAs.",
+  "A_01_archetype_map_burden": "LGA structural archetypes (Ward clustering of 15 covariates) and the share of modelled zero-dose children in each, under both methods.",
+  "A_02_maternal_care": "Antenatal care and facility delivery against modelled zero-dose by archetype.",
+  "_anc_r_m1": -0.6281971332261257,
+  "_anc_r_m2": -0.8692387466131568,
+  "_anc_n": 767,
+  "_deliv_r_m1": -0.5887432819618884,
+  "_deliv_r_m2": -0.8277646538867638,
+  "_mc": [
+    {
+      "archetype": 1,
+      "anc": 35.7,
+      "deliv": 9.8,
+      "zd1": 44.2,
+      "zd2": 51.8
+    },
+    {
+      "archetype": 2,
+      "anc": 39.8,
+      "deliv": 19.2,
+      "zd1": 39.0,
+      "zd2": 44.1
+    },
+    {
+      "archetype": 3,
+      "anc": 42.6,
+      "deliv": 26.8,
+      "zd1": 17.7,
+      "zd2": 29.0
+    },
+    {
+      "archetype": 4,
+      "anc": 71.8,
+      "deliv": 60.7,
+      "zd1": 20.6,
+      "zd2": 18.1
+    },
+    {
+      "archetype": 5,
+      "anc": 80.9,
+      "deliv": 77.8,
+      "zd1": 9.9,
+      "zd2": 7.4
+    }
+  ]
+}

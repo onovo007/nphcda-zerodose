@@ -1,0 +1,47 @@
+{
+  "denominator": "2024 under-5 projection / 5, LGA share by NPC 2022 population",
+  "m1": {
+    "lgas": 773,
+    "national": 2099204.0,
+    "national_lo95": 1898901.8898778916,
+    "national_hi95": 2308431.7047391892,
+    "state_model_sum": 2072330.105320694,
+    "pareto": {
+      "50": 151,
+      "60": 199,
+      "80": 342
+    },
+    "top155_share": 50.90210384507652,
+    "capped": 10,
+    "near_certain_top155": 97,
+    "diagnostics": {
+      "max_rhat": 1.0055916620433418,
+      "min_ess_bulk": 1168.340323584543,
+      "min_ess_tail": 1695.678744192744,
+      "divergences": 0
+    }
+  },
+  "m2": {
+    "lgas": 774,
+    "national": 2149561.482170561,
+    "national_lo95": 1856458.7333575313,
+    "national_hi95": 2455410.689857596,
+    "pareto": {
+      "50": 138,
+      "60": 181,
+      "80": 319
+    },
+    "top155_share": 54.212840369008376,
+    "near_certain_top155": 40,
+    "diagnostics": {
+      "parameters": 1649,
+      "max_rhat": 1.0030429791019833,
+      "min_ess_bulk": 2549.1825925677817,
+      "min_ess_tail": 2523.8439651533513,
+      "divergences": 0
+    },
+    "survey_ppc_coverage95": 0.9797297297297297
+  },
+  "overlap_top155": 107,
+  "rank_corr": 0.7469150589973744
+}

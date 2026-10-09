@@ -1,0 +1,16 @@
+covariate,role,file,measure,year,unit_col,definition,higher_is,IHME LGAs bridged
+edu_mean_years_women_15_49,predictor,IHME_LMIC_EDU_2000_2017_MEAN_15_49_FEMALE_AD2_Y2019M12D24.CSV,Mean years of attainment,2017,value,"Mean years of schooling, women 15-49",better,770/774
+stunting_prev_u5,predictor,IHME_LMIC_CGF_2000_2017_STUNTING_PREV_ADMIN_2_Y2020M01D08.CSV,Stunting prevalence,2017,mean,"Stunting prevalence, children under 5",worse,770/774
+wasting_prev_u5,predictor,IHME_LMIC_CGF_2000_2017_WASTING_PREV_ADMIN_2_Y2020M01D08.CSV,Wasting prevalence,2017,mean,"Wasting prevalence, children under 5",worse,770/774
+underweight_prev_u5,predictor,IHME_LMIC_CGF_2000_2017_UNDERWEIGHT_PREV_ADMIN_2_Y2020M01D08.CSV,Underweight prevalence,2017,mean,"Underweight prevalence, children under 5",worse,770/774
+dpt1_3_dropout,predictor,IHME_AFRICA_DPT_2000_2016_REL_DROPOUT_PREV_ADMIN_2_Y2019M04D01.CSV,DPT 1-3 Relative Dropout,2016,mean,DPT1-to-DPT3 relative dropout (reached but not completed),worse,774/774
+poverty_rate,predictor,povertyrate.csv,poverty_rate,2014,Poverty_Ra,Poverty headcount rate (~2014),worse,770/774
+exclusive_breastfeeding,predictor,IHME_AFRICA_EBF_2000_2017_PREV_ADMIN_2_Y2019M07D01.CSV,EBF prevalence,2017,mean,Exclusive breastfeeding prevalence (maternal care behaviour proxy),better,774/774
+ors_coverage,predictor,IHME_LMIC_ORT_2000_2017_ORS_ADMIN_2_Y2020M05D27.CSV,Oral Rehydration Solution,2017,mean,Oral rehydration solution coverage (care-seeking / treatment proxy),better,770/774
+anc4plus,predictor,NG2018DHS_RHANCNWN4P_MS_MEAN_v01.tif,ANC 4+ visits,2018,raster zonal mean,"ANC 4+ visits, proportion (DHS 2018 modelled surface)",better,768/774
+delivery_hf,predictor,NG2018DHS_RHDELPCDHF_MS_MEAN_v01.tif,Facility delivery,2018,raster zonal mean,"Delivery in a health facility, proportion (DHS 2018 modelled surface)",better,768/774
+improved_water,predictor,NG2018DHS_WSSRCEPIMP_MS_MEAN_v01.tif,Improved water source,2018,raster zonal mean,"Population using an improved water source, proportion (DHS 2018 surface)",better,768/774
+travel_time_hc,predictor,2020_motorized_travel_time_to_healthcare.geotiff,Travel time to healthcare (min),2020,raster zonal mean,"Motorized travel time to healthcare, minutes (Weiss 2020)",worse,768/774
+relative_wealth_index,predictor,nga_relative_wealth_index.csv,Relative Wealth Index,2021,point-in-polygon mean,"Relative Wealth Index (Meta), LGA mean",better,768/774
+conflict_events,predictor,acled_pv_lga_2021_2024.csv,conflict_events,2021-2024,conflict_events,ACLED political-violence events (2021-2024),worse,748/772
+conflict_fatalities,predictor,acled_pv_lga_2021_2024.csv,conflict_fatalities,2021-2024,conflict_fatalities,ACLED political-violence fatalities (2021-2024),worse,748/772

@@ -1,0 +1,775 @@
+state,lga_clean,m1_rate,gi
+Akwa Ibom,Eastern Obolo,21.32838812275726,Cold Spot (p<0.05)
+Bayelsa,Ekeremor,6.532329498406727,Not Significant
+Rivers,Degema,14.048784766355343,Cold Spot (p<0.10)
+Rivers,Andoni,15.163526952113507,Not Significant
+Cross River,Akpabuyo,8.469631338974533,Cold Spot (p<0.10)
+Akwa Ibom,Oron,19.93969716584,Cold Spot (p<0.10)
+Cross River,Bakassi,17.70227008106357,Cold Spot (p<0.05)
+Cross River,Calabar South,6.639575738178652,Cold Spot (p<0.10)
+Akwa Ibom,Udung Uko,21.43156735341737,Cold Spot (p<0.10)
+Bayelsa,Southern Ijaw,17.975272546730864,Not Significant
+Oyo,Iwajowa,25.09019999081944,Not Significant
+Oyo,Ibarapa North,27.654731480937222,Not Significant
+Rivers,Okrika,11.954485683968493,Cold Spot (p<0.05)
+Ogun,Imeko Afon,28.48395505871543,Not Significant
+Akwa Ibom,Ibeno,17.82367720590882,Not Significant
+Bayelsa,Nembe,21.94794290706963,Not Significant
+Ondo,Ilaje,1.0568068860583022,Not Significant
+Bayelsa,Brass,14.92691933695619,Not Significant
+Delta,Warri North,15.355597359512563,Cold Spot (p<0.05)
+Ondo,Ese Odo,21.016219074970248,Cold Spot (p<0.05)
+Taraba,Jalingo,33.68928224664069,Not Significant
+Delta,Burutu,15.546743597156146,Cold Spot (p<0.10)
+Adamawa,Girei,22.02083718565389,Cold Spot (p<0.05)
+Taraba,Yorro,39.95424795936096,Not Significant
+Taraba,Ardo-Kola,40.25508091660286,Not Significant
+Adamawa,Yola North,8.852029171203903,Not Significant
+Adamawa,Yola South,11.556172589079708,Not Significant
+Akwa Ibom,Mbo,15.308472025718848,Not Significant
+Taraba,Lau,34.171570003488824,Not Significant
+Oyo,Ibarapa Central,26.97920833938321,Not Significant
+Ogun,Abeokuta North,19.094033437364686,Not Significant
+Rivers,Bonny,20.245850083909875,Cold Spot (p<0.10)
+Delta,Warri South West,18.92115198138376,Cold Spot (p<0.05)
+Delta,Warri South,2.4870908094919835,Cold Spot (p<0.10)
+Rivers,Akuku Toru,21.7522004484955,Cold Spot (p<0.10)
+Osun,Isokan,7.463094238654083,Cold Spot (p<0.05)
+Osun,Irewole,10.450448755832618,Cold Spot (p<0.05)
+Akwa Ibom,Essien Udim,10.42521892873938,Not Significant
+Akwa Ibom,Onna,15.89033522812998,Cold Spot (p<0.05)
+Enugu,Udenu,8.553003456641964,Cold Spot (p<0.10)
+Rivers,Ogu/Bolo,23.752084408315728,Cold Spot (p<0.10)
+Enugu,Enugu South,10.417472201770185,Cold Spot (p<0.01)
+Akwa Ibom,Ikot Ekpene,13.77938965659192,Cold Spot (p<0.10)
+Akwa Ibom,Nsit Ubium,18.087545402351083,Cold Spot (p<0.10)
+Akwa Ibom,Urue-Offong/Oruko,18.593292778865404,Not Significant
+Akwa Ibom,Abak,15.979982756408434,Cold Spot (p<0.05)
+Enugu,Nkanu East,11.867614559092129,Cold Spot (p<0.01)
+Enugu,Igbo-Eze South,12.561432669707372,Cold Spot (p<0.10)
+Enugu,Nsukka,4.256153072754518,Cold Spot (p<0.05)
+Rivers,Tai,20.824142709630426,Not Significant
+Osun,Ife North,9.167303161613646,Cold Spot (p<0.01)
+Osun,Ayedaade,7.024070862716022,Cold Spot (p<0.05)
+Osun,Ayedire,18.466616488301664,Cold Spot (p<0.10)
+Rivers,Ahoada East,19.5259347743394,Cold Spot (p<0.10)
+Oyo,Iseyin,12.373169795091682,Not Significant
+Oyo,Itesiwaju,19.53371509556424,Not Significant
+Oyo,Kajola,17.954219168221574,Not Significant
+Enugu,Nkanu West,12.346232972592476,Cold Spot (p<0.01)
+Ebonyi,Afikpo North,7.146684848890632,Cold Spot (p<0.01)
+Taraba,Donga,30.35385652229992,Not Significant
+Enugu,Oji River,12.15782161951678,Cold Spot (p<0.05)
+Kwara,Oyun,52.081398298597925,Not Significant
+Bayelsa,Ogbia,20.85666344066808,Not Significant
+Rivers,Asari-Toru,18.72233333340305,Cold Spot (p<0.05)
+Akwa Ibom,Uyo,1.0,Cold Spot (p<0.10)
+Akwa Ibom,Ikono,13.53751047651985,Cold Spot (p<0.10)
+Kwara,Baruten,18.69650180751532,Not Significant
+Oyo,Lagelu,18.51920215933948,Cold Spot (p<0.05)
+Kogi,Idah,37.41592856434852,Not Significant
+Yobe,Machina,54.11512082220198,Not Significant
+Kogi,Ibaji,45.92716865917885,Not Significant
+FCT,Abuja Municipal Area Council,1.0,Not Significant
+Kwara,Kaiama,39.45586604878935,Not Significant
+Zamfara,Bakura,99.0,Hot Spot (p<0.01)
+Yobe,Nguru,32.1287049560557,Hot Spot (p<0.05)
+Zamfara,Gummi,65.97252368098516,Hot Spot (p<0.01)
+Kano,Ajingi,47.65361351661853,Hot Spot (p<0.10)
+Rivers,Port-Harcourt,1.0,Cold Spot (p<0.10)
+Kebbi,Augie,92.86757029392508,Hot Spot (p<0.01)
+Sokoto,Kebbe,91.10994356491828,Hot Spot (p<0.01)
+Oyo,Surulere,24.726645718274,Not Significant
+Jigawa,Ringim,25.351969102702547,Hot Spot (p<0.10)
+Rivers,Emohua,19.458342129774657,Cold Spot (p<0.10)
+Enugu,Isi-Uzo,12.461422851961029,Not Significant
+Bayelsa,Yenagoa,12.611823308075929,Not Significant
+Kwara,Ilorin East,21.465465889716324,Not Significant
+Bauchi,Alkaleri,28.707323763949702,Not Significant
+Rivers,Omumma,22.227494758688827,Cold Spot (p<0.01)
+Jigawa,Birnin Kudu,7.20479024794882,Not Significant
+Taraba,Takum,34.03786646693687,Not Significant
+Edo,Esan South-East,13.540326151045551,Cold Spot (p<0.10)
+Osun,Ifedayo,20.689671219188032,Not Significant
+Oyo,Ori Ire,23.00713226704561,Not Significant
+Kwara,Ifelodun,23.19606844109196,Hot Spot (p<0.10)
+Zamfara,Maradun,81.19295532349453,Hot Spot (p<0.01)
+Enugu,Aninri,14.094618893550834,Cold Spot (p<0.01)
+Ebonyi,Abakaliki,6.742240501609611,Cold Spot (p<0.01)
+Kwara,Pategi,46.1422849972861,Hot Spot (p<0.10)
+Jigawa,Birniwa,34.797862902832264,Hot Spot (p<0.10)
+Taraba,Ussa,40.565464126455616,Not Significant
+Sokoto,Silame,99.0,Hot Spot (p<0.01)
+Kano,Takai,23.63488228258973,Not Significant
+FCT,Bwari,19.752373737344257,Not Significant
+Kwara,Edu,32.82451172692728,Not Significant
+Kaduna,Jema'A,59.289246002596094,Hot Spot (p<0.01)
+Jigawa,Gumel,46.79670097326733,Hot Spot (p<0.10)
+Sokoto,Binji,99.0,Hot Spot (p<0.01)
+Sokoto,Kware,76.15771194096568,Hot Spot (p<0.01)
+Kebbi,Bunza,83.50343038020829,Hot Spot (p<0.01)
+Kogi,Mopa-Muro,52.19596923407492,Not Significant
+Sokoto,Sokoto North,75.1880870389492,Hot Spot (p<0.01)
+Katsina,Musawa,48.23784101459548,Not Significant
+Delta,Ethiope West,6.443968437562639,Cold Spot (p<0.05)
+Ebonyi,Ishielu,7.586795669392774,Cold Spot (p<0.05)
+Kebbi,Sakaba,86.61594279471073,Not Significant
+Kaduna,Kudan,63.95633632434377,Not Significant
+Kaduna,Kachia,51.99497275389795,Hot Spot (p<0.01)
+Sokoto,Sabon Birni,45.07584702632623,Hot Spot (p<0.05)
+Enugu,Uzo-Uwani,14.15355325043707,Cold Spot (p<0.01)
+Kaduna,Jaba,66.23543209813056,Hot Spot (p<0.01)
+Akwa Ibom,Ibesikpo Asutan,18.44613551546492,Cold Spot (p<0.05)
+Sokoto,Sokoto South,67.70812350910776,Hot Spot (p<0.01)
+Sokoto,Yabo,99.0,Hot Spot (p<0.01)
+Borno,Damboa,19.78932273170304,Not Significant
+Katsina,Matazu,47.73939805568928,Hot Spot (p<0.05)
+Katsina,Sandamu,58.121671687965005,Hot Spot (p<0.10)
+Katsina,Mashi,43.191839060021465,Hot Spot (p<0.10)
+Katsina,Dan Musa,53.87317846764093,Hot Spot (p<0.10)
+Kano,Kura,51.57604946940428,Not Significant
+Kaduna,Lere,1.0,Not Significant
+Katsina,Zango,48.7098958168537,Hot Spot (p<0.10)
+Sokoto,Wurno,38.63476732007388,Not Significant
+Sokoto,Gudu,99.0,Hot Spot (p<0.01)
+Jigawa,Gwiwa,44.36532547773844,Hot Spot (p<0.05)
+Kebbi,Birnin Kebbi,14.821986567031262,Hot Spot (p<0.01)
+Kebbi,Suru,82.46592624204081,Hot Spot (p<0.01)
+Adamawa,Numan,30.207353560319,Not Significant
+Borno,Biu,24.320494643714586,Not Significant
+Kaduna,Kaduna South,39.60384794965786,Hot Spot (p<0.10)
+Borno,Dikwa,48.544918646774896,Not Significant
+Kaduna,Zaria,18.66611399371733,Not Significant
+Kebbi,Kalgo,99.0,Hot Spot (p<0.01)
+Jigawa,Yankwashi,52.07886423730383,Hot Spot (p<0.05)
+Kaduna,Kaura,60.50657872818529,Hot Spot (p<0.05)
+Adamawa,Lamurde,25.895204560829622,Not Significant
+Borno,Monguno,21.760137757782267,Hot Spot (p<0.10)
+Enugu,Enugu East,5.50181107057725,Cold Spot (p<0.01)
+Borno,Ngala,34.48955964868929,Hot Spot (p<0.10)
+Borno,Gubio,31.916432902976776,Not Significant
+Kogi,Yagba East,34.091673173775064,Not Significant
+Borno,Chibok,39.15268677842969,Not Significant
+Sokoto,Tureta,99.0,Hot Spot (p<0.01)
+Taraba,Gashaka,40.2980570533517,Not Significant
+Bauchi,Bauchi,1.0,Not Significant
+Borno,Hawul,40.744662631029335,Not Significant
+Akwa Ibom,Uruan,18.53578304374337,Cold Spot (p<0.10)
+Adamawa,Mayo-Belwa,20.07439273293631,Not Significant
+Adamawa,Mubi South,25.157710901408954,Not Significant
+Edo,Etsako West,7.49388038412395,Cold Spot (p<0.05)
+Yobe,Fune,1.0,Not Significant
+Borno,Mobbar,47.289215768387486,Not Significant
+Yobe,Potiskum,1.0,Not Significant
+Borno,Gwoza,22.019791573313224,Not Significant
+Borno,Guzamala,,Not estimated
+Adamawa,Maiha,25.79081048118561,Not Significant
+Yobe,Gulani,38.0173147868724,Not Significant
+Taraba,Zing,34.6801209550168,Not Significant
+Oyo,Orelope,23.68511185638709,Not Significant
+Akwa Ibom,Nsit Ibom,14.31896628906038,Cold Spot (p<0.05)
+Adamawa,Fufore,14.189597436874084,Cold Spot (p<0.10)
+Akwa Ibom,Mkpat Enin,7.992895425637038,Cold Spot (p<0.05)
+Edo,Owan West,15.442427891194832,Not Significant
+Borno,Kaga,48.03412425556646,Not Significant
+Taraba,Karim-Lamido,8.989941431819393,Not Significant
+Borno,Kukawa,47.24877787908349,Hot Spot (p<0.10)
+Adamawa,Gombi,21.571269132993343,Not Significant
+Adamawa,Guyuk,20.82872414713828,Not Significant
+Kano,Tudun Wada,33.03662568134264,Not Significant
+Oyo,Saki West,7.337451830779942,Not Significant
+Adamawa,Toungo,30.838769364617523,Not Significant
+Rivers,Abua/Odual,8.664976981817833,Not Significant
+Zamfara,Bungudu,51.33989103695775,Hot Spot (p<0.01)
+Borno,Shani,36.413551855574426,Not Significant
+Sokoto,Shagari,95.55020998129532,Hot Spot (p<0.01)
+Yobe,Yunusari,38.98028571434315,Hot Spot (p<0.05)
+Adamawa,Ganye,18.092588995178016,Not Significant
+Adamawa,Jada,17.981459813621477,Cold Spot (p<0.10)
+Taraba,Bali,12.96284651793468,Not Significant
+Adamawa,Shelleng,22.396319117276743,Not Significant
+Ondo,Okitipupa,11.879060468280452,Cold Spot (p<0.10)
+Borno,Bayo,39.76989666780656,Not Significant
+Akwa Ibom,Ikot Abasi,14.269913867926888,Cold Spot (p<0.05)
+Borno,Maiduguri,1.0,Not Significant
+Yobe,Gujba,42.97135991226762,Not Significant
+Edo,Esan North-East,12.843634768575184,Cold Spot (p<0.05)
+Bauchi,Tafawa-Balewa,35.45623644331202,Hot Spot (p<0.05)
+Yobe,Nangere,46.371584691566994,Not Significant
+Akwa Ibom,Ika,19.938005703042293,Cold Spot (p<0.10)
+Bauchi,Dambam,42.361559876909496,Not Significant
+Bauchi,Ganjuwa,12.394104828992475,Not Significant
+Borno,Nganzai,41.71942859425212,Not Significant
+Rivers,Ahoada West,11.724885272272392,Not Significant
+Adamawa,Song,14.150870600877107,Not Significant
+Delta,Oshimili North,13.724081441357908,Cold Spot (p<0.05)
+Rivers,Gokana,10.87729496741296,Not Significant
+Zamfara,Bukkuyum,87.79678801098468,Hot Spot (p<0.01)
+Yobe,Damaturu,40.874980725030426,Not Significant
+Yobe,Geidam,34.636974363007525,Hot Spot (p<0.10)
+Yobe,Tarmuwa,47.66122717260451,Not Significant
+Adamawa,Madagali,21.35237832083652,Not Significant
+Adamawa,Michika,19.12811091422759,Not Significant
+Adamawa,Mubi North,16.16803362367612,Not Significant
+Edo,Owan East,14.799442910799272,Cold Spot (p<0.10)
+Adamawa,Hong,17.991562466490247,Not Significant
+Kano,Nasarawa,1.0,Not Significant
+Katsina,Sabuwa,50.3840777552975,Not Significant
+Ebonyi,Ohaozara,6.894327727043073,Cold Spot (p<0.01)
+Zamfara,Kaura Namoda,55.26300404955305,Hot Spot (p<0.01)
+Katsina,Dutsi,55.73500952002587,Hot Spot (p<0.10)
+Kano,Kabo,51.40825943215326,Hot Spot (p<0.05)
+Katsina,Dandume,20.79415810070083,Not Significant
+Kano,Dawakin Tofa,35.11612188071573,Not Significant
+Kano,Gezawa,27.77186943054888,Not Significant
+Sokoto,Bodinga,86.8158904274167,Hot Spot (p<0.01)
+Zamfara,Zurmi,56.64344109144244,Hot Spot (p<0.01)
+Kano,Warawa,53.83983964411861,Not Significant
+Sokoto,Tangaza,91.12533443637884,Hot Spot (p<0.01)
+Jigawa,Maigatari,32.3999188203669,Hot Spot (p<0.05)
+Katsina,Danja,33.65398644048095,Not Significant
+Kano,Fagge,37.00582279205079,Cold Spot (p<0.01)
+Katsina,Jibia,39.69394229546204,Not Significant
+Rivers,Eleme,17.067922890247043,Cold Spot (p<0.05)
+Kano,Bebeji,39.26411165406839,Not Significant
+Kano,Rano,47.22726178262008,Hot Spot (p<0.10)
+Kano,Tarauni,30.107176670321035,Cold Spot (p<0.01)
+Akwa Ibom,Etinan,1.0,Cold Spot (p<0.10)
+Ogun,Yewa South,23.06944331569616,Cold Spot (p<0.10)
+Kebbi,Argungu,50.46956464765767,Hot Spot (p<0.01)
+Kano,Kiru,21.35458816978512,Not Significant
+Katsina,Batagarawa,37.85556738231973,Not Significant
+Delta,Bomadi,19.30645463364169,Cold Spot (p<0.10)
+Borno,Kwaya Kusar,32.52087293257343,Not Significant
+Enugu,Igbo-Etiti,8.67533689442097,Cold Spot (p<0.01)
+Kano,Doguwa,42.10553966194193,Not Significant
+Yobe,Bade,38.70474536046508,Hot Spot (p<0.10)
+Akwa Ibom,Itu,14.432294296506734,Cold Spot (p<0.05)
+Borno,Bama,1.0,Not Significant
+Sokoto,Gada,33.31722123044381,Not Significant
+Zamfara,Gusau,13.64505374794614,Hot Spot (p<0.01)
+Lagos,Lagos Mainland,9.758400788554736,Cold Spot (p<0.01)
+Katsina,Kaita,41.142358893695366,Not Significant
+Kano,Minjibir,44.157529297831246,Cold Spot (p<0.10)
+Akwa Ibom,Ini,18.616973258033298,Cold Spot (p<0.05)
+Zamfara,Talata Mafara,75.60886483791619,Hot Spot (p<0.01)
+Kebbi,Gwandu,74.71789854354645,Hot Spot (p<0.01)
+Zamfara,Birnin Magaji,92.81534461165997,Hot Spot (p<0.10)
+Kano,Shanono,46.83941923749891,Hot Spot (p<0.05)
+Kano,Rogo,27.02369090379031,Hot Spot (p<0.10)
+Katsina,Batsari,29.06831121854385,Not Significant
+Akwa Ibom,Eket,12.12175611483928,Cold Spot (p<0.10)
+Akwa Ibom,Okobo,17.547968769882615,Not Significant
+Kano,Kano Municipal,19.033034211754853,Cold Spot (p<0.05)
+Yobe,Busari,44.90866425602884,Not Significant
+Kebbi,Maiyama,79.73250187802263,Hot Spot (p<0.01)
+Lagos,Lagos Island,10.986267921620833,Cold Spot (p<0.01)
+Kano,Madobi,51.61730931462992,Hot Spot (p<0.10)
+Jigawa,Miga,42.07983251194128,Not Significant
+Katsina,Rimi,41.781538688057445,Not Significant
+Kano,Gabasawa,38.39490424798122,Not Significant
+Kebbi,Aleiro,99.0,Hot Spot (p<0.01)
+Kano,Ungogo,1.0,Cold Spot (p<0.10)
+Sokoto,Tambuwal,83.23751281283207,Hot Spot (p<0.01)
+Kebbi,Jega,55.15828527206842,Hot Spot (p<0.01)
+Katsina,Katsina,8.25391965810175,Hot Spot (p<0.10)
+Kano,Dawakin Kudu,35.22889879099919,Not Significant
+Kebbi,Arewa,67.20264420938453,Hot Spot (p<0.01)
+Akwa Ibom,Etim Ekpo,19.47454489647064,Cold Spot (p<0.05)
+Kano,Albasu,40.26259990852928,Not Significant
+Borno,Marte,59.214136493141226,Not Significant
+Kano,Kumbotso,5.893148835557469,Cold Spot (p<0.10)
+Jigawa,Kazaure,35.09570640103456,Hot Spot (p<0.10)
+Katsina,Malumfashi,29.54916207301807,Not Significant
+Enugu,Udi,9.12180929507428,Cold Spot (p<0.01)
+Jigawa,Dutse,13.769504085876813,Not Significant
+Jigawa,Gwaram,7.238221661012331,Not Significant
+Kaduna,Zangon Kataf,44.941832505156775,Hot Spot (p<0.01)
+Jigawa,Kiyawa,20.692845809395312,Not Significant
+Bauchi,Zaki,29.88040442071328,Not Significant
+Rivers,Opobo/Nkoro,18.474493636665667,Cold Spot (p<0.10)
+Bauchi,Shira,41.64714318864627,Not Significant
+Bauchi,Dass,54.59118993102487,Not Significant
+Enugu,Enugu North,6.351001576619844,Cold Spot (p<0.05)
+Jigawa,Buji,41.3443414245438,Not Significant
+Akwa Ibom,Ukanafun,19.63523386225278,Cold Spot (p<0.10)
+Niger,Agaie,43.9328485049021,Hot Spot (p<0.10)
+Kano,Bagwai,47.57659513886397,Hot Spot (p<0.05)
+Kaduna,Kajuru,67.12217925926262,Hot Spot (p<0.05)
+Niger,Katcha,51.42475148176842,Hot Spot (p<0.10)
+Katsina,Kafur,34.18761360825112,Not Significant
+Kebbi,Danko/Wasagu,22.03796086133716,Hot Spot (p<0.01)
+Niger,Bida,39.94721090660576,Hot Spot (p<0.10)
+Bauchi,Kirfi,40.98556797140844,Not Significant
+Kebbi,Dandi,80.1248912636116,Hot Spot (p<0.01)
+Kebbi,Bagudo,8.470599054531595,Hot Spot (p<0.01)
+Katsina,Kankara,35.42785697070598,Hot Spot (p<0.10)
+Bauchi,Itas/Gadau,40.90102161776782,Not Significant
+Lagos,Apapa,10.45473950443422,Cold Spot (p<0.01)
+Ondo,Ondo East,30.43840970411712,Not Significant
+Bauchi,Warji,51.75043244870011,Not Significant
+Bauchi,Katagum,30.95414311194912,Hot Spot (p<0.05)
+Katsina,Mani,44.628527588633474,Hot Spot (p<0.05)
+Kaduna,Sanga,62.3967503084931,Hot Spot (p<0.05)
+Bauchi,Bogoro,48.89487935448824,Not Significant
+Yobe,Fika,27.6376812500638,Not Significant
+FCT,Kuje,26.63832647336498,Not Significant
+Jigawa,Sule-Tankarkar,38.15923952540096,Not Significant
+Oyo,Ibadan North East,1.0,Cold Spot (p<0.05)
+Katsina,Bindawa,47.29373141007901,Hot Spot (p<0.05)
+Kwara,Ilorin South,22.24030385021859,Not Significant
+Bauchi,Gamawa,29.80431270243672,Not Significant
+Jigawa,Kafin Hausa,9.438616484465978,Hot Spot (p<0.10)
+Ogun,Ado Odo/Ota,1.0,Cold Spot (p<0.01)
+Kano,Garko,47.49682610476104,Hot Spot (p<0.10)
+Kaduna,Kubau,40.774509772029575,Not Significant
+Taraba,Wukari,22.28389306612824,Not Significant
+Kano,Gwarzo,38.03731892269221,Hot Spot (p<0.05)
+Rivers,Oyigbo,21.65778532592888,Cold Spot (p<0.10)
+Delta,Ughelli South,13.162683436310228,Cold Spot (p<0.10)
+Kebbi,Fakai,79.97192590990743,Hot Spot (p<0.01)
+Jigawa,Kaugama,44.05228588268911,Hot Spot (p<0.10)
+Edo,Esan Central,14.657717683101875,Cold Spot (p<0.05)
+Sokoto,Goronyo,1.0,Not Significant
+Oyo,Ibarapa East,20.850371109647696,Not Significant
+Edo,Ikpoba-Okha,1.0,Cold Spot (p<0.01)
+Enugu,Awgu,8.67533689442097,Cold Spot (p<0.05)
+Oyo,Olorunsogo,29.791841056035373,Not Significant
+Kogi,Kabba/Bunu,33.22478760856086,Not Significant
+Bauchi,Ningi,20.15757375204221,Not Significant
+Taraba,Kurmi,44.285287518383264,Not Significant
+Katsina,Bakori,24.61457677984664,Not Significant
+Akwa Ibom,Nsit Atai,18.510411101777773,Not Significant
+Katsina,Kankia,48.84770063490424,Hot Spot (p<0.05)
+Jigawa,Gagarawa,52.40709992920024,Hot Spot (p<0.10)
+Bauchi,Giade,46.59521853546344,Not Significant
+Edo,Igueben,16.435996329578696,Cold Spot (p<0.05)
+Ondo,Akure North,17.776892882643693,Cold Spot (p<0.10)
+Rivers,Khana,11.746343254673896,Not Significant
+Akwa Ibom,Oruk Anam,1.0,Cold Spot (p<0.05)
+Bauchi,Misau,39.8040326792808,Not Significant
+Bayelsa,Kolokuma/Opokuma,29.23576193032541,Cold Spot (p<0.10)
+Kano,Karaye,49.69460052711433,Not Significant
+Bayelsa,Sagbama,19.96332898788826,Not Significant
+Jigawa,Garki,34.59119598571232,Not Significant
+Katsina,Mai'Adua,48.67764362539506,Hot Spot (p<0.10)
+Ebonyi,Ezza North,8.901071559974861,Cold Spot (p<0.01)
+Taraba,Ibi,27.57234544938867,Not Significant
+Kogi,Omala,45.55104062468508,Not Significant
+Ondo,Ile-Oluji/Okeigbo,18.942118131682022,Not Significant
+Katsina,Baure,40.31846200279746,Hot Spot (p<0.10)
+Katsina,Dutsin-Ma,37.29262004049625,Hot Spot (p<0.05)
+Edo,Uhunmwonde,9.534723662966474,Cold Spot (p<0.05)
+Jigawa,Taura,40.3839481038099,Not Significant
+Delta,Ughelli North,1.1355213496184782,Cold Spot (p<0.05)
+Edo,Orhionmwon,17.41763001194593,Cold Spot (p<0.01)
+Kaduna,Soba,28.3425479274742,Not Significant
+Yobe,Karasuwa,48.61567623346048,Not Significant
+Ondo,Ondo West,8.851267475010085,Cold Spot (p<0.10)
+Delta,Ika South,12.178355566870056,Cold Spot (p<0.10)
+Ekiti,Oye,11.58220152786316,Not Significant
+Kano,Bichi,27.359270978292315,Hot Spot (p<0.05)
+FCT,Kwali,27.11624670575169,Not Significant
+Oyo,Oyo West,21.72732296977418,Not Significant
+Katsina,Kusada,53.893702589478245,Hot Spot (p<0.05)
+Jigawa,Roni,49.27366475933738,Hot Spot (p<0.05)
+Bauchi,Toro,1.0,Not Significant
+Ondo,Akure South,1.0,Not Significant
+Kaduna,Igabi,21.993360468929943,Not Significant
+Kogi,Okene,1.0,Not Significant
+Anambra,Onitsha South,8.186048296166659,Cold Spot (p<0.01)
+Benue,Agatu,39.46112542697466,Not Significant
+Kano,Dala,11.702535043329892,Cold Spot (p<0.10)
+Zamfara,Anka,99.0,Hot Spot (p<0.01)
+Kano,Tofa,58.37567196259245,Not Significant
+Katsina,Ingawa,51.17279043733143,Hot Spot (p<0.05)
+Delta,Uvwie,12.191901363238498,Cold Spot (p<0.01)
+Ondo,Idanre,23.214013160079467,Not Significant
+Delta,Okpe,15.197563068547398,Cold Spot (p<0.01)
+Anambra,Anambra West,13.071884790267095,Cold Spot (p<0.05)
+Lagos,Mushin,5.514687636234177,Cold Spot (p<0.01)
+Ogun,Sagamu,11.364748149568817,Cold Spot (p<0.10)
+Cross River,Biase,10.915745260830418,Cold Spot (p<0.05)
+Kano,Gaya,42.32834282616047,Not Significant
+Katsina,Charanchi,41.541113260820325,Hot Spot (p<0.05)
+Edo,Etsako Central,10.84605498029292,Not Significant
+Bauchi,Darazo,31.46987586915689,Hot Spot (p<0.10)
+Kogi,Ijumu,36.57770037319099,Not Significant
+Kwara,Irepodun,39.74298874481303,Hot Spot (p<0.10)
+Oyo,Egbeda,8.035083002421175,Cold Spot (p<0.05)
+Ondo,Akoko South East,30.41689785336564,Not Significant
+Katsina,Faskari,34.12310922533385,Not Significant
+Kaduna,Makarfi,54.56381705182658,Not Significant
+Delta,Udu,15.93656151487022,Cold Spot (p<0.01)
+Kano,Bunkure,39.654704855537936,Hot Spot (p<0.05)
+Katsina,Funtua,5.829141263893321,Not Significant
+Kano,Danbatta,36.26314557798898,Not Significant
+Yobe,Jakusko,24.68627477914314,Not Significant
+Kano,Gwale,10.140162237451705,Not Significant
+Jigawa,Babura,28.312168768508965,Not Significant
+Delta,Sapele,14.076272146937418,Cold Spot (p<0.01)
+Delta,Ika North East,10.16454717342824,Cold Spot (p<0.10)
+Lagos,Surulere,6.865098220173387,Cold Spot (p<0.01)
+Kano,Garum Mallam,54.09840134086606,Hot Spot (p<0.05)
+Kwara,Offa,52.447184746956864,Not Significant
+Lagos,Shomolu,7.412438695537174,Cold Spot (p<0.01)
+Kano,Makoda,41.13730862731318,Hot Spot (p<0.10)
+Kano,Rimin Gado,55.02812318661752,Hot Spot (p<0.10)
+Yobe,Yusufari,45.73812593986795,Not Significant
+Kogi,Bassa,46.08120204473344,Not Significant
+Jigawa,Jahun,26.905010200471622,Not Significant
+Katsina,Kurfi,45.8365187596297,Not Significant
+Edo,Esan West,12.26032356826274,Cold Spot (p<0.05)
+Kaduna,Kaduna North,53.81708260034696,Not Significant
+Katsina,Daura,12.895303210740131,Hot Spot (p<0.05)
+Taraba,Gassol,5.6067644444243445,Not Significant
+Jigawa,Auyo,44.60846302729133,Not Significant
+Kano,Wudil,42.2045632904835,Hot Spot (p<0.10)
+Kaduna,Ikara,9.081077245428034,Not Significant
+Ondo,Ifedore,32.872834147492576,Cold Spot (p<0.05)
+Niger,Lavun,30.71587158958949,Hot Spot (p<0.10)
+Sokoto,Dange-Shuni,72.03295838953049,Hot Spot (p<0.01)
+Ogun,Yewa North,17.157787292148384,Not Significant
+Zamfara,Tsafe,49.11783270178742,Not Significant
+Kwara,Ekiti,58.61835611765769,Not Significant
+Kebbi,Zuru,59.02232311998706,Hot Spot (p<0.01)
+Kogi,Yagba West,28.829462862619447,Hot Spot (p<0.05)
+Kogi,Kogi,47.17018225888681,Not Significant
+Kogi,Olamaboro,23.846661948516346,Cold Spot (p<0.10)
+Ondo,Odigbo,1.0,Not Significant
+Lagos,Agege,6.439997117640845,Cold Spot (p<0.01)
+Kano,Kibiya,51.55129356226888,Not Significant
+Kwara,Isin,59.59771983423162,Not Significant
+Kaduna,Sabon Gari,37.301416724262346,Not Significant
+Jigawa,Malam Madori,40.961399783998,Hot Spot (p<0.10)
+Kogi,Lokoja,32.562085833500426,Not Significant
+Osun,Ede South,15.840458475872174,Cold Spot (p<0.05)
+Kaduna,Giwa,23.368207492878124,Not Significant
+Ekiti,Ikole,12.812639156135573,Not Significant
+Kano,Kunchi,53.87284752029914,Hot Spot (p<0.10)
+Jigawa,Guri,48.623271814283406,Not Significant
+Zamfara,Maru,57.47170331657606,Hot Spot (p<0.05)
+Gombe,Dukku,34.93424116560416,Not Significant
+Sokoto,Wamako,72.19456253986658,Hot Spot (p<0.01)
+Kwara,Oke-Ero,57.63112602585022,Not Significant
+Lagos,Oshodi/Isolo,4.739592707510681,Cold Spot (p<0.01)
+Borno,Abadam,58.97363746728057,Not Significant
+Ekiti,Moba,10.28227074450559,Cold Spot (p<0.10)
+FCT,Gwagwalada,22.75467041055649,Hot Spot (p<0.05)
+Kaduna,Kagarko,55.818097575796266,Hot Spot (p<0.10)
+FCT,Abaji,28.626261837021755,Not Significant
+Taraba,Sardauna,18.0173177122292,Not Significant
+Kebbi,Shanga,58.96246711201586,Hot Spot (p<0.01)
+Kaduna,Birnin Gwari,43.777004545687255,Hot Spot (p<0.10)
+Kebbi,Ngaski,81.44172343897804,Hot Spot (p<0.01)
+Kaduna,Chikun,46.0716572872132,Hot Spot (p<0.10)
+Kebbi,Yauri,91.02533538192256,Hot Spot (p<0.01)
+Kaduna,Kauru,55.3902809629694,Not Significant
+Adamawa,Demsa,17.247333705157057,Not Significant
+Abia,Umuahia South,10.01545690463757,Cold Spot (p<0.05)
+Osun,Obokun,15.149994439169587,Cold Spot (p<0.05)
+Imo,Owerri West,9.894346474877285,Cold Spot (p<0.01)
+Nasarawa,Nasarawa,18.563215527977896,Not Significant
+Anambra,Idemili South,11.339936457801498,Cold Spot (p<0.01)
+Abia,Aba North,11.10491372789862,Cold Spot (p<0.05)
+Ogun,Odeda,25.593540768063715,Not Significant
+Ogun,Ijebu East,26.65237086729461,Not Significant
+Benue,Okpokwu,27.670381917205127,Not Significant
+Gombe,Shongom,55.94270538974182,Not Significant
+Ekiti,Ado Ekiti,1.0,Cold Spot (p<0.05)
+Imo,Ahiazu-Mbaise,10.300749902583432,Cold Spot (p<0.01)
+Kogi,Ankpa,2.500500448055952,Not Significant
+Imo,Nkwerre,11.29057268398114,Cold Spot (p<0.05)
+Benue,Apa,42.10229397981993,Not Significant
+Benue,Kwande,12.51910585510762,Not Significant
+Cross River,Ikom,11.9090157624325,Cold Spot (p<0.05)
+Ekiti,Ido-Osi,10.222315865608596,Cold Spot (p<0.05)
+Abia,Ukwa East,13.814262620731494,Cold Spot (p<0.10)
+Abia,Ukwa West,13.231948478074957,Cold Spot (p<0.10)
+Anambra,Nnewi South,10.818131511481738,Cold Spot (p<0.05)
+Abia,Bende,7.01812719943637,Cold Spot (p<0.01)
+Imo,Okigwe,9.438713765979925,Cold Spot (p<0.05)
+Bauchi,Jama'Are,53.650611746773,Not Significant
+Nasarawa,Kokona,34.87504848375443,Not Significant
+Borno,Mafa,32.159060238800784,Not Significant
+Gombe,Akko,4.931234079552126,Not Significant
+Benue,Ushongo,21.87608868049585,Not Significant
+Imo,Ehime-Mbano,8.879385337126616,Cold Spot (p<0.01)
+Imo,Ideato South,9.848259488230193,Cold Spot (p<0.05)
+Osun,Ife South,10.2648616014588,Cold Spot (p<0.01)
+Anambra,Oyi,12.423685192465625,Cold Spot (p<0.05)
+Ekiti,Ekiti South West,8.521777482348384,Not Significant
+Anambra,Ayamelum,15.323930033221624,Cold Spot (p<0.05)
+Imo,Aboh-Mbaise,9.52879287624469,Cold Spot (p<0.01)
+Ekiti,Ilejemeje,18.340751512615288,Not Significant
+Imo,Mbaitoli,4.242406021520624,Cold Spot (p<0.01)
+Cross River,Akamkpa,9.535379290113092,Cold Spot (p<0.05)
+Abia,Obi Nwga,10.232501266900462,Cold Spot (p<0.05)
+Benue,Logo,29.4661664998554,Not Significant
+Benue,Guma,32.43288664370745,Not Significant
+Cross River,Ogoja,11.77559136669491,Cold Spot (p<0.05)
+Abia,Ohafia,4.018679988261874,Cold Spot (p<0.05)
+Anambra,Orumba North,13.483521425498072,Cold Spot (p<0.01)
+Benue,Ado,23.13628838761885,Not Significant
+Nasarawa,Toto,37.38363618249742,Not Significant
+Osun,Egbedore,16.57083372856913,Cold Spot (p<0.05)
+Imo,Owerri North,7.224443543890232,Cold Spot (p<0.01)
+Anambra,Idemili North,1.0,Cold Spot (p<0.05)
+Abia,Isiala-Ngwa South,9.19598209297182,Cold Spot (p<0.05)
+Gombe,Funakaye,34.489092692517325,Not Significant
+Benue,Katsina-Ala,32.288488760599606,Not Significant
+Niger,Mokwa,19.48144121157377,Not Significant
+Abia,Aba South,1.0,Cold Spot (p<0.05)
+Niger,Edati,48.781356098705885,Not Significant
+Ogun,Odogbolu,24.123040317237283,Not Significant
+Gombe,Balanga,38.21816504420468,Not Significant
+Ogun,Ijebu North East,30.79349550580226,Not Significant
+Benue,Otukpo,17.00594189567678,Not Significant
+Cross River,Abi,12.64861519065694,Cold Spot (p<0.01)
+Imo,Ideato North,10.11744938750978,Cold Spot (p<0.01)
+Osun,Oriade,9.289032370396477,Cold Spot (p<0.10)
+Sokoto,Illela,66.01512764844406,Hot Spot (p<0.01)
+Imo,Nwangele,11.809051283760894,Cold Spot (p<0.01)
+Osun,Ife East,1.0,Cold Spot (p<0.05)
+Cross River,Obanliku,13.19878492122924,Not Significant
+Imo,Onuimo,10.187627298995125,Cold Spot (p<0.01)
+Plateau,Qua'An Pan,1.0,Not Significant
+Imo,Ngor-Okpala,1.0,Cold Spot (p<0.01)
+Oyo,Ona Ara,11.88433668538532,Cold Spot (p<0.01)
+Enugu,Igbo-Eze North,7.00374422637498,Not Significant
+Benue,Oju,28.44487965387448,Not Significant
+Osun,Boluwaduro,15.345559397541995,Cold Spot (p<0.05)
+Zamfara,Shinkafi,99.0,Hot Spot (p<0.01)
+Imo,Orsu,14.0893096912771,Cold Spot (p<0.01)
+Anambra,Anaocha,5.686337857741214,Cold Spot (p<0.01)
+Cross River,Bekwarra,15.063432032031166,Not Significant
+Abia,Umunneochi,8.831771065564824,Cold Spot (p<0.05)
+Ondo,Ose,29.81994399501215,Not Significant
+Anambra,Nnewi North,12.060727578413417,Cold Spot (p<0.01)
+Ondo,Akoko North West,22.76226429429845,Not Significant
+Osun,Ilesa East,13.020731065869992,Cold Spot (p<0.10)
+Anambra,Njikoka,12.611569133857357,Cold Spot (p<0.01)
+Imo,Ohaji/Egbema,7.589997142522825,Cold Spot (p<0.01)
+Gombe,Gombe,4.938865196233606,Not Significant
+Imo,Owerri Municipal,8.700274548111791,Cold Spot (p<0.01)
+Nasarawa,Keana,39.7912069269286,Not Significant
+Ebonyi,Ohaukwu,8.270515231518427,Cold Spot (p<0.01)
+Ekiti,Aiyekire (Gbonyin),11.81248276726298,Cold Spot (p<0.05)
+Imo,Isiala Mbano,3.316476562520013,Cold Spot (p<0.01)
+Ekiti,Irepodun/Ifelodun,13.127402270344794,Cold Spot (p<0.05)
+Imo,Obowo,9.786461028862504,Cold Spot (p<0.01)
+Abia,Isuikwuato,11.060446102459396,Cold Spot (p<0.01)
+Benue,Makurdi,1.0,Not Significant
+Benue,Gboko,1.0,Not Significant
+Osun,Ife Central,1.4584517923012374,Cold Spot (p<0.05)
+Abia,Isiala-Ngwa North,10.407195509697422,Cold Spot (p<0.05)
+Cross River,Yakurr,9.14169496194908,Cold Spot (p<0.01)
+Gombe,Billiri,49.217147887790006,Not Significant
+Anambra,Dunukofia,15.219739847540756,Cold Spot (p<0.01)
+Abia,Osisioma Ngwa,6.879430558185448,Cold Spot (p<0.05)
+Osun,Ola-Oluwa,17.810076985194293,Cold Spot (p<0.05)
+Nasarawa,Wamba,39.90906004029237,Not Significant
+Osun,Boripe,8.37107440252598,Cold Spot (p<0.05)
+Cross River,Yala,7.403883387835979,Not Significant
+Anambra,Aguata,1.0,Cold Spot (p<0.05)
+Cross River,Calabar Municipal,9.825289088258971,Cold Spot (p<0.05)
+Anambra,Onitsha North,12.063289632159664,Cold Spot (p<0.01)
+Benue,Ukum,33.756096336186594,Not Significant
+Sokoto,Isa,94.87301163702983,Hot Spot (p<0.01)
+Ogun,Ogun Waterside,31.925588972689983,Cold Spot (p<0.05)
+Osun,Ifelodun,14.702988820032656,Cold Spot (p<0.05)
+Abia,Arochukwu,8.737542049753129,Cold Spot (p<0.05)
+Ogun,Ijebu Ode,21.63557454869815,Not Significant
+Borno,Magumeri,48.22992877219636,Not Significant
+Cross River,Boki,10.879506536062182,Cold Spot (p<0.05)
+Gombe,Kwami,32.88147077828377,Not Significant
+Ekiti,Ekiti East,11.116188605527428,Not Significant
+Kwara,Moro,42.10290131487072,Not Significant
+Imo,Ezinihitte-Mbaise,9.853496645803723,Cold Spot (p<0.05)
+Borno,Kala/Balge,55.92589759973687,Not Significant
+Nasarawa,Awe,31.531868329149688,Not Significant
+Osun,Orolu,15.14600331757015,Cold Spot (p<0.05)
+Cross River,Obubra,10.930570193690151,Cold Spot (p<0.05)
+Edo,Akoko-Edo,4.6340144736406765,Not Significant
+Osun,Osogbo,5.7908142884900125,Cold Spot (p<0.10)
+Ekiti,Ise/Orun,12.388867171204542,Cold Spot (p<0.05)
+Imo,Njaba,10.446342883127643,Cold Spot (p<0.05)
+Benue,Obi,41.296291250472514,Not Significant
+Benue,Buruku,24.59601971503632,Not Significant
+Cross River,Obudu,12.589315459218009,Not Significant
+Imo,Orlu,8.888812220758973,Cold Spot (p<0.05)
+Osun,Iwo,5.816756578886356,Not Significant
+Anambra,Awka North,12.310100809715168,Cold Spot (p<0.05)
+Benue,Tarka,44.591188401387846,Not Significant
+Abia,Umuahia North,6.098070854039039,Cold Spot (p<0.01)
+Osun,Odo Otin,8.544688192101486,Not Significant
+Anambra,Ihiala,1.0,Cold Spot (p<0.05)
+Osun,Ilesa West,15.469284167124542,Cold Spot (p<0.05)
+Gombe,Kaltungo,49.209516771108525,Not Significant
+Osun,Irepodun,12.601663297929116,Cold Spot (p<0.05)
+Ebonyi,Ebonyi,5.889609905927326,Cold Spot (p<0.01)
+Nasarawa,Lafia,1.0,Not Significant
+Ogun,Ijebu North,10.80306233086643,Not Significant
+Delta,Ndokwa West,15.214119041886608,Cold Spot (p<0.05)
+Imo,Ikeduru,4.07586441068228,Cold Spot (p<0.01)
+Kogi,Okehi,19.60178841637243,Not Significant
+Gombe,Yamaltu/Deba,18.38998020013723,Not Significant
+Ekiti,Emure,14.221578810214949,Not Significant
+Ekiti,Ikere,11.553586699298684,Cold Spot (p<0.05)
+Imo,Oguta,7.781677109714129,Cold Spot (p<0.01)
+Benue,Konshisha,39.80505493037697,Cold Spot (p<0.10)
+Osun,Ejigbo,11.520069344481712,Not Significant
+Benue,Gwer West,32.133589213265736,Not Significant
+Cross River,Etung,14.941538139628918,Cold Spot (p<0.05)
+Anambra,Ekwusigo,10.482502470722867,Cold Spot (p<0.01)
+Ekiti,Ijero,6.932973191578025,Cold Spot (p<0.05)
+Abia,Ugwunagbo,13.710504828039966,Cold Spot (p<0.05)
+Osun,Olorunda,13.375940888219878,Cold Spot (p<0.05)
+Nasarawa,Nasarawa Eggon,25.7739019333772,Not Significant
+Osun,Ede North,13.964631324136825,Cold Spot (p<0.05)
+Ebonyi,Afikpo South,7.218690747657802,Cold Spot (p<0.01)
+Imo,Oru West,9.617824554994746,Cold Spot (p<0.01)
+Anambra,Anambra East,12.018026682642564,Cold Spot (p<0.05)
+Benue,Vandeikya,29.39002943421672,Cold Spot (p<0.10)
+Osun,Atakumosa West,16.874158970126334,Cold Spot (p<0.05)
+Anambra,Ogbaru,10.57046631601082,Cold Spot (p<0.01)
+Abia,Ikwuano,10.06310078903674,Cold Spot (p<0.05)
+Nasarawa,Keffi,30.16092394920385,Not Significant
+Kogi,Adavi,10.864871500845853,Not Significant
+Imo,Oru East,11.878181763731527,Cold Spot (p<0.01)
+Ogun,Remo North,31.71277633330585,Not Significant
+Nasarawa,Karu,1.0,Not Significant
+Ogun,Ikenne,24.17362692823843,Not Significant
+Osun,Ila,16.231588392616995,Not Significant
+Nasarawa,Doma,31.625669786724924,Not Significant
+Gombe,Nafada,53.32523236799129,Not Significant
+Benue,Gwer East,34.08427334324988,Not Significant
+Ekiti,Efon,15.43566510787909,Cold Spot (p<0.05)
+Imo,Ihitte/Uboma,8.211124030743822,Cold Spot (p<0.01)
+Ekiti,Ekiti West,10.646087850539628,Cold Spot (p<0.05)
+Oyo,Atisbo,25.856611700509813,Not Significant
+Imo,Isu,10.36883295103936,Cold Spot (p<0.01)
+Benue,Ogbadibo,40.73182679832368,Cold Spot (p<0.10)
+Osun,Atakumosa East,14.83669139361379,Cold Spot (p<0.05)
+Nasarawa,Akwanga,38.04265155110296,Hot Spot (p<0.10)
+Niger,Rafi,50.59954644638231,Hot Spot (p<0.10)
+Cross River,Odukpani,8.537167144224428,Cold Spot (p<0.05)
+Niger,Gbako,40.46424808645348,Hot Spot (p<0.05)
+Delta,Ukwuani,16.04041262036161,Cold Spot (p<0.05)
+Anambra,Awka South,8.203982672390415,Cold Spot (p<0.05)
+Niger,Gurara,67.25430699458971,Hot Spot (p<0.05)
+Niger,Kontagora,38.42349206533267,Hot Spot (p<0.01)
+Niger,Mashegu,38.31734535953612,Not Significant
+Niger,Wushishi,69.04852873127982,Hot Spot (p<0.10)
+Niger,Shiroro,36.04032731583589,Hot Spot (p<0.05)
+Niger,Borgu,30.370038773929743,Hot Spot (p<0.01)
+Niger,Lapai,48.01778463442747,Not Significant
+Ondo,Akoko South West,25.07120294162364,Not Significant
+Niger,Rijau,41.30999764554213,Hot Spot (p<0.01)
+Niger,Chanchaga,35.60204414351464,Hot Spot (p<0.05)
+Niger,Mariga,34.51318438727905,Hot Spot (p<0.05)
+Niger,Muya,59.37205806737478,Hot Spot (p<0.05)
+Niger,Bosso,49.06213125597419,Hot Spot (p<0.05)
+Niger,Suleja,37.7831877432696,Not Significant
+Niger,Paikoro,54.03733007927711,Hot Spot (p<0.10)
+Plateau,Kanke,45.082487352912665,Not Significant
+Plateau,Jos North,1.0,Not Significant
+Plateau,Jos East,44.93520927220572,Not Significant
+Edo,Oredo,1.0,Cold Spot (p<0.01)
+Delta,Patani,20.259175644888828,Not Significant
+Plateau,Shendam,5.742875572969262,Not Significant
+Edo,Egor,5.4261839042440245,Cold Spot (p<0.01)
+Plateau,Langtang North,33.665708726259645,Not Significant
+Plateau,Jos South,17.137835224702727,Not Significant
+Plateau,Mikang,44.54246772365387,Not Significant
+Plateau,Barkin Ladi,29.99466619604585,Not Significant
+Plateau,Pankshin,39.15863566225563,Not Significant
+Plateau,Bokkos,35.24212966419692,Not Significant
+Plateau,Wase,27.733674920007783,Not Significant
+Plateau,Bassa,28.57370545441034,Not Significant
+Anambra,Orumba South,14.30423264221377,Cold Spot (p<0.01)
+Plateau,Kanam,18.85062475588718,Not Significant
+Plateau,Langtang South,44.02972181304452,Not Significant
+Plateau,Mangu,23.811714178219194,Not Significant
+Niger,Tafa,64.71705831732373,Not Significant
+Niger,Magama,41.52913923170276,Hot Spot (p<0.01)
+Niger,Agwara,53.11967468722949,Hot Spot (p<0.01)
+Plateau,Riyom,43.132416469478144,Not Significant
+Sokoto,Rabah,1.827498222098998,Hot Spot (p<0.01)
+Ebonyi,Ikwo,5.983823231417081,Cold Spot (p<0.01)
+Katsina,Safana,31.170567698165915,Hot Spot (p<0.05)
+Lagos,Ajeromi/Ifelodun,2.7481856113121057,Cold Spot (p<0.01)
+Kebbi,Koko/Besse,62.91961430566749,Hot Spot (p<0.01)
+Lagos,Epe,10.953427493099005,Not Significant
+Kano,Sumaila,21.42060392214616,Hot Spot (p<0.10)
+Kogi,Ogori/Magongo,53.71839223083539,Not Significant
+Lagos,Amuwo Odofin,9.094294345113342,Cold Spot (p<0.01)
+Kano,Tsanyawa,47.628857609483134,Hot Spot (p<0.05)
+Lagos,Ibeju/Lekki,11.314064050755364,Cold Spot (p<0.10)
+Kogi,Ajaokuta,40.86555996641991,Not Significant
+Oyo,Irepo,23.449292868790053,Not Significant
+Delta,Isoko North,12.38304760088208,Cold Spot (p<0.01)
+Enugu,Ezeagu,9.849559308139172,Cold Spot (p<0.01)
+Ondo,Irele,21.052072159556044,Cold Spot (p<0.05)
+Ondo,Owo,22.889542744578023,Not Significant
+Kogi,Dekina,7.726889041640728,Not Significant
+Ondo,Akoko North East,22.568657637535164,Not Significant
+Oyo,Oluyole,12.075939612807918,Cold Spot (p<0.05)
+Rivers,Ogba/Egbema/Ndoni,8.910670880315061,Cold Spot (p<0.05)
+Edo,Ovia South-West,13.16885687002816,Cold Spot (p<0.05)
+Delta,Ndokwa East,19.178522112384176,Cold Spot (p<0.05)
+Oyo,Saki East,25.628162056275176,Not Significant
+Ebonyi,Onicha,4.148682241341635,Cold Spot (p<0.01)
+Delta,Ethiope East,3.335960715247729,Cold Spot (p<0.05)
+Nasarawa,Obi,25.20387769118919,Not Significant
+Oyo,Oyo East,22.211243183905605,Not Significant
+Ebonyi,Ivo,8.468363215046914,Cold Spot (p<0.05)
+Edo,Etsako East,13.889417764531771,Not Significant
+Delta,Oshimili South,10.464059782019362,Cold Spot (p<0.05)
+Ebonyi,Izzi,1.0,Cold Spot (p<0.05)
+Delta,Isoko South,10.680792523914446,Not Significant
+Ebonyi,Ezza South,8.741581858967203,Cold Spot (p<0.01)
+Kogi,Ofu,34.16689878067382,Not Significant
+Delta,Aniocha North,16.196941822841396,Cold Spot (p<0.10)
+Delta,Aniocha South,13.836963077761595,Cold Spot (p<0.05)
+Kogi,Igalamela-Odolu,36.25888708681057,Not Significant
+Akwa Ibom,Ibiono Ibom,15.971525442419903,Cold Spot (p<0.05)
+Akwa Ibom,Obot Akara,14.417071131327376,Cold Spot (p<0.05)
+Oyo,Ogo Oluwa,29.8458829073597,Not Significant
+Oyo,Atiba,18.644480996500405,Not Significant
+Oyo,Ogbomosho South,28.27129987559197,Not Significant
+Edo,Ovia North-East,9.933046145021263,Cold Spot (p<0.01)
+Oyo,Afijio,21.92383879277171,Not Significant
+Oyo,Ogbomosho North,18.796780759323493,Not Significant
+Rivers,Ikwerre,18.27386150121161,Cold Spot (p<0.05)
+Akwa Ibom,Esit Eket,19.442407103314206,Not Significant
+Rivers,Obio/Akpor,1.0,Cold Spot (p<0.10)
+Rivers,Etche,14.149637283642416,Cold Spot (p<0.05)
+Borno,Askira/Uba,28.18124891726505,Not Significant
+Sokoto,Gwadabawa,45.46061881284071,Hot Spot (p<0.01)
+Jigawa,Hadejia,46.748073463356754,Not Significant
+Jigawa,Kiri Kasamma,32.17805580639989,Hot Spot (p<0.10)
+Borno,Konduga,9.000919527388088,Not Significant
+Borno,Jere,1.0,Not Significant
+Lagos,Eti-Osa,9.50540785771992,Cold Spot (p<0.01)
+Lagos,Kosofe,4.787332960084079,Cold Spot (p<0.01)
+Oyo,Ibadan North,14.69942584982496,Cold Spot (p<0.05)
+Oyo,Akinyele,16.974096501021386,Not Significant
+Oyo,Ido,24.51047831297672,Cold Spot (p<0.10)
+Oyo,Ibadan North West,16.423852196628303,Cold Spot (p<0.05)
+Oyo,Ibadan South West,9.983046097884204,Cold Spot (p<0.05)
+Oyo,Ibadan South East,10.847715719073348,Cold Spot (p<0.05)
+Ogun,Abeokuta South,12.043306483342816,Not Significant
+Lagos,Alimosho,1.0,Cold Spot (p<0.01)
+Lagos,Ifako/Ijaye,6.120107017594901,Cold Spot (p<0.01)
+Lagos,Ikorodu,5.319165455312557,Cold Spot (p<0.01)
+Ogun,Ifo,1.0,Cold Spot (p<0.05)
+Lagos,Ikeja,8.389137366019662,Cold Spot (p<0.01)
+Ogun,Ewekoro,32.01280726751955,Cold Spot (p<0.10)
+Lagos,Ojo,4.675128162634501,Cold Spot (p<0.01)
+Lagos,Badagry,10.29357814224377,Cold Spot (p<0.05)
+Ogun,Obafemi Owode,13.960364603696608,Not Significant
+Ogun,Ipokia,27.154748245512888,Cold Spot (p<0.01)
+Benue,Ohimini,42.30707643222742,Not Significant
+Kwara,Ilorin West,1.0,Not Significant
+Kwara,Asa,37.23754823293513,Not Significant
