@@ -1,0 +1,33 @@
+model,interval,nominal,empirical_coverage,covered,n,mean_width,CRPS
+Method 2 (SAE),latent credible interval,0.5,0.5676,21,37,10.4023,4.3277
+Method 2 (SAE),latent credible interval,0.8,0.8108,30,37,19.7025,4.3277
+Method 2 (SAE),latent credible interval,0.9,0.9459,35,37,25.2849,4.3277
+Method 2 (SAE),latent credible interval,0.95,0.9459,35,37,30.2254,4.3277
+Method 2 (SAE),"predictive, design effect 1",0.5,0.6216,23,37,12.6012,4.3666
+Method 2 (SAE),"predictive, design effect 1",0.8,0.9189,34,37,23.7601,4.3666
+Method 2 (SAE),"predictive, design effect 1",0.9,0.973,36,37,30.4214,4.3666
+Method 2 (SAE),"predictive, design effect 1",0.95,0.973,36,37,35.9809,4.3666
+Method 2 (SAE),"predictive, design effect 2",0.5,0.6486,24,37,14.4776,4.4297
+Method 2 (SAE),"predictive, design effect 2",0.8,0.9189,34,37,27.2206,4.4297
+Method 2 (SAE),"predictive, design effect 2",0.9,0.973,36,37,34.709,4.4297
+Method 2 (SAE),"predictive, design effect 2",0.95,1.0,37,37,41.011,4.4297
+Method 2 (SAE),"predictive, design effect 3",0.5,0.7297,27,37,16.0593,4.5373
+Method 2 (SAE),"predictive, design effect 3",0.8,0.9459,35,37,30.395,4.5373
+Method 2 (SAE),"predictive, design effect 3",0.9,1.0,37,37,38.733,4.5373
+Method 2 (SAE),"predictive, design effect 3",0.95,1.0,37,37,45.5946,4.5373
+Method 1 (state model),latent credible interval,0.5,0.3784,14,37,7.9473,4.3963
+Method 1 (state model),latent credible interval,0.8,0.6757,25,37,15.1379,4.3963
+Method 1 (state model),latent credible interval,0.9,0.8919,33,37,19.4817,4.3963
+Method 1 (state model),latent credible interval,0.95,0.9459,35,37,23.0771,4.3963
+Method 1 (state model),"predictive, design effect 1",0.5,0.4324,16,37,10.575,4.3913
+Method 1 (state model),"predictive, design effect 1",0.8,0.8919,33,37,20.0093,4.3913
+Method 1 (state model),"predictive, design effect 1",0.9,0.9459,35,37,25.5741,4.3913
+Method 1 (state model),"predictive, design effect 1",0.95,0.9459,35,37,30.1796,4.3913
+Method 1 (state model),"predictive, design effect 2",0.5,0.5676,21,37,12.6719,4.4546
+Method 1 (state model),"predictive, design effect 2",0.8,0.9189,34,37,23.9538,4.4546
+Method 1 (state model),"predictive, design effect 2",0.9,0.9459,35,37,30.4805,4.4546
+Method 1 (state model),"predictive, design effect 2",0.95,0.973,36,37,35.9675,4.4546
+Method 1 (state model),"predictive, design effect 3",0.5,0.6486,24,37,14.3832,4.5676
+Method 1 (state model),"predictive, design effect 3",0.8,0.9459,35,37,27.4258,4.5676
+Method 1 (state model),"predictive, design effect 3",0.9,0.973,36,37,34.9761,4.5676
+Method 1 (state model),"predictive, design effect 3",0.95,0.973,36,37,41.305,4.5676

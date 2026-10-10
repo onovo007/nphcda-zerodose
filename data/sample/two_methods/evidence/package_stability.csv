@@ -1,0 +1,16 @@
+alternative,same_primary_profile,same_core_lgas,same_core_children
+"Ward original, k=3",0.786,0.786,0.937
+"Ward original, k=4",0.811,0.811,0.955
+"Ward domain_balanced, k=3",0.702,0.702,0.812
+"Ward domain_balanced, k=4",0.745,0.745,0.787
+"Ward domain_balanced, k=5",0.767,0.767,0.803
+"Ward no_dtp_dropout, k=3",0.522,0.514,0.72
+"Ward no_dtp_dropout, k=4",0.655,0.508,0.706
+"Ward no_dtp_dropout, k=5",0.681,0.694,0.816
+"Ward domain_balanced_no_dtp, k=3",0.661,0.661,0.785
+"Ward domain_balanced_no_dtp, k=4",0.798,0.798,0.817
+"Ward domain_balanced_no_dtp, k=5",0.824,0.824,0.835
+K-means k=5,0.742,0.704,0.831
+Bootstrap Ward k=5 (mean of 100),0.735,0.707,0.788
+"LGA barrier rule, threshold top 20% (vs top 25%)",,0.824,0.766
+"LGA barrier rule, threshold top 33% (vs top 25%)",,0.726,0.688

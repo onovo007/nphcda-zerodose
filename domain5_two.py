@@ -429,6 +429,8 @@ def _render_validation(tm: dict):
                 "Spearman agreement, MAE and bias of each method against the NmDHS 2025-26 state survey, and "
                 "LGA agreement with IHME 2018 overall and within state. Compare the two methods.",
                 show.to_dict(orient="records"))
+    import evidence_views as EV
+    EV.render_sae_evidence(tm)
 
 
 def _render_compare(tm: dict, data: dict):
@@ -558,7 +560,7 @@ def _render_compare(tm: dict, data: dict):
     with tabs[4]:
         a = tm["archetype"]
         t = pd.DataFrame({
-            "Archetype": a["archetype"].astype(int).astype(str) + ". " + a["archetype_type"],
+            "Contextual profile": a["archetype"].astype(int).astype(str) + ". " + a["archetype_type"],
             "LGAs": a["lgas"], "Cohort share (%)": a["cohort_share"].round(1),
             "Method 1 children": a["m1_children"].round(0).astype(int),
             "Method 1 share (%)": a["m1_share"].round(1), "Method 1 mean rate (%)": a["m1_mean_rate"].round(1),
@@ -566,8 +568,9 @@ def _render_compare(tm: dict, data: dict):
             "Method 2 (SAE) share (%)": a["m2_share"].round(1),
             "Method 2 (SAE) mean rate (%)": a["m2_mean_rate"].round(1)})
         st.dataframe(t, use_container_width=True)
-        st.caption(clean("Archetypes come from unsupervised clustering (Ward, k=5) of LGA covariates; see "
-                         "LGA Priority & Archetypes."))
+        st.caption(clean("Contextual profiles (archetypes) come from Ward clustering (k=5) of 15 LGA indicators; "
+                         "labels describe only what the indicators measure. Dominant barriers, candidate packages "
+                         "and robustness checks are on LGA Priority & Archetypes."))
     with tabs[5]:
         _render_validation(tm)
     with tabs[6]:

@@ -284,6 +284,17 @@ def priority_table(tm: dict, method: str, bundles: dict, evidence: dict) -> pd.D
         "Intervention bundle": lg["archetype_type"].map(bundles),
         "Evidence base (method and citation)": lg["archetype_type"].map(evidence),
     })
+    import evidence_views as EV
+    b = EV.lga_barriers()
+    if b is not None:
+        b = lg[["lga_uid"]].merge(b, on="lga_uid", how="left")
+        pos = out.columns.get_loc("Intervention bundle")
+        out.insert(pos, "Dominant barrier", b["dominant_barrier"].values)
+        out.insert(pos + 1, "Flagged barriers", b["barriers_flagged"].values)
+        out.insert(pos + 2, "Candidate components (LGA barriers)", b["candidate_components"].values)
+        out.insert(pos + 3, "Profile membership", b["membership"].values)
+        out = out.rename(columns={"Intervention bundle": "Profile package"})
+    out.insert(out.columns.get_loc("Equity index"), "P(top 155), Method 2 (%)", (lg["m2_p_top155"] * 100).round(0).values)
     top = (out["Burden rank"].fillna(10 ** 6) <= TOP_N) & out["Equity tier"].isin(["Critical", "High"])
     out["Priority flag"] = np.where(top, "TOP PRIORITY", "Standard")
     if p == "m1":

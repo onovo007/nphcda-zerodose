@@ -1,8 +1,9 @@
 """
 LGA Priority List and Archetypes page - NPHCDA filters, views and downloads the ranked local
-governments (worst zero-dose burden first), each tagged with its archetype, equity-deprivation tier
-and matched intervention bundle. Archetypes come from the LGA covariate/archetype analysis (IHME, DHS,
-Meta, Weiss, ACLED); zero-dose figures come from the platform model.
+governments (worst zero-dose burden first), each tagged with its contextual profile (archetype), dominant
+barrier, candidate components, equity-deprivation tier and priority probability. Profiles come from Ward
+clustering of 15 LGA indicators (IHME, DHS, Meta, Weiss, ACLED); zero-dose figures come from both Domain 5
+methods. Contextual-barrier evidence is drawn by evidence_views.
 """
 import pandas as pd
 import plotly.graph_objects as go
@@ -10,6 +11,7 @@ import streamlit as st
 
 import config as C
 import ai
+import evidence_views as EV
 import viz
 from theme import clean, domain_banner, kpi_row, section, style_fig
 from models import d5_two_methods as TM
@@ -17,34 +19,32 @@ from models import d5_two_methods as TM
 ARCH_FILE = C.DATA_DIR / "lga_archetype_summary.csv"
 
 BUNDLE = {
-    "Remote Rural / Hard-to-Reach": "Reaching-Every-Community microplanning + BHCPF-funded outreach + community health workers; co-deliver with nutrition and antenatal contacts",
-    "Conflict-Affected / Nomadic": "Security-integrated microplanning + negotiated access + mobile and transit-point vaccination teams",
-    "Riverine / Geographically Isolated": "Boat-based outreach + community health worker networks + multi-antigen bundling per visit",
-    "Peri-urban / Migrant Dense (transitional)": "Ward-level enumeration + migrant-sensitive scheduling + Periodic Intensification of Routine Immunization",
-    "Urban Slums (better-off urban core)": "Targeted social mobilisation + fixed-site plus outreach hybrid + private-sector last-mile reach",
+    "Deprived northern rural": "Reaching-Every-Community microplanning + BHCPF-funded outreach + community health workers; co-deliver with nutrition and antenatal contacts; defaulter tracing",
+    "Low maternal care, high conflict exposure": "Security-integrated microplanning + negotiated access + mobile outreach teams; integrate with antenatal care; defaulter tracing",
+    "Geographically isolated": "Outreach and mobile sessions (boat-based where waterways apply) + community health worker networks + multi-antigen bundling per visit",
+    "Near-average": "Core fixed-site and outreach services + ward-level enumeration + Periodic Intensification of Routine Immunization",
+    "Relatively advantaged": "Targeted social mobilisation + fixed-site plus outreach hybrid + private-sector last-mile reach",
 }
 EVIDENCE = {
-    "Remote Rural / Hard-to-Reach": "Binding constraint: geographic access, low female education, weak maternal-and-child-health platform. Evidence-based response: fixed-plus-outreach integrated with nutrition and antenatal contacts. Frameworks: WHO Reaching Every District/Community; Gavi zero-dose IRMMA; WHO/UNICEF Big Catch-Up (2023).",
-    "Conflict-Affected / Nomadic": "Binding constraint: insecurity and population mobility. Evidence-based response: negotiated access, mobile and transit-point vaccination, security-integrated microplanning. Frameworks: WHO/UNICEF immunization in conflict settings; polio Days of Tranquility; permanent transit-point strategy.",
-    "Riverine / Geographically Isolated": "Binding constraint: extreme physical access. Evidence-based response: transport-adapted (boat) outreach with multi-antigen bundling. Frameworks: WHO Reaching Every District/Community; riverine and boat-clinic service-delivery models.",
-    "Peri-urban / Migrant Dense (transitional)": "Binding constraint: population mobility and enumeration gaps. Evidence-based response: ward enumeration, migrant-sensitive scheduling, Periodic Intensification of Routine Immunization. Frameworks: WHO PIRI; WHO/UNICEF urban microplanning.",
-    "Urban Slums (better-off urban core)": "Binding constraint: residual demand-side gaps in informal settlements. Evidence-based response: demand generation, targeted social mobilisation, private-sector last-mile reach. Frameworks: WHO Behavioural and Social Drivers of vaccination; urban private-sector engagement.",
+    "Deprived northern rural": "Measured constraints: highest undernutrition, lowest maternal education and facility delivery, high DTP1-3 dropout. Evidence-based response: fixed-plus-outreach integrated with nutrition and antenatal contacts, with defaulter tracing. Frameworks: WHO Reaching Every District/Community; Gavi zero-dose IRMMA; WHO/UNICEF Big Catch-Up (2023).",
+    "Low maternal care, high conflict exposure": "Measured constraints: highest conflict events and fatalities, weak antenatal and delivery care, high dropout. Evidence-based response: negotiated access, security-sensitive scheduling, mobile outreach and maternal-care integration. Frameworks: WHO/UNICEF immunization in humanitarian and conflict settings; polio negotiated-access experience. Population mobility is not measured and must be confirmed locally.",
+    "Geographically isolated": "Measured constraints: very long travel time to care, low improved water. Evidence-based response: transport-adapted outreach with multi-antigen bundling per visit. Frameworks: WHO Reaching Every District/Community integrated outreach.",
+    "Near-average": "Measured constraints: near the national average on every indicator; fair care-seeking. Evidence-based response: core services, enumeration and periodic intensification; use each LGA's flagged barriers to add components. Frameworks: WHO PIRI; RED/REC microplanning.",
+    "Relatively advantaged": "Measured constraints: highest wealth, education and facility delivery; moderate conflict events. Evidence-based response: demand generation, fixed-plus-outreach hybrid and private-sector reach. Frameworks: WHO Behavioural and Social Drivers of vaccination (BeSD).",
 }
 
 TIER_ORDER = ["Critical", "High", "Moderate", "Low"]
 TIER_COLOR = {"Critical": "#B2182B", "High": "#EF8A62", "Moderate": "#F0C24B", "Low": "#9ECAE1"}
 TIER_DEF = {"Critical": "worst quarter on the equity index (most deprived)", "High": "second quarter",
             "Moderate": "third quarter", "Low": "least-deprived quarter"}
-ARCH_COLOR = {"Remote Rural / Hard-to-Reach": "#7A1616", "Conflict-Affected / Nomadic": "#D6604D",
-              "Riverine / Geographically Isolated": "#2C7FB8",
-              "Peri-urban / Migrant Dense (transitional)": "#C8902A",
-              "Urban Slums (better-off urban core)": "#1C7A3D"}
+ARCH_COLOR = {"Deprived northern rural": "#8B1A1A", "Low maternal care, high conflict exposure": "#D6604D",
+              "Geographically isolated": "#2C7FB8", "Near-average": "#F2C14E", "Relatively advantaged": "#1C7A3D"}
 ARCH_DEF = {
-    "Remote Rural / Hard-to-Reach": "Deep-north deprivation: lowest education, highest undernutrition, lowest facility delivery",
-    "Conflict-Affected / Nomadic": "Insecurity belt: highest political-violence fatalities, high dropout, weak antenatal and delivery",
-    "Riverine / Geographically Isolated": "Creek and hard-to-reach terrain: extreme travel time, low improved water",
-    "Peri-urban / Migrant Dense (transitional)": "Transitional: moderate on all fronts, fair care-seeking",
-    "Urban Slums (better-off urban core)": "Better-off urban core with residual gaps in informal settlements",
+    "Deprived northern rural": "highest undernutrition, lowest maternal education and facility delivery, high dropout",
+    "Low maternal care, high conflict exposure": "highest conflict events and fatalities, weak antenatal and delivery care",
+    "Geographically isolated": "very long travel time to care, low improved water",
+    "Near-average": "near the national average on every indicator",
+    "Relatively advantaged": "highest wealth, education and facility delivery; moderate conflict events",
 }
 
 
@@ -95,8 +95,8 @@ def _archetype_map(tm: dict):
         on=["state_key", "lga_key"], how="left")
     g["archetype_type"] = g["archetype_type"].fillna("Not classified")
     return viz.choropleth(g, "archetype_type", categorical=True, color_map=ARCH_COLOR,
-                          title="LGA archetypes (Ward clustering of 15 LGA covariates, k=5)",
-                          legend_title="Archetype", height=640)
+                          title="Contextual profiles (Ward clustering of 15 LGA indicators, k=5)",
+                          legend_title="Profile", height=640)
 
 
 def _archetype_burden_fig(tm: dict) -> go.Figure:
@@ -107,7 +107,7 @@ def _archetype_burden_fig(tm: dict) -> go.Figure:
                 marker_color="#CBD5E1")
     fig.add_bar(y=names, x=a["m1_share"], name=TM.M1_SHORT, orientation="h", marker_color=C.NAVY)
     fig.add_bar(y=names, x=a["m2_share"], name=TM.M2_SHORT, orientation="h", marker_color=C.NPHCDA_GREEN)
-    fig.update_layout(barmode="group", title="Share of zero-dose children by archetype, 2026",
+    fig.update_layout(barmode="group", title="Share of zero-dose children by contextual profile, 2026",
                       xaxis_title="Percent of the national total", yaxis=dict(autorange="reversed", automargin=True),
                       legend=dict(orientation="h", y=-0.2))
     return style_fig(fig, height=460)
@@ -116,7 +116,7 @@ def _archetype_burden_fig(tm: dict) -> go.Figure:
 def render():
     domain_banner("_banner_d5.jpg", "LGA Priority and Archetypes",
                   "Every local government ranked by its estimated zero-dose children, tagged with its "
-                  "archetype, equity-deprivation tier and matched intervention bundle.")
+                  "contextual profile, dominant barrier, candidate components and equity-deprivation tier.")
     tm = TM.load()
     method = st.radio("Rank LGAs by", [TM.M1, TM.M2], horizontal=True, key="lp_method",
                       help="The burden rank and zero-dose figures follow the chosen method. Archetype and "
@@ -132,7 +132,7 @@ def render():
          "color": C.NAVY},
         {"label": "Zero-dose children, 2026", "value": f"{df['Zero-dose children'].sum() / 1e6:.2f}M",
          "sub": "sum over ranked LGAs", "color": C.ACCENT},
-        {"label": "Archetypes 1 and 2", "value": f"{top2:.0f}%",
+        {"label": "Profiles 1 and 2", "value": f"{top2:.0f}%",
          "sub": clean(f"of zero-dose children; {a.loc[[1, 2], 'cohort_share'].sum():.0f}% of the cohort"),
          "color": C.GOLD},
         {"label": "TOP PRIORITY LGAs", "value": str(n_top),
@@ -141,12 +141,12 @@ def render():
                  "Critical or High."},
     ])
 
-    with st.expander("What the classifications mean (equity tier and archetype)", expanded=False):
+    with st.expander("What the classifications mean (equity tier and contextual profile)", expanded=False):
         st.markdown("**Equity-deprivation tier** (equal-weight index of remoteness, low women's education, "
                     "poverty and low relative wealth; quartiles across the 774 local governments):")
         _chips(TIER_COLOR, TIER_DEF)
-        st.markdown("**Archetype** (five data-driven groups from Ward agglomerative clustering of 15 "
-                    "local-government covariates):")
+        st.markdown("**Contextual profile** (archetype; five groups from Ward agglomerative clustering of 15 "
+                    "local-government indicators; labels describe only what the indicators measure):")
         _chips(ARCH_COLOR, ARCH_DEF)
 
     c1, c2 = st.columns([3, 2])
@@ -154,16 +154,20 @@ def render():
         st.plotly_chart(_archetype_map(tm), use_container_width=True)
     with c2:
         st.plotly_chart(_archetype_burden_fig(tm), use_container_width=True)
-        st.caption(clean(f"Archetypes 1 and 2 (Remote Rural and Conflict-Affected) hold "
+        st.caption(clean(f"Profiles 1 and 2 (deprived northern rural; low maternal care, high conflict exposure) hold "
                          f"{a.loc[[1, 2], 'm1_share'].sum():.0f}% of zero-dose children under Method 1 and "
                          f"{a.loc[[1, 2], 'm2_share'].sum():.0f}% under Method 2 (SAE), against "
                          f"{a.loc[[1, 2], 'cohort_share'].sum():.0f}% of the 12-23-month cohort."))
 
+    EV.render_profile_evidence(tm)
+
     section("LGA priority list")
-    c1, c2, c3 = st.columns(3)
+    c1, c2, c3, c4 = st.columns(4)
     states = c1.multiselect("State", sorted(df["State"].dropna().unique()))
-    archs = c2.multiselect("Archetype", [x for x in ARCH_COLOR if x in set(df["Archetype"])])
-    tiers = c3.multiselect("Equity tier", [t for t in TIER_ORDER if t in set(df["Equity tier"])])
+    archs = c2.multiselect("Contextual profile", [x for x in ARCH_COLOR if x in set(df["Archetype"])])
+    bars = (c3.multiselect("Dominant barrier", sorted(df["Dominant barrier"].dropna().unique()))
+            if "Dominant barrier" in df else [])
+    tiers = c4.multiselect("Equity tier", [t for t in TIER_ORDER if t in set(df["Equity tier"])])
     only_priority = st.checkbox("Show only TOP PRIORITY local governments (high burden and high "
                                 "deprivation)", value=False)
     f = df.copy()
@@ -171,6 +175,8 @@ def render():
         f = f[f["State"].isin(states)]
     if archs:
         f = f[f["Archetype"].isin(archs)]
+    if bars:
+        f = f[f["Dominant barrier"].isin(bars)]
     if tiers:
         f = f[f["Equity tier"].isin(tiers)]
     if only_priority:
@@ -191,12 +197,14 @@ def render():
                 "zero-dose children per archetype. Name the archetypes and states that dominate the TOP "
                 "PRIORITY list and the intervention bundle that fits them.",
                 {"top_30": df.head(30)[["Burden rank", "State", "LGA", "Zero-dose children", "Zero-dose rate (%)",
-                                        "Equity tier", "Archetype", "Priority flag"]].to_dict(orient="records"),
+                                        "Equity tier", "Archetype", "Priority flag"] + [c for c in ["Dominant barrier",
+                                        "Candidate components (LGA barriers)", "P(top 155), Method 2 (%)"] if c in df]]
+                           .to_dict(orient="records"),
                  "archetype_shares": tm["archetype"][["archetype_type", "lgas", "cohort_share", "m1_share",
                                                       "m2_share"]].round(1).to_dict(orient="records")})
 
     if ARCH_FILE.exists():
-        with st.expander("The five LGA archetypes - determinants, intervention levers and evidence"):
+        with st.expander("The five contextual profiles - determinants, intervention levers and evidence"):
             arch = _load(str(ARCH_FILE)).copy()
             am = tm["archetype"].set_index("archetype")
             arch["Mean zero-dose rate (%)"] = arch["Cluster"].map(am[f"{p}_mean_rate"]).round(1)
@@ -208,6 +216,8 @@ def render():
                              "Catch-Up; PIRI; BeSD)."))
     with st.expander("How the intervention bundles were developed - method and evidence"):
         st.markdown(METHOD_MD)
-    st.caption(clean("Zero-dose figures are model estimates for 2026. Archetype and equity tier use modelled "
+    st.caption(clean("Zero-dose figures are model estimates for 2026. Candidate components follow each LGA's own "
+                     "flagged barriers (national top quartile of a domain score) and need local validation. "
+                     "Profile and equity tier use modelled "
                      "covariate surfaces (2014-2021). Under Method 1, Guzamala (Borno) is not estimated (no "
                      "Penta1 data for 2021-2024)."))

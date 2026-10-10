@@ -1,0 +1,18 @@
+check,approach,MAE,bias,spearman_rho,spearman_ci_lo,spearman_ci_hi,CRPS,dMAE_vs_SAE,dMAE_lo,dMAE_hi
+NmDHS 2025-26,Latest survey carried forward,8.235,3.585,0.838,0.686,0.921,6.063,2.339,-0.177,4.923
+NmDHS 2025-26,Routine data only,26.507,-26.371,0.183,,,26.507,20.611,14.92,26.327
+NmDHS 2025-26,Fay-Herriot area-level model,7.946,4.232,0.842,0.683,0.926,5.662,2.05,-0.03,4.21
+NmDHS 2025-26,Method 1 (hierarchical state model),6.299,-0.635,0.887,0.749,0.958,4.453,0.403,-0.797,1.615
+NmDHS 2025-26,Method 2 (SAE),5.896,0.086,0.871,0.73,0.947,4.446,,,
+NmDHS 2025-26,Gradient boosting,7.482,1.383,0.89,0.75,0.955,7.482,1.587,0.251,2.783
+Predict 2024,Latest survey carried forward,8.884,-0.228,0.856,0.717,0.92,6.48,-2.024,-4.551,0.61
+Predict 2024,Routine data only,29.383,-28.96,-0.057,,,29.383,18.475,13.435,24.206
+Predict 2024,Fay-Herriot area-level model,9.723,0.401,0.815,0.656,0.892,7.115,-1.184,-3.768,1.326
+Predict 2024,Method 1 (hierarchical state model),10.392,-6.882,0.848,0.712,0.913,7.808,-0.516,-2.051,0.944
+Predict 2024,Method 2 (SAE),10.907,-5.793,0.815,0.675,0.893,7.836,,,
+Predict 2024,Gradient boosting,10.131,-1.304,0.835,0.661,0.913,10.131,-0.777,-3.127,1.525
+Predict 2018,Latest survey carried forward,12.039,9.591,0.907,0.825,0.945,9.792,1.984,-0.16,4.103
+Predict 2018,Fay-Herriot area-level model,11.927,10.297,0.918,0.842,0.948,9.545,1.872,0.101,3.625
+Predict 2018,Method 1 (hierarchical state model),11.074,9.218,0.923,0.852,0.951,7.858,1.019,-0.302,2.259
+Predict 2018,Method 2 (SAE),10.055,7.903,0.907,0.817,0.944,7.13,,,
+Predict 2018,Gradient boosting,11.628,8.838,0.916,0.837,0.947,11.628,1.573,-0.188,3.37

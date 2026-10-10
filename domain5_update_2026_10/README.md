@@ -20,7 +20,7 @@ Zero-dose children are children aged 12-23 months who have not received the firs
 
 | Folder | Content |
 |---|---|
-| `report_and_deck/` | Updated RI team presentation (46 slides) and consolidated report (Word and PDF) |
+| `report_and_deck/` | RI team presentation and consolidated report (Word and PDF). The 10.10.2026 versions (54 slides; report Sections 5.5.6 and 5.5.7) add external validation, calibration, temporal holdouts and uncertainty-aware prioritization for Method 2, and contextual profiles, dominant barriers and candidate intervention packages. Profile labels describe only what the indicators measure. |
 | `government_workbook/` | `NPHCDA_ZeroDose_LGA_Estimates_2026_Method1_vs_SAE.xlsx`. It compares the two methods for every LGA, with national, zone and state tables, priority lists, burden concentration, validation, archetypes and definitions. |
 | `Updated Datasets for Domain 5/` | All inputs needed to run the three notebooks, one subfolder per notebook. See its README. |
 | `notebooks/` | Executed notebooks with their outputs: |
@@ -29,7 +29,7 @@ Zero-dose children are children aged 12-23 months who have not received the firs
 | | - `D5_LGA_Archetypes_Unsupervised_Clustering.ipynb` |
 | `results/` | Combined tables for both methods: LGA, state, zone and national estimates; validation; Pareto scenarios; archetype burden |
 | `figures/` | Publication figures (PNG, SVG, PDF) with source data |
-| `code/` | Scripts that combine the notebook outputs and build the figures, workbook, deck and report |
+| `code/` | Scripts that combine the notebook outputs and build the figures, workbook, deck and report. `update_10_10.py` builds the 10.10.2026 deck and report; `build_app_evidence_10_10.py` writes the web-app evidence files in `data/sample/two_methods/evidence/`. |
 
 ## Reproducing
 
