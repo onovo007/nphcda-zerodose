@@ -1,0 +1,4 @@
+pair,col,last_month,latest_pct,mean_2021,mean_2024,mean_2025,forecast_12m_pct,forecast_12m_lo95,forecast_12m_hi95,forecast_month
+Penta1 to Penta3,dropout_p1p3,Dec 2025,6.4,6.4,6.8,4.8,6.6,2.6,10.6,Dec 2026
+Penta1 to Measles1,dropout_p1m1,Dec 2025,20.1,12.4,12.6,10.8,11.2,0.1,22.2,Dec 2026
+Measles1 to Measles2,dropout_m1m2,Dec 2025,36.2,60.4,36.9,33.5,25.6,19.5,32.0,Dec 2026

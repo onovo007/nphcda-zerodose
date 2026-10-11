@@ -9,12 +9,12 @@ PIP = ["geopandas", "scikit-learn", "openpyxl"]
 
 cells = [
 md("""
-# Domain 5: Community archetypes for all 774 LGAs (unsupervised machine learning)
+# Domain 5: Archetype (contextual) profiles for all 774 LGAs (unsupervised machine learning)
 
 **National Primary Health Care Development Agency (NPHCDA) - Predictive Modelling of Zero-Dose Children.**
 Prepared by the CIDRE and Quantium Insights LLC consortium, with UNICEF and Gavi.
 
-**Why archetypes?** Two LGAs can have the same zero-dose rate for very different reasons: one may be remote, another conflict-affected, another an urban area with informal settlements. Each needs a different response. Archetypes group LGAs that share a **profile of structural barriers**, so that an intervention package can be matched to each group.
+**Why archetypes?** Two LGAs can have the same zero-dose rate for very different reasons: one may be far from health facilities, another exposed to conflict, another short of maternal-care services. Each needs a different response. Archetypes (contextual profiles) group LGAs that share a **profile of measured barriers**, so that candidate intervention components can be matched to each group. The labels describe only what the 15 indicators measure.
 
 **How:** agglomerative (Ward) hierarchical clustering of 15 social, health-service, nutrition, geographic and security covariates for all 774 LGAs. Ward clustering starts with every LGA as its own group and repeatedly merges the two groups whose merger increases within-group variation the least, until five groups remain. Modelled zero-dose estimates are **not** used to form the groups; they are attached afterwards to describe each group.
 
@@ -67,8 +67,8 @@ rank = {c: i + 1 for i, c in enumerate(dep.index)}
 m["archetype_reproduced"] = [rank[c] for c in labels]
 print("Agreement with the published archetypes (adjusted Rand index, 1 = identical):",
       round(adjusted_rand_score(m.archetype, m.archetype_reproduced), 3))
-NAMES = {1: "Remote Rural / Hard-to-Reach", 2: "Conflict-Affected / Nomadic", 3: "Riverine / Geographically Isolated",
-         4: "Peri-urban / Migrant Dense", 5: "Urban Slums (better-off core)"}
+NAMES = {1: "Deprived northern rural", 2: "Low maternal care, high conflict exposure", 3: "Geographically isolated",
+         4: "Near-average", 5: "Relatively advantaged"}
 m["archetype_name"] = m.archetype_reproduced.map(NAMES)
 m.archetype_name.value_counts()
 '''),
@@ -124,22 +124,24 @@ keys = pd.read_csv(DATA_DIR / "lga_map_keys_774.csv")
 g = gpd.read_file(DATA_DIR / "nga_lgas.geojson").rename(columns={"lga_key": "geo_lga_key"}).drop(columns=["state", "lga"])
 g = g.merge(keys[["lga_uid", "state_key", "geo_lga_key"]], on=["state_key", "geo_lga_key"]).merge(m[["lga_uid", "archetype_reproduced"]], on="lga_uid")
 gs = gpd.read_file(DATA_DIR / "nga_states.geojson")
-COL = {1: "#7F1D1D", 2: "#D55E00", 3: "#56B4E9", 4: "#E6A817", 5: "#1C7A3D"}
+COL = {1: "#8B1A1A", 2: "#D6604D", 3: "#2C7FB8", 4: "#F2C14E", 5: "#1C7A3D"}
 fig, ax = plt.subplots(figsize=(9, 8))
 g.plot(ax=ax, color=g.archetype_reproduced.map(COL), edgecolor="white", linewidth=0.1)
 gs.boundary.plot(ax=ax, color="black", linewidth=0.4); ax.axis("off")
 ax.legend(handles=[Patch(color=COL[k], label=f"{k} {NAMES[k]} ({(m.archetype_reproduced == k).sum()})") for k in range(1, 6)], loc="lower left", frameon=False)
-ax.set_title("Structural archetypes, 774 LGAs"); plt.show()
+ax.set_title("Archetype (contextual) profiles, 774 LGAs"); plt.show()
 '''),
 md("""
-## 8. Matched intervention packages
-| Archetype | Defining barriers | Package |
+## 8. Candidate intervention packages
+| Archetype (contextual profile) | Defining barriers (measured) | Candidate package |
 |---|---|---|
-| 1 Remote Rural / Hard-to-Reach | lowest maternal education and facility delivery, highest child undernutrition | Reaching-Every-Community microplanning, BHCPF outreach and community health workers; co-deliver with nutrition and antenatal care |
-| 2 Conflict-Affected / Nomadic | highest conflict fatalities, weak antenatal and delivery care | Security-integrated microplanning, negotiated access, mobile and transit-point teams |
-| 3 Riverine / Geographically Isolated | extreme travel time, low improved water | Boat-based outreach, community health worker networks, multi-antigen bundling per visit |
-| 4 Peri-urban / Migrant Dense | moderate on all fronts | Ward enumeration, migrant-sensitive scheduling, Periodic Intensification of Routine Immunization |
-| 5 Urban Slums (better-off core) | highest wealth and education; residual informal-settlement gaps | Targeted social mobilisation, fixed-plus-outreach hybrid, private-sector last-mile reach |
+| 1 Deprived northern rural | highest child undernutrition, lowest maternal education and facility delivery, high DTP1-3 dropout | Reaching-Every-Community microplanning, BHCPF outreach and community health workers; co-deliver with nutrition and antenatal care; defaulter tracing |
+| 2 Low maternal care, high conflict exposure | highest conflict events and fatalities, weak antenatal and delivery care | Security-integrated microplanning, negotiated access, mobile outreach teams and defaulter tracing |
+| 3 Geographically isolated | very long travel time to care, low improved water | Outreach and mobile sessions (boat-based where waterways apply), community health worker networks, multi-antigen bundling per visit |
+| 4 Near-average | near the national average on every indicator | Core fixed-site and outreach services, ward enumeration, Periodic Intensification of Routine Immunization |
+| 5 Relatively advantaged | highest wealth, education and facility delivery; moderate conflict events | Targeted social mobilisation, fixed-plus-outreach hybrid, private-sector last-mile reach |
+
+Population mobility, migration, riverine settlement and informal settlements are not measured by any input, so components that depend on them (for example transit-point vaccination) are not assigned; they need local confirmation first. In practice, each LGA's own flagged barriers (national top quartile of a domain score) should refine the package.
 """),
 code(r'''
 within = m.groupby("state").archetype_reproduced.nunique()
@@ -152,7 +154,7 @@ md("""
 ## Limitations
 * The covariates are modelled surfaces (2016-2024) summarised to LGAs, not direct measurements.
 * One covariate is vaccination-related (DPT dropout); results without it are shown above.
-* Cluster boundaries are statistical; the archetype names are interpretations of each group's profile. A given LGA may share features of more than one archetype.
+* Cluster boundaries are statistical; the archetype labels describe each group's measured profile. A given LGA may share features of more than one archetype (23% of LGAs are mixed between profiles).
 * Matched packages are programme recommendations based on each profile; their effectiveness has not been evaluated here.
 """),
 ]

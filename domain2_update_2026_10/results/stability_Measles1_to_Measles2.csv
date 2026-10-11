@@ -1,0 +1,5 @@
+Driver,Selection freq (%),Std coef,95% CI,Direction
+Cu5 Stunted,89,-2.8,-8.4 to 2.8,Lower dropout
+C12To23 Vax Card Seen,89,-6.54,-11.0 to -2.1,Lower dropout
+Anc 4Plus,86,8.11,2.0 to 14.2,Higher dropout
+Problem Accessing Hfdistance,78,3.59,0.2 to 7.0,Higher dropout

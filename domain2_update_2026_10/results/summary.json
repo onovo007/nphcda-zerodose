@@ -1,0 +1,240 @@
+{
+  "parsing_impact": [
+    {
+      "antigen": "penta_1_count",
+      "rows_lost_pct": 27.1,
+      "doses_lost_pct": 47.4
+    },
+    {
+      "antigen": "penta_3_count",
+      "rows_lost_pct": 23.7,
+      "doses_lost_pct": 43.6
+    },
+    {
+      "antigen": "measles_1_count",
+      "rows_lost_pct": 18.3,
+      "doses_lost_pct": 37.6
+    },
+    {
+      "antigen": "measles_2_count",
+      "rows_lost_pct": 4.8,
+      "doses_lost_pct": 21.2
+    }
+  ],
+  "national": [
+    {
+      "pair": "Penta1 to Penta3",
+      "col": "dropout_p1p3",
+      "last_month": "Dec 2025",
+      "latest_pct": 6.4,
+      "mean_2021": 6.4,
+      "mean_2024": 6.8,
+      "mean_2025": 4.8,
+      "forecast_12m_pct": 6.6,
+      "forecast_12m_lo95": 2.6,
+      "forecast_12m_hi95": 10.6,
+      "forecast_month": "Dec 2026"
+    },
+    {
+      "pair": "Penta1 to Measles1",
+      "col": "dropout_p1m1",
+      "last_month": "Dec 2025",
+      "latest_pct": 20.1,
+      "mean_2021": 12.4,
+      "mean_2024": 12.6,
+      "mean_2025": 10.8,
+      "forecast_12m_pct": 11.2,
+      "forecast_12m_lo95": 0.1,
+      "forecast_12m_hi95": 22.2,
+      "forecast_month": "Dec 2026"
+    },
+    {
+      "pair": "Measles1 to Measles2",
+      "col": "dropout_m1m2",
+      "last_month": "Dec 2025",
+      "latest_pct": 36.2,
+      "mean_2021": 60.4,
+      "mean_2024": 36.9,
+      "mean_2025": 33.5,
+      "forecast_12m_pct": 25.6,
+      "forecast_12m_lo95": 19.5,
+      "forecast_12m_hi95": 32.0,
+      "forecast_month": "Dec 2026"
+    }
+  ],
+  "state_lasso": {
+    "dropout_p1p3": {},
+    "dropout_p1m1": {
+      "pct_problem_accessing_hfdistance": 1.844,
+      "anc_4plus": -1.744,
+      "total_fertility_rate": 1.37,
+      "pct_women_no_education": 0.232,
+      "pct_c12to23_vax_card_seen": -0.187,
+      "pct_cu5_stunted": 0.173,
+      "delivered_in_hf": -0.014
+    },
+    "dropout_m1m2": {
+      "anc_4plus": 7.219,
+      "pct_cu5_stunted": -5.796,
+      "pct_c12to23_vax_card_seen": -5.261,
+      "pct_cu5_birth_registered": -3.823,
+      "pct_cu5_slept_under_itn": 1.889,
+      "pct_women_curr_employed": 1.864,
+      "pct_problem_accessing_hfdistance": 1.633,
+      "pct_muslim": -1.576,
+      "total_fertility_rate": 0.967,
+      "delivered_in_hf": -0.622
+    }
+  },
+  "lga_lasso": {
+    "dropout_p1p3": {
+      "coef": {
+        "ors_coverage": -1.045,
+        "delivery_hf": -0.493,
+        "conflict_fatalities": 0.369,
+        "dpt1_3_dropout": -0.266
+      },
+      "n": 743,
+      "r2": 0.098,
+      "median_dropout": 6.0
+    },
+    "dropout_p1m1": {
+      "coef": {
+        "wasting_prev_u5": 1.548,
+        "stunting_prev_u5": 1.241,
+        "delivery_hf": -0.721,
+        "dpt1_3_dropout": 0.514,
+        "edu_mean_years_women_15_49": -0.371
+      },
+      "n": 743,
+      "r2": 0.125,
+      "median_dropout": 14.5
+    },
+    "dropout_m1m2": {
+      "coef": {},
+      "n": 743,
+      "r2": 0.0,
+      "median_dropout": 49.3
+    }
+  },
+  "stability": {
+    "Penta1 to Penta3": [
+      {
+        "Driver": "Cu5 Slept Under Itn",
+        "Selection freq (%)": 88,
+        "Std coef": -1.01,
+        "95% CI": "-2.1 to 0.1",
+        "Direction": "Lower dropout"
+      },
+      {
+        "Driver": "Muslim",
+        "Selection freq (%)": 72,
+        "Std coef": -1.55,
+        "95% CI": "-2.8 to -0.3",
+        "Direction": "Lower dropout"
+      },
+      {
+        "Driver": "C12To23 Vax Card Seen",
+        "Selection freq (%)": 59,
+        "Std coef": -0.56,
+        "95% CI": "-2.1 to 1.0",
+        "Direction": "Lower dropout"
+      },
+      {
+        "Driver": "Cu5 Birth Registered",
+        "Selection freq (%)": 56,
+        "Std coef": -1.47,
+        "95% CI": "-2.8 to -0.2",
+        "Direction": "Lower dropout"
+      }
+    ],
+    "Penta1 to Measles1": [
+      {
+        "Driver": "Problem Accessing Hfdistance",
+        "Selection freq (%)": 80,
+        "Std coef": 2.82,
+        "95% CI": "-0.5 to 6.2",
+        "Direction": "Higher dropout"
+      },
+      {
+        "Driver": "Anc 4Plus",
+        "Selection freq (%)": 54,
+        "Std coef": -2.61,
+        "95% CI": "-8.6 to 3.4",
+        "Direction": "Lower dropout"
+      },
+      {
+        "Driver": "C12To23 Vax Card Seen",
+        "Selection freq (%)": 54,
+        "Std coef": -0.9,
+        "95% CI": "-5.4 to 3.7",
+        "Direction": "Lower dropout"
+      },
+      {
+        "Driver": "Media At Least Once Week",
+        "Selection freq (%)": 49,
+        "Std coef": -1.45,
+        "95% CI": "-7.1 to 4.2",
+        "Direction": "Lower dropout"
+      }
+    ],
+    "Measles1 to Measles2": [
+      {
+        "Driver": "Cu5 Stunted",
+        "Selection freq (%)": 89,
+        "Std coef": -2.8,
+        "95% CI": "-8.4 to 2.8",
+        "Direction": "Lower dropout"
+      },
+      {
+        "Driver": "C12To23 Vax Card Seen",
+        "Selection freq (%)": 89,
+        "Std coef": -6.54,
+        "95% CI": "-11.0 to -2.1",
+        "Direction": "Lower dropout"
+      },
+      {
+        "Driver": "Anc 4Plus",
+        "Selection freq (%)": 86,
+        "Std coef": 8.11,
+        "95% CI": "2.0 to 14.2",
+        "Direction": "Higher dropout"
+      },
+      {
+        "Driver": "Problem Accessing Hfdistance",
+        "Selection freq (%)": 78,
+        "Std coef": 3.59,
+        "95% CI": "0.2 to 7.0",
+        "Direction": "Higher dropout"
+      }
+    ]
+  },
+  "state_year": {
+    "dropout_p1p3": {
+      "neg_cells_obs": 4,
+      "states_above_10_2025": 1,
+      "top5_2025": {
+        "Akwa Ibom": 12.6,
+        "FCT": 9.8,
+        "Zamfara": 9.0,
+        "Cross River": 8.9,
+        "Enugu": 8.8
+      },
+      "median_2025": 5.4,
+      "median_2027": 5.1
+    },
+    "dropout_m1m2": {
+      "neg_cells_obs": 0,
+      "states_above_10_2025": 34,
+      "top5_2025": {
+        "Anambra": 60.2,
+        "Akwa Ibom": 58.0,
+        "Imo": 54.0,
+        "Abia": 53.3,
+        "Oyo": 47.5
+      },
+      "median_2025": 34.9,
+      "median_2027": 21.1
+    }
+  }
+}
