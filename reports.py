@@ -891,7 +891,8 @@ def methods_sections() -> list:
           "Independent survey: against NmDHS 2025-26 state zero-dose (100 minus Penta1), Spearman rho is "
           "0.89 for Method 1 (MAE 6.3 pp) and 0.87 for Method 2 (MAE 5.9 pp) across 37 states. Method 2's "
           "posterior predictive interval contains 98% of the NDHS state observations.",
-          "IHME 2018 LGA DTP1: overall rho 0.65 (Method 1) and 0.89 (Method 2); within states 0.08 and "
+          "IHME 2018 LGA DTP1 (the same 773 LGAs for both methods): overall rho 0.65 (Method 1) and 0.88 "
+          "(Method 2); within states 0.07 and "
           "0.54 - Method 2 places children inside a state far more consistently with an independent LGA "
           "model.",
           "Leave-one-wave-out (Method 1 state model, live in the app): MAE 8.5-10.2 pp with 95% interval "

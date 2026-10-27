@@ -314,14 +314,19 @@ def render_two(data: dict):
         st.caption(clean("Overall rho reflects the shared north-south gradient. The within-state comparison "
                          "is the stricter test of whether a method places children correctly inside a state: "
                          "Method 2 (SAE) models LGA differences directly and agrees far more closely with IHME "
-                         "within states than Method 1, whose within-state pattern follows DHIS2 reporting."))
+                         "within states than Method 1, whose within-state pattern follows DHIS2 reporting. "
+                         "Both methods are compared on the same 773 LGAs (Guzamala has no Method 1 estimate)."))
         meth = st.radio("Method for the tercile comparison", [TM.M1, TM.M2], horizontal=True, key="xc_lga_m")
         lg = tm["lga"]
+        lg = lg[pd.to_numeric(lg["m1_rate"], errors="coerce").notna()]  # same 773 LGAs for both methods
         pfx = TM._p(meth)
         cdf = pd.DataFrame({"State": lg["state"], "LGA": lg["lga_clean"], "Zone": lg["zone"],
                             "ZD proxy (%)": lg[f"{pfx}_rate"],
                             "ihme_dtp1": 100.0 - pd.to_numeric(lg["ihme_zd_2018"], errors="coerce")}
                            ).dropna(subset=["ZD proxy (%)"])
+        # Terciles here rank coverage (100 - zero-dose); reversing the row order breaks ties exactly as the
+        # zero-dose ranking in the report and deck does, so the counts match them.
+        cdf = cdf.iloc[::-1]
         try:
             lc = T.lga_crosscheck(cdf, T.load_ihme_dtp1())
         except Exception as exc:
